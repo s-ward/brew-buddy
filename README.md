@@ -1,6 +1,6 @@
 # SDK Configuration Editor
 
-Serial flasher config
+Serial flasher config\n
 Flash size - 4MB
 
 Partition Table
