@@ -74,6 +74,9 @@ static uint32_t currentTime = 0;
 static uint32_t previousTime = 0;
 int timeInterval = 1000; // interval time in milli seconds
 
+#define HEATER_PWM_PIN 16 //Change to 9
+
+int Heater_Duty_Cycle; //0-100 PWM value, global variable that is changed through Heater_PID function
 
 void getTempTask(void* arg) {
 
@@ -109,6 +112,41 @@ while(1) {
    }
 }
 
+int Heater_PID (void)
+{
+    Heater_Duty_Cycle = 10;         //manual value atm, proper PID function will update this automatically
+    return (Heater_Duty_Cycle);
+}
+
+void Heater_PWM (void)
+{
+    gpio_reset_pin(HEATER_PWM_PIN);
+    gpio_set_direction(HEATER_PWM_PIN, GPIO_MODE_OUTPUT);
+   
+    TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
+
+    while(1) 
+    {
+        /* Heater off (output low) */
+        if (Heater_Duty_Cycle !=100)      //removes error if PWM = 100%
+        {    
+            printf("Turning heater off\n");
+            gpio_set_level(HEATER_PWM_PIN, 0);
+            vTaskDelayUntil(&xLastWakeTime,(100-Heater_Duty_Cycle)); 
+            /*vTaskDelayUntil resumes task immediatly after specified time
+            vTaskDelay is not sufficient to guarantee a stable frequency*/
+        }
+
+        /* Heater on (output high) */
+        if (Heater_Duty_Cycle !=0)        //Removes error if PWM = 0%
+        {
+            printf("Turning heater on\n");
+            gpio_set_level(HEATER_PWM_PIN, 1);
+            vTaskDelayUntil(&xLastWakeTime, Heater_Duty_Cycle);
+        }
+    }
+}
+
 void app_main(void)
 {
 
@@ -128,6 +166,8 @@ void app_main(void)
     ds18b20_init(DS_PIN);
 
     //int count = 0;
+         Heater_PID();
+         Heater_PWM();
 
 
     //flow rate
