@@ -82,7 +82,7 @@ void getTempTask(void* arg) {
    while(1) {
 
    printf("%d - Temperature: %f\n", count, ds18b20_get_temp());
-   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 secondsec
    count++;
    }
 
