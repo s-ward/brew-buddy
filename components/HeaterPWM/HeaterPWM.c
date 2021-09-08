@@ -1,5 +1,10 @@
 #include <stdio.h>
 #include "HeaterPWM.h"
+#include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#define HEATER_PWM_PIN 25
 
 int Heater_Duty_Cycle; //0-100 PWM value, global variable that is changed through Heater_PID function
 
