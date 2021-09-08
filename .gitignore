@@ -2,4 +2,4 @@ build/
 sdkconfig
 sdkconfig.old
 .env
-.vscode/c_cpp_properties.json.example
+.vscode/c_cpp_properties.json
