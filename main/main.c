@@ -51,6 +51,7 @@
 #include "string.h"
 #include "ds18b20.h"
 
+#include "HeaterPID.h"
 
 const int DS_PIN = 22;
 
@@ -74,7 +75,7 @@ static uint32_t currentTime = 0;
 static uint32_t previousTime = 0;
 int timeInterval = 1000; // interval time in milli seconds
 
-#define HEATER_PWM_PIN 16 //Change to 9
+#define HEATER_PWM_PIN 25
 
 int Heater_Duty_Cycle; //0-100 PWM value, global variable that is changed through Heater_PID function
 
@@ -112,11 +113,7 @@ while(1) {
    }
 }
 
-int Heater_PID (void)
-{
-    Heater_Duty_Cycle = 10;         //manual value atm, proper PID function will update this automatically
-    return (Heater_Duty_Cycle);
-}
+
 
 void Heater_PWM (void)
 {
@@ -161,13 +158,15 @@ void app_main(void)
     int1.gpio_num = 55;
 
     button(&int1);
-
+    
+    Heater_PID();
+    Heater_PWM();
+    
     //ds18b20
     ds18b20_init(DS_PIN);
 
     //int count = 0;
-         Heater_PID();
-         Heater_PWM();
+ 
 
 
     //flow rate
