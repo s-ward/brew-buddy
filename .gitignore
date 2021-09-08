@@ -1,5 +1,5 @@
 build/
 sdkconfig
 sdkconfig.old
-.vscode/c_cpp_properties.json
-.vscode/settings.json
+.env
+.vscode/c_cpp_properties.json.example
