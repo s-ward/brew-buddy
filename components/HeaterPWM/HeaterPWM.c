@@ -24,7 +24,8 @@ void Heater_PWM (int Manual_Duty)
         {    
             printf("Turning heater off\n");
             gpio_set_level(HEATER_PWM_PIN, 0);
-            vTaskDelayUntil(&xLastWakeTime,(100-Heater_Duty_Cycle)); 
+            vTaskDelay((1000-Heater_Duty_Cycle) / portTICK_PERIOD_MS); //pause task for 1 second
+            //vTaskDelayUntil(&xLastWakeTime,(100-Heater_Duty_Cycle)); 
             /*vTaskDelayUntil resumes task immediatly after specified time
             vTaskDelay is not sufficient to guarantee a stable frequency*/
         }
@@ -34,7 +35,8 @@ void Heater_PWM (int Manual_Duty)
         {
             printf("Turning heater on\n");
             gpio_set_level(HEATER_PWM_PIN, 1);
-            vTaskDelayUntil(&xLastWakeTime, Heater_Duty_Cycle);
+            vTaskDelay(Heater_Duty_Cycle / portTICK_PERIOD_MS); //pause task for 1 second
+            //vTaskDelayUntil(&xLastWakeTime, Heater_Duty_Cycle);
         }
     }
 }

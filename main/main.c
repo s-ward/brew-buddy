@@ -53,7 +53,11 @@
 
 //For Heater Control
 #include "HeaterPWM.h"
-int Manual_Duty = 100; // Manual duty cycle entry 0-100, 0==PID controlled
+int Manual_Duty = 50; // Manual duty cycle entry 0-100, 0==PID controlled
+
+//For Primary State Machine
+#include "BrewStates.h"
+
 
 const int DS_PIN = 22;
 
@@ -77,7 +81,6 @@ static uint32_t currentTime = 0;
 static uint32_t previousTime = 0;
 int timeInterval = 1000; // interval time in milli seconds
 
-enum Brew_States {Passive, WPS, Clean, Manual, Safety_Check, Mash, Sparge, Boil, Cooling, Transfer};
 
 void getTempTask(void* arg) {
 
@@ -86,7 +89,7 @@ void getTempTask(void* arg) {
    while(1) {
 
    printf("%d - Temperature: %f\n", count, ds18b20_get_temp());
-   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 secondsec
+   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    count++;
    }
 
@@ -116,7 +119,6 @@ while(1) {
 
 void app_main(void)
 {
-
     led_config();
     nvs_config();
     load_gpio_state(GPIO_LED);
@@ -128,9 +130,29 @@ void app_main(void)
     int1.gpio_num = 55;
 
     button(&int1);
+
+   
+
+    xTaskCreate(
+      Brew_States,              //function name
+      "State Machine for Brew", //function description
+      1000,                      //stach size
+      NULL,                      //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+    );
+
+     xTaskCreate(
+      Heater_PWM,                //function name
+      "Heater PWM Control",      //function description
+      1000,                      //stach size
+      Manual_Duty,               //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+    );
     
-    Heater_PWM(Manual_Duty);
-    
+   //Heater_PWM(Manual_Duty);
+
     //ds18b20
     ds18b20_init(DS_PIN);
 
@@ -139,53 +161,7 @@ void app_main(void)
     //flow rate
     flowM(); // add flow rate interrupt
 
-
-   // switch (Brew_States)
-   // {
-   //    case Passive:
-   //       Passive();
-   //       break;
-
-   //    case WPS:
-   //       WPS();
-   //       break;
-
-   //    case Clean:
-   //       Clean();
-   //       break;
-
-   //    case Manual:
-   //       Manual();
-   //       break;
-
-   //    case Safety_Check:
-   //       Safety_Check();
-   //       break;
-
-   //    case Mash:
-   //       Mash();
-   //       break;
-
-   //    case Sparge:
-   //       Sparge();
-   //       break;
-
-   //    case Boil:
-   //       Boil();
-   //       break;
-
-   //    case Cooling:
-   //       Cooling();
-   //       break;
-
-   //    case Transfer:
-   //       Transfer();
-   //       break;
-
-   //    default:
-   //       Passive();
-   //       break;
-   // }
+  
 
 //temp task
 //xTaskCreate(getTempTask, "Temp task", 2048, NULL, 10, NULL );
