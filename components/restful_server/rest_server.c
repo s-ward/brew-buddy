@@ -73,8 +73,12 @@ static esp_err_t rest_common_get_handler(httpd_req_t *req)
     strlcpy(filepath, rest_context->base_path, sizeof(filepath));
     if (req->uri[strlen(req->uri) - 1] == '/') {
         strlcat(filepath, "/index.html", sizeof(filepath));
+        printf("home page");
+        printf(filepath);
     } else {
         strlcat(filepath, req->uri, sizeof(filepath));
+        printf("not home page");
+        printf(filepath);
     }
     int fd = open(filepath, O_RDONLY, 0);
     if (fd == -1) {
@@ -185,6 +189,17 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
     int red = cJSON_GetObjectItem(root, "red")->valueint;
     int green = cJSON_GetObjectItem(root, "green")->valueint;
     int blue = cJSON_GetObjectItem(root, "blue")->valueint;
+    char *heater = cJSON_GetObjectItem(root, "heater")->valuestring;
+    char *pump = cJSON_GetObjectItem(root, "pump")->valuestring;
+
+    if (strcmp(pump, "On") == 0) {
+        printf("Pump: %s", pump);
+        //pump function on
+    } else {
+        printf("Pump: %s", pump);
+        //pump function off
+    }
+
 
     //gpio logic
     if (red < 100) {

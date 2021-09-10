@@ -41,8 +41,8 @@
       <v-toolbar-title>ESP Home</v-toolbar-title>
     </v-toolbar>
     <v-content>
-      <v-container fluid fill-height>
-        <router-view></router-view>
+      <v-container fluid fill-height color="red accent-4">
+        <router-view color="red accent-4"></router-view>
       </v-container>
     </v-content>
     <v-footer color="red accent-4" app fixed>

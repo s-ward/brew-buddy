@@ -14,11 +14,25 @@
                   <v-text-field v-model="targettemp" class="mt-0" type="number"></v-text-field>
                 </v-flex>
                 <v-flex xs3>
-                  <v-text-field v-model="currenttemp" label = "Current Temp" class="mt-0" type="number" value="0" readonly outlined></v-text-field>
-                  
+                  <v-text-field v-model="currenttemp" label = "Current Temp" class="mt-0" type="number" value="0" readonly outlined></v-text-field>                
                 </v-flex>
                 <v-flex xs9>
                   <chart></chart>
+                </v-flex>
+                <v-flex xs9>
+                  <v-switch v-model="heater" @change="set_color" true-value="On" false-value="Off" :label="`Heater: ${heater.toString()}`"></v-switch>
+                </v-flex>
+                <v-flex xs9>
+                  <v-switch v-model="pump" @change="set_color" true-value="On" false-value="Off" :label="`Pump: ${pump.toString()}`"></v-switch>
+                </v-flex>
+                <v-flex xs9>
+                  <v-switch v-model="valve1" true-value="Open" false-value="Closed" :label="`Valve 1: ${valve1.toString()}`"></v-switch>
+                </v-flex>
+                <v-flex xs9>
+                  <v-switch v-model="valve2" true-value="Open" false-value="Closed" :label="`Valve 2: ${valve2.toString()}`"></v-switch>
+                </v-flex>
+                <v-flex xs9>
+                  <v-switch v-model="valve3" true-value="Open" false-value="Closed" :label="`Valve 3: ${valve3.toString()}`"></v-switch>
                 </v-flex>
                 <v-flex xs9>
                   <v-slider v-model="red" :max="255" label="Red"></v-slider>
@@ -56,13 +70,18 @@ import Chart from './Chart.vue';
 
 export default {
   data() {
-    return { targettemp: 0, red: 160, green: 160, blue: 160 };
+    return { targettemp: 0, red: 160, green: 160, blue: 160, valve1: 'Closed', valve2: 'Closed', valve3: 'Closed', heater: 'Off', pump: "Off" };
   },
   methods: {
     set_color: function() {
       this.$ajax
         .post("/api/v1/manual/brightness", {
           targettemp: this.targettemp,
+          heater: this.heater,
+          pump: this.pump,
+          valve1: this.valve1,
+          valve2: this.valve2,
+          valve3: this.valve3,
           red: this.red,
           green: this.green,
           blue: this.blue
