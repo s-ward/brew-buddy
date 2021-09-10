@@ -52,8 +52,8 @@
 #include "ds18b20.h"
 
 //For Heater Control
-#include "HeaterPID.h"
 #include "HeaterPWM.h"
+int Manual_Duty = 100; // Manual duty cycle entry 0-100, 0==PID controlled
 
 const int DS_PIN = 22;
 
@@ -129,8 +129,7 @@ void app_main(void)
 
     button(&int1);
     
-    Heater_PID();
-    Heater_PWM();
+    Heater_PWM(Manual_Duty);
     
     //ds18b20
     ds18b20_init(DS_PIN);

@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include "HeaterPWM.h"
+#include "HeaterPID.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
 #define HEATER_PWM_PIN 25
 
-int Heater_Duty_Cycle; //0-100 PWM value, global variable that is changed through Heater_PID function
+int Heater_Duty_Cycle; //0-100 PWM value that is changed through Heater_PID function
 
-void Heater_PWM (void)
+void Heater_PWM (int Manual_Duty)
 {
     gpio_reset_pin(HEATER_PWM_PIN);
     gpio_set_direction(HEATER_PWM_PIN, GPIO_MODE_OUTPUT);
@@ -17,6 +18,7 @@ void Heater_PWM (void)
 
     while(1) 
     {
+        Heater_Duty_Cycle = Heater_PID(Manual_Duty);
         /* Heater off (output low) */
         if (Heater_Duty_Cycle !=100)      //removes error if PWM = 100%
         {    
