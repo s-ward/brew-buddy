@@ -53,8 +53,7 @@
 
 //For Heater Control
 #include "HeaterPWM.h"
-int Manual_Duty = 50; //Manual duty cycle entry 0-100, 0==PID controlled, Global variable
-int Pause = 0;       //Pause command global variable
+
 
 //For Primary State Machine
 #include "BrewStates.h"

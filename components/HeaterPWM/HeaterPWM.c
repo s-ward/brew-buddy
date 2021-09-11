@@ -41,7 +41,7 @@ void Heater_PWM (void)
             /* Heater off (output low) */
             if (Heater_Duty_Cycle !=100)      //removes error if PWM = 100%
             {    
-                printf("Turning heater off\n");
+                //printf("Turning heater off\n");
                 PWM_Set_Low;
                 vTaskDelayUntil(&xLastWakeTime,(100-Heater_Duty_Cycle)); 
                 /*vTaskDelayUntil resumes task immediatly after specified time
@@ -51,7 +51,7 @@ void Heater_PWM (void)
             /* Heater on (output high) */
             if (Heater_Duty_Cycle !=0)        //Removes error if PWM = 0%
             {
-                printf("Turning heater on\n");
+                //printf("Turning heater on\n");
                 PWM_Set_High;
                 vTaskDelayUntil(&xLastWakeTime, Heater_Duty_Cycle);
             }
