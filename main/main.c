@@ -53,7 +53,8 @@
 
 //For Heater Control
 #include "HeaterPWM.h"
-int Manual_Duty = 50; // Manual duty cycle entry 0-100, 0==PID controlled
+int Manual_Duty = 50; //Manual duty cycle entry 0-100, 0==PID controlled, Global variable
+int Pause = 0;       //Pause command global variable
 
 //For Primary State Machine
 #include "BrewStates.h"
@@ -133,23 +134,23 @@ void app_main(void)
 
    
 
-    xTaskCreate(
+   xTaskCreate(
       Brew_States,              //function name
       "State Machine for Brew", //function description
-      1000,                      //stach size
+      1000,                      //stack size
       NULL,                      //task parameters
-      1,                         //task priority
+      2,                         //task priority
       NULL                       //task handle
-    );
+   );
 
-     xTaskCreate(
+   xTaskCreate(
       Heater_PWM,                //function name
       "Heater PWM Control",      //function description
-      1000,                      //stach size
-      Manual_Duty,               //task parameters
+      2048,                      //stack size
+      NULL,               //task parameters
       1,                         //task priority
       NULL                       //task handle
-    );
+   );
     
    //Heater_PWM(Manual_Duty);
 

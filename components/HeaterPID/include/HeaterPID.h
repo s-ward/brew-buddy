@@ -1,1 +1,1 @@
-int Heater_PID(int Heater_Duty_Cycle);
+int Heater_PID(void);

@@ -1,1 +1,1 @@
-void Heater_PWM (int Manual_Duty);
+void Heater_PWM (void);
