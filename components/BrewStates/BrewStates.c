@@ -1,14 +1,21 @@
 #include <stdio.h>
 #include "BrewStates.h"
+#include "Default.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+//State machine setup variables
 enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
                   Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
 char BrewState;
 
 int Manual_Duty = 20; //Manual duty cycle entry 0-100, 0==PID controlled, Global variable
 int Pause = 0;       //Pause command global variable
+
+//User input commands
+int WPS_In, Clean_In, Manual_In, Pause_In, Reset_In, Brew_In;  // set to inerrupts?
+
+int Defult_Setting;
 
 void Brew_States (void)
 {
@@ -68,37 +75,66 @@ void Brew_States (void)
 
 void Passive (void)
 {
-   Pause = 0;  
-   Manual_Duty = 50;
    printf("Passive\n");
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-   BrewState = WPS_State;
+   if (!Defult_Setting)
+   {
+      xTaskCreate(
+         Default,        //Call to default control function to zero everything
+         "Reset valves, heater, pump and PWM", //function description
+         1000,                      //stack size
+         NULL,                      //task parameters
+         2,                         //task priority
+         NULL                       //task handle
+      );      
+      vTaskDelay(16000 / portTICK_PERIOD_MS); //pause task for 16 seconds
+      Clean_In = 1; // test variable
+   }
+   
+   else  //If Zeroed and safe wait for user input
+   {
+      if (WPS_In)
+         BrewState = WPS_State;
+      else if (Clean_In)
+         BrewState = Clean_State;
+      else if (Manual_In)
+         BrewState = Manual_State;
+      else if (Brew_In)
+         BrewState = Safety_Check_State;
+   }
 }
 
 void WPS (void)
 {
+   WPS_In = 0;             //Reset trigger variable
    printf("WPS\n");
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-   BrewState = Clean_State;
+   BrewState = Passive_State;
 }
 
 void Clean (void)
 {
+   Clean_In = 0;             //Reset trigger variable
+   Defult_Setting = 0;     //Alert that config is no longer in default
+   Manual_Duty = 50;    //test
+   Pause = 0;           //test
    printf("Clean\n");
-   Manual_Duty = 99;
-   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-   BrewState = Manual_State;
+   vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for 1 second
+   BrewState = Passive_State;
 }
 
 void Manual (void)
 {
+   Manual_In = 0;             //Reset trigger variable
+   Defult_Setting = 0;     //Alert that config is no longer in default
    printf("Manual\n");
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-   BrewState = Safety_Check_State;
+   BrewState = Passive_State;
 }
 
 void Safety_Check (void)
 {
+   Brew_In = 0;             //Reset trigger variable
    printf("Safety_Check\n");
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Mash_State;
@@ -106,8 +142,8 @@ void Safety_Check (void)
 
 void Mash (void)
 { 
+   Defult_Setting = 0;  //Alert that config is no longer in default
    printf("Mash\n");
-   Manual_Duty = 1;
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Sparge_State;
 }
@@ -122,7 +158,6 @@ void Sparge (void)
 void Boil (void)
 {
    printf("Boil\n");
-   Pause = 1;
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Cooling_State;
 }

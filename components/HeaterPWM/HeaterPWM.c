@@ -9,9 +9,10 @@
 #define PWM_Set_High (gpio_set_level(HEATER_PWM_PIN, 1))
 #define PWM_Set_Low (gpio_set_level(HEATER_PWM_PIN, 0))
 
-int Manual_Duty;
+int Manual_Duty; //0-100 PWM value that is manually configured
 int Heater_Duty_Cycle; //0-100 PWM value that is changed through Heater_PID function
 int Pause;
+int Auto_PID = 0; //Automatic 1, or manual 0
 
 void Heater_PWM (void)
 {
@@ -28,7 +29,7 @@ void Heater_PWM (void)
         }
         else
         {
-            if (Manual_Duty == 0)      //If manual heater power setting == 0, use PID
+            if (Auto_PID == 1)      //Case to use PID not manual setting
             {
                 Heater_Duty_Cycle = Heater_PID();
             }
