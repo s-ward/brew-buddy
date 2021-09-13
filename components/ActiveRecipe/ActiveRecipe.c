@@ -116,6 +116,36 @@ void ActiveRecipe (void)
     Cooling_Temp = 25;
 
 
+
+    //Passive Ingredients
+
+    //yeast name
+    strcpy (Yeast,"London II");
+
+    //Mash water chemistry (mg)
+    Mash_Gypsum = 12;
+    Mash_Calcium_Chloride  = 0; 
+    Mash_Epsom_Salt  = 0; 
+    Mash_Magnesium_Chloride  = 0; 
+    Mash_Canning_Salt = 0; 
+    Mash_Baking_Soda = 0;
+    Mash_Chalk = 0; 
+    Mash_Pickling_Lime = 0; 
+    Mash_Acid = 0;  
+
+    //Sparge water chemistry (mg)
+    Sparge_Gypsum = 12;
+    Sparge_Calcium_Chloride  = 0; 
+    Sparge_Epsom_Salt  = 0; 
+    Sparge_Magnesium_Chloride  = 0; 
+    Sparge_Canning_Salt = 0; 
+    Sparge_Baking_Soda = 0;
+    Sparge_Chalk = 0; 
+    Sparge_Pickling_Lime = 0; 
+    Sparge_Acid = 0;  
+
+
+
     //*********Calculation Variables*********
     Total_Grain_Weight = (Grain_Weight_1 + Grain_Weight_2 + Grain_Weight_3 + Grain_Weight_4 + Grain_Weight_5 + Grain_Weight_6 + Grain_Weight_7 + Grain_Weight_8);
     Total_Brew_Volume = (Mash_Water_Volume + Sparge_Water_Volume - Total_Grain_Weight);

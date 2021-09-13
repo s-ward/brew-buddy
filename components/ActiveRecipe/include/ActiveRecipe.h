@@ -107,6 +107,34 @@ int Adjunct_Time_8;
 int Cooling_Temp;
 
 
-//Calculation Variable
+//Passive Ingredients
+
+//yeast name
+char Yeast[40];
+
+//Mash water chemistry (mg)
+float Mash_Gypsum;
+float Mash_Calcium_Chloride; 
+float Mash_Epsom_Salt; 
+float Mash_Magnesium_Chloride; 
+float Mash_Canning_Salt;
+float Mash_Baking_Soda;
+float Mash_Chalk;
+float Mash_Pickling_Lime; 
+float Mash_Acid;  
+
+//Sparge water chemistry (mg)
+float Sparge_Gypsum;
+float Sparge_Calcium_Chloride; 
+float Sparge_Epsom_Salt; 
+float Sparge_Magnesium_Chloride; 
+float Sparge_Canning_Salt;
+float Sparge_Baking_Soda;
+float Sparge_Chalk;
+float Sparge_Pickling_Lime; 
+float Sparge_Acid;
+
+
+//Calculation Variable (not user defined)
 float Total_Grain_Weight;
 float Total_Brew_Volume;
