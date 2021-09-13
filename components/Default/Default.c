@@ -3,8 +3,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-int Pause, Heater_Relay, Pump_Relay, Valve_1, Valve_2, Valve_3, Defult_Setting;
-
 void Default (void)
 {
     printf("Moving to default settings\n");

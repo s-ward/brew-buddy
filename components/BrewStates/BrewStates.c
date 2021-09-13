@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "BrewStates.h"
+#include "EquipConfig.h"
+#include "ActiveRecipe.h"
 #include "Default.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -15,40 +17,25 @@ int Pause = 0;       //Pause command global variable
 //User input commands
 int WPS_In, Clean_In, Manual_In, Pause_In, Reset_In, Brew_In;  // set to inerrupts?
 
-//User input config variables
-int Main_Config = 2;    //1 = full, 2 = BIAB + Sparge, 3 = BIAB
-int Kettle_Volume = 37; //0-127
-int Mash_Tun_Volume = 60; //0-127
-int Sparge_Connection = 1; //1 = tank, 0 = tap
-int Cooling_Rqd = 1;  // 0 = n, 1 = y
-int Cooling_Method = 0; // 0 = pumped water, 1 = pumped wort
-int Transfer_Method = 1; //0 = manual, 1 = pumped
-int Heating_Method = 1; //0 = boiler, 1 = RIMS
-int Safety_Margin = 5; //xL of safety margin for kettle and mash tun (Hardcoded)
-
 //User input recipe variables
-float Grain_Weight_1 = 0.6;
-float Grain_Weight_2 = 2;
-float Grain_Weight_3 = 0;
-float Grain_Weight_4 = 4;
-float Grain_Weight_5 = 0;
-float Grain_Weight_6 = 0;
-float Grain_Weight_7 = 0;
-float Grain_Weight_8 = 0;
+// float Grain_Weight_1 = 0.6;
+// float Grain_Weight_2 = 2;
+// float Grain_Weight_3 = 0;
+// float Grain_Weight_4 = 4;
+// float Grain_Weight_5 = 0;
+// float Grain_Weight_6 = 0;
+// float Grain_Weight_7 = 0;
+// float Grain_Weight_8 = 0;
 
-float Mash_Water_Volume = 30;
-float Sparge_Water_Volume = 30; 
-
-
+// float Mash_Water_Volume = 30;
+// float Sparge_Water_Volume = 30; 
 
 
-float Total_Grain_Weight;
-float Total_Brew_Volume;
+// float Total_Grain_Weight;
+// float Total_Brew_Volume;
 
 int Kettle_Check;
 int Mash_Check;
-
-int Defult_Setting;
 
 void Brew_States (void)
 {
@@ -109,6 +96,8 @@ void Brew_States (void)
 void Passive (void)
 {
    printf("Passive\n");
+   EquipConfig();
+   ActiveRecipe();
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    if (!Defult_Setting)
    {
@@ -167,23 +156,29 @@ void Manual (void)
 
 void Safety_Check (void)
 {
-   Total_Grain_Weight = (Grain_Weight_1 + Grain_Weight_2 + Grain_Weight_3 + Grain_Weight_4 + Grain_Weight_5 + Grain_Weight_6 + Grain_Weight_7 + Grain_Weight_8);
-   Total_Brew_Volume = (Mash_Water_Volume + Sparge_Water_Volume - Total_Grain_Weight);
+   // Total_Grain_Weight = (Grain_Weight_1 + Grain_Weight_2 + Grain_Weight_3 + Grain_Weight_4 + Grain_Weight_5 + Grain_Weight_6 + Grain_Weight_7 + Grain_Weight_8);
+   // Total_Brew_Volume = (Mash_Water_Volume + Sparge_Water_Volume - Total_Grain_Weight);
    Brew_In = 0;             //Reset trigger variable
    
    printf("Safety_Check\n");
    printf("Grain Weight: %f\n", Total_Grain_Weight);
    printf("Kettle Recipe Volume: %f\n", Total_Brew_Volume);
   
-   Kettle_Check = (Total_Brew_Volume < (Kettle_Volume - Safety_Margin));
+   Kettle_Safe = (Kettle_Volume - Safety_Margin);
+   Mash_Displacement = (Total_Grain_Weight + Mash_Water_Volume);
+   Mash_Safe = (Mash_Tun_Volume - Safety_Margin);
+
+   Kettle_Check = (Total_Brew_Volume < Kettle_Safe);
 
    if (Main_Config == 1)
    {
-      Mash_Check = ((Total_Grain_Weight + Mash_Water_Volume) < (Mash_Tun_Volume - Safety_Margin));   
+      Mash_Check = (Mash_Displacement < Mash_Safe);
+      Mash_Exceeded = (Mash_Displacement - Mash_Safe);
    }
    else
    {
-      Mash_Check = ((Total_Grain_Weight + Mash_Water_Volume) < (Kettle_Volume - Safety_Margin));
+      Mash_Check = (Mash_Displacement < Kettle_Safe);
+      Mash_Exceeded = (Mash_Displacement - Kettle_Safe);
    }
 
    if (Mash_Check && Kettle_Check)
@@ -194,11 +189,11 @@ void Safety_Check (void)
       {
          if (!Kettle_Check)
          {
-            printf("***WARNING*** Recipe exceeds kettle volume \n");
+            printf("***WARNING*** Recipe exceeds kettle volume by %f, L\n", (Total_Brew_Volume-Kettle_Safe));
          }
          if (!Mash_Check)
          {
-            printf("***WARNING*** Recipe exceeds Mash volume \n");
+            printf("***WARNING*** Recipe exceeds Mash volume by %f, L\n", Mash_Exceeded);
          }
          BrewState = Passive_State;
       }
