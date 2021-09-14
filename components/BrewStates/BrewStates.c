@@ -17,23 +17,6 @@ int Pause = 0;       //Pause command global variable
 //User input commands
 int WPS_In, Clean_In, Manual_In, Pause_In, Reset_In, Brew_In;  // set to inerrupts?
 
-//User input recipe variables
-// float Grain_Weight_1 = 0.6;
-// float Grain_Weight_2 = 2;
-// float Grain_Weight_3 = 0;
-// float Grain_Weight_4 = 4;
-// float Grain_Weight_5 = 0;
-// float Grain_Weight_6 = 0;
-// float Grain_Weight_7 = 0;
-// float Grain_Weight_8 = 0;
-
-// float Mash_Water_Volume = 30;
-// float Sparge_Water_Volume = 30; 
-
-
-// float Total_Grain_Weight;
-// float Total_Brew_Volume;
-
 int Kettle_Check;
 int Mash_Check;
 
@@ -156,16 +139,14 @@ void Manual (void)
 
 void Safety_Check (void)
 {
-   // Total_Grain_Weight = (Grain_Weight_1 + Grain_Weight_2 + Grain_Weight_3 + Grain_Weight_4 + Grain_Weight_5 + Grain_Weight_6 + Grain_Weight_7 + Grain_Weight_8);
-   // Total_Brew_Volume = (Mash_Water_Volume + Sparge_Water_Volume - Total_Grain_Weight);
    Brew_In = 0;             //Reset trigger variable
    
    printf("Safety_Check\n");
-   printf("Grain Weight: %f\n", Total_Grain_Weight);
+   printf("Grain Weight: %f\n", Grain_Weight);
    printf("Kettle Recipe Volume: %f\n", Total_Brew_Volume);
   
    Kettle_Safe = (Kettle_Volume - Safety_Margin);
-   Mash_Displacement = (Total_Grain_Weight + Mash_Water_Volume);
+   Mash_Displacement = (Grain_Weight + Mash_Water_Volume);
    Mash_Safe = (Mash_Tun_Volume - Safety_Margin);
 
    Kettle_Check = (Total_Brew_Volume < Kettle_Safe);
@@ -193,7 +174,7 @@ void Safety_Check (void)
          }
          if (!Mash_Check)
          {
-            printf("***WARNING*** Recipe exceeds Mash volume by %f, L\n", Mash_Exceeded);
+            printf("***WARNING*** Recipe exceeds mash volume by %f, L\n", Mash_Exceeded);
          }
          BrewState = Passive_State;
       }

@@ -136,7 +136,7 @@ void app_main(void)
    xTaskCreate(
       Brew_States,              //function name
       "State Machine for Brew", //function description
-      1000,                      //stack size
+      2048,                      //stack size
       NULL,                      //task parameters
       2,                         //task priority
       NULL                       //task handle
