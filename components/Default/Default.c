@@ -2,13 +2,16 @@
 #include "Default.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "PumpRelay.h"
+#include "HeaterRelay.h"
+#include "BrewStates.h"
 
 void Default (void)
 {
     printf("Moving to default settings\n");
     Pause = 1;              //Pause set (Mainly for Heater PWM)
-    Heater_Relay = 1;       //Heater off
-    Pump_Relay = 1;         //Pump off
+    HeaterRelay (Off);       //Heater off
+    PumpRelay(Off);         //Pump off
     Valve_1 = 0;
     vTaskDelay(5000 / portTICK_PERIOD_MS); //pause task for 5 seconds 
     printf("Valve_1 In Default Position\n");

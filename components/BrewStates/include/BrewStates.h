@@ -18,3 +18,7 @@ float Kettle_Safe;
 float Mash_Displacement;
 float Mash_Safe;
 float Mash_Exceeded;
+
+//Control Variables
+static int On = 1;
+static int Off = 0;

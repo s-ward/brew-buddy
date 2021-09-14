@@ -7,7 +7,7 @@ void EquipConfig (void)
     //Manual entry at the moment
     //will eventually refrence register where default config is stored
 
-    Main_Config = 2;    //1 = full, 2 = BIAB + Sparge, 3 = BIAB
+    Main_Config = 1;    //1 = full, 2 = BIAB + Sparge, 3 = BIAB
     Kettle_Volume = 37; //0-127
     Mash_Tun_Volume = 60; //0-127
     Sparge_Connection = 1; //1 = tank, 0 = tap

@@ -23,7 +23,7 @@ void ActiveRecipe (void)
     Grain_Weight = 5.6;
 
     //Liters
-    Mash_Water_Volume = 30;
+    Mash_Water_Volume = 15;
 
     //Deg C
     Strike_Temp = 75;
@@ -49,7 +49,7 @@ void ActiveRecipe (void)
     //*********SPARGE*********
 
     //Liters
-    Sparge_Water_Volume = 30; 
+    Sparge_Water_Volume = 20; 
 
     //Deg C
     Sparge_Temp = 75;

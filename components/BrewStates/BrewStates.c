@@ -3,6 +3,8 @@
 #include "EquipConfig.h"
 #include "ActiveRecipe.h"
 #include "Default.h"
+#include "PumpRelay.h"
+#include "HeaterRelay.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -19,6 +21,8 @@ int WPS_In, Clean_In, Manual_In, Pause_In, Reset_In, Brew_In;  // set to inerrup
 
 int Kettle_Check;
 int Mash_Check;
+
+
 
 void Brew_States (void)
 {
@@ -81,13 +85,14 @@ void Passive (void)
    printf("Passive\n");
    EquipConfig();
    ActiveRecipe();
+   HeaterRelay(Off);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    if (!Defult_Setting)
    {
       xTaskCreate(
          Default,        //Call to default control function to zero everything
          "Reset valves, heater, pump and PWM", //function description
-         1000,                      //stack size
+         2048,                      //stack size
          NULL,                      //task parameters
          1,                         //task priority
          NULL                       //task handle
@@ -186,6 +191,7 @@ void Mash (void)
 { 
    Defult_Setting = 0;  //Alert that config is no longer in default
    printf("Mash\n");
+   HeaterRelay(On);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Sparge_State;
 }
@@ -193,6 +199,10 @@ void Mash (void)
 void Sparge (void)
 {
    printf("Sparge\n");
+   PumpRelay(On);
+   //if (flow max and (temp > target temp))
+         //Heater power --5;                 //ensures flow rate can maintain temp pid if water has been preheated
+         //delay x 
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Boil_State;
 }
@@ -200,6 +210,7 @@ void Sparge (void)
 void Boil (void)
 {
    printf("Boil\n");
+   HeaterRelay(On);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Cooling_State;
 }
@@ -207,6 +218,7 @@ void Boil (void)
 void Cooling (void)
 {
    printf("Cooling\n");
+   PumpRelay(Off);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Transfer_State;
 }
@@ -214,6 +226,8 @@ void Cooling (void)
 void Transfer (void)
 {
    printf("Transfer\n");
+   PumpRelay(On);
+   HeaterRelay(On);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = 132;
 }
