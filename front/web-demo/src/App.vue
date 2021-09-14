@@ -1,5 +1,5 @@
-<template>
-  <v-app id="inspire">
+<template color="green accent-4">
+  <v-app id="inspire" color="blue accent-4">
     <v-navigation-drawer v-model="drawer" fixed app clipped>
       <v-list dense>
         <v-list-tile to="/">
@@ -31,18 +31,18 @@
             <v-icon>highlight</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>Manual</v-list-tile-title>
+            <v-list-tile-title>Manual Control</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
     <v-toolbar color="red accent-4" dark fixed app clipped-left>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>ESP Home</v-toolbar-title>
+      <v-toolbar-title>Brew Buddy</v-toolbar-title>
     </v-toolbar>
-    <v-content>
-      <v-container fluid fill-height color="red accent-4">
-        <router-view color="red accent-4"></router-view>
+    <v-content color="indigo accent-4" class="red">
+      <v-container fluid fill-height teal>
+        <router-view class="#C96E12"></router-view>
       </v-container>
     </v-content>
     <v-footer color="red accent-4" app fixed>

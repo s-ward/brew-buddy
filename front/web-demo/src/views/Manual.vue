@@ -3,12 +3,28 @@
     <v-layout text-xs-center wrap>
       <v-flex xs12 sm6 offset-sm3>
         <v-card>
-          <v-responsive :style="{ background: `rgb(${red}, ${green}, ${blue})` }" height="300px"></v-responsive>
+          <!-- <v-responsive :style="{ background: `rgb(${red}, ${green}, ${blue})` }" height="300px"></v-responsive> -->
           <v-card-text>
             <v-container fluid grid-list-lg>
               <v-layout row wrap>
                 <v-flex xs9>
-                  <v-slider v-model="targettemp" :max="255" label="Target Temp (Sensor 1)"></v-slider>
+                  <h1> Manual Control</h1>
+                </v-flex>
+                <v-flex xs3>
+                  <v-icon large color="orange darker-2" @click="gohome">home</v-icon>
+                  
+                </v-flex>
+                <v-flex xs12>
+                  <div :class="'text-${model}'">Manual Control</div>
+                </v-flex>
+                 <v-flex xs9>
+                  <v-select :items="items" filled label="Mode"></v-select>
+                </v-flex>
+                <v-flex xs9>
+                  <v-slider v-model="heaterpower" :max="100" :min="1" label="Heater Power"></v-slider>
+                </v-flex>
+                <v-flex xs9>
+                  <v-slider v-model="targettemp" :max="110" label="Target Temp"></v-slider>
                 </v-flex>
                 <v-flex xs3>
                   <v-text-field v-model="targettemp" class="mt-0" type="number"></v-text-field>
@@ -70,7 +86,8 @@ import Chart from './Chart.vue';
 
 export default {
   data() {
-    return { targettemp: 0, red: 160, green: 160, blue: 160, valve1: 'Closed', valve2: 'Closed', valve3: 'Closed', heater: 'Off', pump: "Off" };
+    return { targettemp: 0, red: 160, green: 160, blue: 160, valve1: 'Closed', valve2: 'Closed', valve3: 'Closed', heater: 'Off', pump: "Off", heaterpower: 0,
+      items: ['None', 'Temperature Control', 'Flow Control'] };
   },
   methods: {
     set_color: function() {
@@ -92,7 +109,8 @@ export default {
         .catch(error => {
           console.log(error);
         });
-    }
+    },
+  gohome () { alert('Mike has bad aids')},
   },
   components: {
     Chart

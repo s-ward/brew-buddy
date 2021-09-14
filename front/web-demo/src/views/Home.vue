@@ -1,8 +1,8 @@
-<template>
-  <v-container color="red accent-4">
-    <v-layout text-xs-center wrap color="red accent-4">
-      <v-flex xs12 sm6 offset-sm3 color="red accent-4">
-        <v-card color="red accent-4">
+<template color="blue accent-4">
+  <v-container color="blue accent-4">
+    <v-layout text-xs-center wrap color="green accent-4">
+      <v-flex xs12 sm6 offset-sm3 color="purple accent-4">
+        <v-card color="orange accent-4">
           <v-img :src="require('../assets/logo.png')" contain height="200"></v-img>
           <v-card-title primary-title>
             <div class="ma-auto">
