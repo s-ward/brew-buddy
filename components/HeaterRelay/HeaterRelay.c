@@ -11,17 +11,14 @@ void HeaterRelay (int Heater_Ctrl)
 {
     gpio_set_direction(Heater_Relay_Pin, GPIO_MODE_OUTPUT);
 
-    if (Pump_Is_On)
-    {
-       if (Heater_Ctrl)
-       {
-            Heater_On;
-            Heater_Is_On = 1;
-       }
-    }
     if (!Heater_Ctrl)
     {
         Heater_Off;
         Heater_Is_On = 0;
+    }
+    else if (Pump_Is_On || External_Safe) //Safety check, if pump is on or externally connected water flowing
+    {
+        Heater_On;
+        Heater_Is_On = 1;
     }
 }

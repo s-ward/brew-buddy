@@ -5,6 +5,7 @@
 #include "Default.h"
 #include "PumpRelay.h"
 #include "HeaterRelay.h"
+#include "Auto_Run.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -31,7 +32,6 @@ void Brew_States (void)
       switch (BrewState)
       {
          case Passive_State:
-            //printf("Passive\n");
             Passive();
             break;
 
@@ -73,7 +73,7 @@ void Brew_States (void)
 
          default:
             printf("Default\n");
-            Passive();
+            BrewState = Passive_State;
          break;
       }
      
@@ -85,10 +85,10 @@ void Passive (void)
    printf("Passive\n");
    EquipConfig();
    ActiveRecipe();
-   HeaterRelay(Off);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-   if (!Defult_Setting)
+   if (!Defult_Setting && !Wait)
    {
+      Wait = 1;        //Prevents looping back into task create
       xTaskCreate(
          Default,        //Call to default control function to zero everything
          "Reset valves, heater, pump and PWM", //function description
@@ -96,13 +96,14 @@ void Passive (void)
          NULL,                      //task parameters
          1,                         //task priority
          NULL                       //task handle
-      );      
-      vTaskDelay(16000 / portTICK_PERIOD_MS); //pause task for 16 seconds
-      Brew_In = 1; // test variable
+      );
    }
-   
-   else  //If Zeroed and safe wait for user input
+
+   else if (Defult_Setting) //If Zeroed and safe wait for user input
    {
+      Wait = 0;      //reset wait
+      Brew_In = 1;   //test variable
+      
       if (WPS_In)
          BrewState = WPS_State;
       else if (Clean_In)
@@ -172,17 +173,17 @@ void Safety_Check (void)
       BrewState = Mash_State;
    }
    else
+   {
+      if (!Kettle_Check)
       {
-         if (!Kettle_Check)
-         {
-            printf("***WARNING*** Recipe exceeds kettle volume by %f, L\n", (Total_Brew_Volume-Kettle_Safe));
-         }
-         if (!Mash_Check)
-         {
-            printf("***WARNING*** Recipe exceeds mash volume by %f, L\n", Mash_Exceeded);
-         }
-         BrewState = Passive_State;
+         printf("***WARNING*** Recipe exceeds kettle volume by %f, L\n", (Total_Brew_Volume-Kettle_Safe));
       }
+      if (!Mash_Check)
+      {
+         printf("***WARNING*** Recipe exceeds mash volume by %f, L\n", Mash_Exceeded);
+      }
+      BrewState = Passive_State;
+   }
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    
 }
@@ -192,6 +193,16 @@ void Mash (void)
    Defult_Setting = 0;  //Alert that config is no longer in default
    printf("Mash\n");
    HeaterRelay(On);
+   Auto_Run (0, 0, 0, 0, 0, 0, 1, 1, 0, 1);
+   while (!Stage_complete)
+   {
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+   // Auto_Run (0, 0, 0, 0, 0, 0, 1, 1, 0, 2);
+   // while (!Stage_complete)
+   // {
+   //    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   // }
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Sparge_State;
 }
@@ -199,6 +210,30 @@ void Mash (void)
 void Sparge (void)
 {
    printf("Sparge\n");
+
+   if ((Sparge_Water_Volume == 0)||(Main_Config == 3)) //Sparge not required
+      BrewState = Boil_State; 
+
+   else if (!Heating_Method) //Internal boiler
+   {
+      //wait for user prompt
+      PumpRelay(On);
+      //volume transfer function of pre-heated sparge water
+      PumpRelay(Off);
+      BrewState = Boil_State;
+   }
+   else
+   {
+      if (Main_Config == 1)
+      {
+         //Instant_Heat(); //valves set to external mash tun
+      }
+      else
+      {
+         //Instant_Heat(); //valves set to kettle, BIAB
+      }
+
+   }
    PumpRelay(On);
    //if (flow max and (temp > target temp))
          //Heater power --5;                 //ensures flow rate can maintain temp pid if water has been preheated
@@ -210,7 +245,7 @@ void Sparge (void)
 void Boil (void)
 {
    printf("Boil\n");
-   HeaterRelay(On);
+   HeaterRelay(On);   
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Cooling_State;
 }

@@ -141,15 +141,6 @@ void app_main(void)
       2,                         //task priority
       NULL                       //task handle
    );
-
-   xTaskCreate(
-      Heater_PWM,                //function name
-      "Heater PWM Control",      //function description
-      2048,                      //stack size
-      NULL,               //task parameters
-      1,                         //task priority
-      NULL                       //task handle
-   );
     
    //Heater_PWM(Manual_Duty);
 

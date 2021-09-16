@@ -12,6 +12,17 @@ void Cooling (void);
 void Transfer (void);
 
 int Defult_Setting;
+int Wait;
+int Valves_Set;
+int Pause;
+int Volume_Reached;
+int Timer;
+int Minutes_Remaining;
+int Seconds_Remaining;
+int Absolute_Seconds_Remaining;
+int Stage_complete;
+int Auto_PID;               //Automatic 1, or manual 0
+int PWM_En;
 
 //Variables for calculations
 float Kettle_Safe;

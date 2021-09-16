@@ -11,15 +11,15 @@ void PumpRelay (int Pump_Ctrl)
 {
     gpio_set_direction(Pump_Relay_Pin, GPIO_MODE_OUTPUT);
 
-    if (Pump_Ctrl)
-    {
-        Pump_On;
-        Pump_Is_On = 1;
-    }
     if (!Pump_Ctrl)
     {
         Pump_Off;
         HeaterRelay(Pump_Ctrl);
         Pump_Is_On = 0;
+    }
+    else
+    {
+        Pump_On;
+        Pump_Is_On = 1;
     }
 }
