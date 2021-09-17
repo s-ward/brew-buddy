@@ -25,9 +25,6 @@ int Auto_PID;               //Automatic 1, or manual 0
 int PWM_En;
 
 
-
-//void Test_Run (struct Auto_Run_Controls);
-
 //Variables for calculations
 float Kettle_Safe;
 float Mash_Displacement;

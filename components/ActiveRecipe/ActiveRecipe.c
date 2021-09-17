@@ -32,7 +32,7 @@ void ActiveRecipe (void)
     Mash_Flow_Rate = 50;
 
     //minutes
-    Mash_Time_1 = 20;
+    Mash_Time_1 = 1;
     Mash_Time_2 = 40;
     Mash_Time_3 = 0;
     Mash_Time_4 = 0;

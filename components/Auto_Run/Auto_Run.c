@@ -12,15 +12,10 @@
 // int Target_Temp;
 
 void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
-
-
 {
-    int tester = Auto_Run_Task.Heater;
-    printf("Heater %d\n",tester);
-
+ 
     TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
-
-    Stage_complete = 0;
+    
     HeaterRelay(Off);   //Turns off while moving valves for safety, Maybe move to vlave function?
     PumpRelay(Off);
     //valve call, set all 3(Valve1, Valve2, Valve3)
@@ -64,8 +59,11 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
         while (!Volume_Reached)
         {
             vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+            Volume_Reached=1;  //test
         }
     }
+
+    Volume_Reached=0; //Test
 
     //Timer delay function
     if (Auto_Run_Task->Target_Time != 0)

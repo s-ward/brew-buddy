@@ -7,6 +7,7 @@
 #include "HeaterRelay.h"
 #include "HeaterPWM.h"
 #include "Auto_Run.h"
+#include "Auto_Run_Setup.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -86,6 +87,7 @@ void Passive (void)
    printf("Passive\n");
    EquipConfig();
    ActiveRecipe();
+   Auto_Run_Setup();
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    if (!Defult_Setting && !Wait)
    {
@@ -189,53 +191,115 @@ void Safety_Check (void)
    
 }
 
+
+
+
 void Mash (void)
 { 
    Defult_Setting = 0;  //Alert that config is no longer in default
    printf("Mash\n");
-   HeaterRelay(On);
-   
-   struct Auto_Run_Controls Auto_Run_Task;
 
-   Auto_Run_Task.Valve1 = 0;
-   Auto_Run_Task.Valve2 = 0;
-   Auto_Run_Task.Valve3 = 0;
-   Auto_Run_Task.FlowCtrl = 0;
-   Auto_Run_Task.Target_Temp = 0;
-   Auto_Run_Task.Target_Sensor = 0;
-   Auto_Run_Task.Pump = 1;
-   Auto_Run_Task.Heater = 1;
-   Auto_Run_Task.Target_Volume = 0;
-   Auto_Run_Task.Target_Time = 100;
-   
-   //Auto_Run(&Auto_Run_Task);
-
+   Stage_complete = 0;
    xTaskCreate(
       Auto_Run,                  //function name
       "Auto Control",            //function description
       2048,                      //stack size
-      &Auto_Run_Task,             //task parameters
+      &Strike_Heat,             //task parameters
       1,                         //task priority
       NULL                       //task handle
    );
-   
-  
-  
-  
-  
-   //Auto_Run (0, 0, 0, 0, 0, 0, 1, 1, 0, 1);
    while (!Stage_complete)
    {
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
-   // Auto_Run (0, 0, 0, 0, 0, 0, 1, 1, 0, 2);
-   // while (!Stage_complete)
-   // {
-   //    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-   // }
+
+   if (Main_Config != 1)   //BIAB
+   {
+      //****Wait for user to confirm bag is in place
+   }
+
+   Stage_complete = 0;
+   xTaskCreate(
+      Auto_Run,                  //function name
+      "Auto Control",            //function description
+      2048,                      //stack size
+      &Mash1,                    //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+   );
+   while (!Stage_complete)
+   {
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+
+   Stage_complete = 0;
+   xTaskCreate(
+      Auto_Run,                  //function name
+      "Auto Control",            //function description
+      2048,                      //stack size
+      &Mash2,                    //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+   );
+   while (!Stage_complete)
+   {
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+
+   Stage_complete = 0;
+   xTaskCreate(
+      Auto_Run,                  //function name
+      "Auto Control",            //function description
+      2048,                      //stack size
+      &Mash3,                    //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+   );
+   while (!Stage_complete)
+   {
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+
+   Stage_complete = 0;
+   xTaskCreate(
+      Auto_Run,                  //function name
+      "Auto Control",            //function description
+      2048,                      //stack size
+      &Mash4,                    //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+   );
+   while (!Stage_complete)
+   {
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+
+   Stage_complete = 0;
+   xTaskCreate(
+      Auto_Run,                  //function name
+      "Auto Control",            //function description
+      2048,                      //stack size
+      &Mash5,                    //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+   );
+   while (!Stage_complete)
+   {
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+
+   Stage_complete = 0;
+
+   HeaterRelay(Off);
+   PumpRelay(Off);
+
+   //Mash Drain delay. pump off, Valve 3 open to drain mash tun delay until flowrate2 < xL...?
+
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Sparge_State;
 }
+
+
 
 void Sparge (void)
 {
@@ -275,7 +339,20 @@ void Sparge (void)
 void Boil (void)
 {
    printf("Boil\n");
-   HeaterRelay(On);   
+
+   xTaskCreate(
+      Auto_Run,                  //function name
+      "Auto Control",            //function description
+      2048,                      //stack size
+      &Boiling,                  //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+   );
+   while (!Stage_complete)
+   {
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+     
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Cooling_State;
 }
@@ -295,12 +372,4 @@ void Transfer (void)
    HeaterRelay(On);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = 132;        //default test
-}
-
-
-void Test_Run (struct Auto_Run_Controls Auto_Run_Task)
-{
-   int tester = Auto_Run_Task.Heater;
-
-   printf("Heater %d\n",tester);
 }
