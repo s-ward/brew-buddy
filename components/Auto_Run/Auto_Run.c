@@ -11,7 +11,7 @@
 //void Auto_Run (struct Auto_Run_Controls);
 // int Target_Temp;
 
-void Auto_Run (struct Auto_Run_Controls Auto_Run_Task)
+void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
 
 
 {
@@ -38,10 +38,10 @@ void Auto_Run (struct Auto_Run_Controls Auto_Run_Task)
     //Initilise temp pid
     Auto_PID = 1;
     PWM_En = 1;
-    Temp = Auto_Run_Task.Target_Temp;             //Assign global target temp
-    Sensor = Auto_Run_Task.Target_Sensor;         //Assign global target sensor
-    PumpRelay(Auto_Run_Task.Pump);
-    HeaterRelay(Auto_Run_Task.Heater);
+    Temp = Auto_Run_Task->Target_Temp;             //Assign global target temp
+    Sensor = Auto_Run_Task->Target_Sensor;         //Assign global target sensor
+    PumpRelay(Auto_Run_Task->Pump);
+    HeaterRelay(Auto_Run_Task->Heater);
     xTaskCreate(
         Heater_PWM,                //function name
         "Heater PWM Control",      //function description
@@ -58,7 +58,7 @@ void Auto_Run (struct Auto_Run_Controls Auto_Run_Task)
     }
 
     //If a volume transefer is required, wait for completion
-    if (Auto_Run_Task.Target_Volume != 0)
+    if (Auto_Run_Task->Target_Volume != 0)
     {
         //Call volume function
         while (!Volume_Reached)
@@ -68,15 +68,15 @@ void Auto_Run (struct Auto_Run_Controls Auto_Run_Task)
     }
 
     //Timer delay function
-    if (Auto_Run_Task.Target_Time != 0)
+    if (Auto_Run_Task->Target_Time != 0)
     {
-        while ((Auto_Run_Task.Target_Time*60) > Timer)    //conversion to seconds
+        while ((Auto_Run_Task->Target_Time*60) > Timer)    //conversion to seconds
         {
             vTaskDelayUntil(&xLastWakeTime, 100); //pause task for exactly 1 second
 
             Timer ++;           //Increment timer
-            Absolute_Seconds_Remaining = ((Auto_Run_Task.Target_Time*60)-Timer);
-            Minutes_Remaining = (((Auto_Run_Task.Target_Time*60)-Timer)/60);
+            Absolute_Seconds_Remaining = ((Auto_Run_Task->Target_Time*60)-Timer);
+            Minutes_Remaining = (((Auto_Run_Task->Target_Time*60)-Timer)/60);
             Seconds_Remaining = (Absolute_Seconds_Remaining-(Minutes_Remaining*60));
             printf("Time Remaining: %d:%d\n", Minutes_Remaining, Seconds_Remaining);
             

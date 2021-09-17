@@ -24,12 +24,9 @@ int Stage_complete;
 int Auto_PID;               //Automatic 1, or manual 0
 int PWM_En;
 
-struct Auto_Run_Controls
-{
-    int Valve1, Valve2, Valve3, FlowCtrl, Target_Temp, Target_Sensor, Pump, Heater, Target_Volume, Target_Time;
-};
 
-void Test_Run (struct Auto_Run_Controls);
+
+//void Test_Run (struct Auto_Run_Controls);
 
 //Variables for calculations
 float Kettle_Safe;
