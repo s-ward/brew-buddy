@@ -73,11 +73,11 @@ static esp_err_t rest_common_get_handler(httpd_req_t *req)
     strlcpy(filepath, rest_context->base_path, sizeof(filepath));
     if (req->uri[strlen(req->uri) - 1] == '/') {
         strlcat(filepath, "/index.html", sizeof(filepath));
-        printf("home page");
+        //printf("home page");
         printf(filepath);
     } else {
         strlcat(filepath, req->uri, sizeof(filepath));
-        printf("not home page");
+        //printf("not home page");
         printf(filepath);
     }
     int fd = open(filepath, O_RDONLY, 0);
@@ -186,9 +186,6 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
 
     cJSON *root = cJSON_Parse(buf);
     int targetTemp = cJSON_GetObjectItem(root, "targetTemp")->valueint;
-    int red = cJSON_GetObjectItem(root, "red")->valueint;
-    int green = cJSON_GetObjectItem(root, "green")->valueint;
-    int blue = cJSON_GetObjectItem(root, "blue")->valueint;
     char *heater = cJSON_GetObjectItem(root, "heater")->valuestring;
     char *pump = cJSON_GetObjectItem(root, "pump")->valuestring;
 
@@ -202,17 +199,17 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
 
 
     //gpio logic
-    if (red < 100) {
-        led_toggle();
-    }
-    else if (red > 100 && red < 150) {
-        save_gpio_state(GPIO_LED, led_get_state(GPIO_LED));
+   // if (red < 100) {
+     //   led_toggle();
+  //  }
+  //  else if (red > 100 && red < 150) {
+   //     save_gpio_state(GPIO_LED, led_get_state(GPIO_LED));
 
-    }
+ //   }
 
     //do something with target temp, update etc.
 
-    ESP_LOGI(REST_TAG, "Target Temp: %d, Light control: red = %d, green = %d, blue = %d", targetTemp, red, green, blue);
+    ESP_LOGI(REST_TAG, "Target Temp: %d", targetTemp);
     cJSON_Delete(root);
     httpd_resp_sendstr(req, "Post control value successfully");
     return ESP_OK;
@@ -329,7 +326,7 @@ esp_err_t start_rest_server(const char *base_path)
         .user_ctx = rest_context
     };
     httpd_register_uri_handler(server, &common_get_uri);
-    printf ("here1");
+    //printf ("here1");
 
     return ESP_OK;
 err_start:

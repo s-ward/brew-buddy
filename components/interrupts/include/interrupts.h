@@ -8,3 +8,4 @@ void button(struct Interrupts *intr);
 void flowM(void);
 void interrupts_config(void);
 void getFlowRate(uint32_t timeDifference);
+
