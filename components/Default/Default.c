@@ -9,7 +9,7 @@
 void Default (void)
 {
     printf("Moving to default settings\n");
-    Pause = 1;              //Pause set (Mainly for Heater PWM)
+    //Pause = 1;              //Pause set
     HeaterRelay (Off);       //Heater off
     PumpRelay(Off);         //Pump off
     Valve_1 = 0;
