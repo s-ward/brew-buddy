@@ -1,8 +1,8 @@
 #include <stdio.h>
+#include "string.h"
 #include "BrewStates.h"
 #include "EquipConfig.h"
 #include "ActiveRecipe.h"
-#include "Default.h"
 #include "PumpRelay.h"
 #include "HeaterRelay.h"
 #include "HeaterPWM.h"
@@ -11,7 +11,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-void Auto_Run (struct Auto_Run_Controls *);
+TaskHandle_t Auto_Task = NULL;
 
 //State machine setup variables
 enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
@@ -89,33 +89,33 @@ void Passive (void)
    ActiveRecipe();
    Auto_Run_Setup();
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-   if (!Defult_Setting && !Wait)
+
+//Zeroise all components
+   Stage_complete = 0;
+   xTaskCreate(   
+      Auto_Run,                  //function name
+      "Auto Control",            //function description
+      2048,                      //stack size
+      &Zeroise,                    //task parameters
+      1,                         //task priority
+      NULL                       //task handle
+   );
+   while (!Stage_complete)
    {
-      Wait = 1;        //Prevents looping back into task create
-      xTaskCreate(
-         Default,        //Call to default control function to zero everything
-         "Reset valves, heater, pump and PWM", //function description
-         2048,                      //stack size
-         NULL,                      //task parameters
-         1,                         //task priority
-         NULL                       //task handle
-      );
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
-   else if (Defult_Setting) //If Zeroed and safe wait for user input
-   {
-      Wait = 0;      //reset wait
-      Brew_In = 1;   //test variable
-      
-      if (WPS_In)
-         BrewState = WPS_State;
-      else if (Clean_In)
-         BrewState = Clean_State;
-      else if (Manual_In)
-         BrewState = Manual_State;
-      else if (Brew_In)
-         BrewState = Safety_Check_State;
-   }
+   Brew_In = 1;   //test variable
+   
+   if (WPS_In)
+      BrewState = WPS_State;
+   else if (Clean_In)
+      BrewState = Clean_State;
+   else if (Manual_In)
+      BrewState = Manual_State;
+   else if (Brew_In)
+      BrewState = Safety_Check_State;
+   
 }
 
 void WPS (void)
@@ -129,9 +129,7 @@ void WPS (void)
 void Clean (void)
 {
    Clean_In = 0;             //Reset trigger variable
-   Defult_Setting = 0;     //Alert that config is no longer in default
    Manual_Duty = 50;    //test
-   Pause = 0;           //test
    printf("Clean\n");
    vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Passive_State;
@@ -140,7 +138,6 @@ void Clean (void)
 void Manual (void)
 {
    Manual_In = 0;             //Reset trigger variable
-   Defult_Setting = 0;     //Alert that config is no longer in default
    printf("Manual\n");
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Passive_State;
@@ -196,7 +193,6 @@ void Safety_Check (void)
 
 void Mash (void)
 { 
-   Defult_Setting = 0;  //Alert that config is no longer in default
    printf("Mash\n");
 
    Stage_complete = 0;
@@ -346,13 +342,76 @@ void Boil (void)
       2048,                      //stack size
       &Boiling,                  //task parameters
       1,                         //task priority
-      NULL                       //task handle
+      &Auto_Task                  //task handle
    );
+      
+
    while (!Stage_complete)
-   {
+   {      
+
+      if ((Timer==10) && (Auto_Task != NULL))
+      {
+         vTaskSuspend(Auto_Task);
+         vTaskDelay(5000 / portTICK_PERIOD_MS); //pause task for 5 seconds
+         vTaskResume(Auto_Task);
+      }
+
+      // if (((Boil_Time*60)-Timer) == Adjunct_Time_1*60)
+      //    printf("Please add %s\n", Adjunct_Name_1);
+      // if (((Boil_Time*60)-Timer) == Adjunct_Time_2*60)
+      //    printf("Please add %s\n", Adjunct_Name_2);
+      // if (((Boil_Time*60)-Timer) == Adjunct_Time_3*60)
+      //    printf("Please add %s\n", Adjunct_Name_3);
+      // if (((Boil_Time*60)-Timer) == Adjunct_Time_4*60)
+      //    printf("Please add %s\n", Adjunct_Name_4);
+      // if (((Boil_Time*60)-Timer) == Adjunct_Time_5*60)
+      //    printf("Please add %s\n", Adjunct_Name_5);
+      // if (((Boil_Time*60)-Timer) == Adjunct_Time_6*60)
+      //    printf("Please add %s\n", Adjunct_Name_6);
+      // if (((Boil_Time*60)-Timer) == Adjunct_Time_7*60)
+      //    printf("Please add %s\n", Adjunct_Name_7);
+      // if (((Boil_Time*60)-Timer) == Adjunct_Time_8*60)
+      //    printf("Please add %s\n", Adjunct_Name_8);
+
+      if ((Absolute_Seconds_Remaining == Adjunct_Time_1*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_1 == 0)&&(strcmp (Adjunct_Name_1,""))))
+         printf("Please add %s\n", Adjunct_Name_1);
+      if ((Absolute_Seconds_Remaining == Adjunct_Time_2*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_2 == 0)&&(strcmp (Adjunct_Name_2,""))))
+         printf("Please add %s\n", Adjunct_Name_2);
+      if ((Absolute_Seconds_Remaining == Adjunct_Time_3*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_3 == 0)&&(strcmp (Adjunct_Name_3,""))))
+         printf("Please add %s\n", Adjunct_Name_3);
+      if ((Absolute_Seconds_Remaining == Adjunct_Time_4*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_4 == 0)&&(strcmp (Adjunct_Name_4,""))))
+         printf("Please add %s\n", Adjunct_Name_4);
+      if ((Absolute_Seconds_Remaining == Adjunct_Time_5*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_5 == 0)&&(strcmp (Adjunct_Name_5,""))))
+         printf("Please add %s\n", Adjunct_Name_5);
+      if ((Absolute_Seconds_Remaining == Adjunct_Time_6*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_6 == 0)&&(strcmp (Adjunct_Name_6,""))))
+         printf("Please add %s\n", Adjunct_Name_6);
+      if ((Absolute_Seconds_Remaining == Adjunct_Time_7*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_7 == 0)&&(strcmp (Adjunct_Name_7,""))))
+         printf("Please add %s\n", Adjunct_Name_7);
+      if ((Absolute_Seconds_Remaining == Adjunct_Time_8*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_8 == 0)&&(strcmp (Adjunct_Name_8,""))))
+         printf("Please add %s\n", Adjunct_Name_8);
+
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
-     
+
+   //Seccond pass to capture any 0 minute additions
+
+   // if ((Adjunct_Time_1 == 0)&&(strcmp (Adjunct_Name_1,"")))    //Checks addition time == 0 and name field is not empty
+   //    printf("Please add %s\n", Adjunct_Name_1);
+   // if ((Adjunct_Time_2 == 0)&&(strcmp (Adjunct_Name_2,"")))
+   //    printf("Please add %s\n", Adjunct_Name_2);
+   // if ((Adjunct_Time_3 == 0)&&(strcmp (Adjunct_Name_3,"")))
+   //    printf("Please add %s\n", Adjunct_Name_3);
+   // if ((Adjunct_Time_4 == 0)&&(strcmp (Adjunct_Name_4,"")))
+   //    printf("Please add %s\n", Adjunct_Name_4);
+   // if ((Adjunct_Time_5 == 0)&&(strcmp (Adjunct_Name_5,"")))
+   //    printf("Please add %s\n", Adjunct_Name_5);
+   // if ((Adjunct_Time_6 == 0)&&(strcmp (Adjunct_Name_6,"")))
+   //    printf("Please add %s\n", Adjunct_Name_6);
+   // if ((Adjunct_Time_7 == 0)&&(strcmp (Adjunct_Name_7,"")))
+   //    printf("Please add %s\n", Adjunct_Name_7);
+   // if ((Adjunct_Time_8 == 0)&&(strcmp (Adjunct_Name_8,"")))
+   //    printf("Please add %s\n", Adjunct_Name_8);
+
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = Cooling_State;
 }
@@ -372,4 +431,14 @@ void Transfer (void)
    HeaterRelay(On);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    BrewState = 132;        //default test
+}
+
+void Pause (void)
+{
+   if ((Timer==10) && (Auto_Task != NULL))
+   {
+      vTaskSuspend(Auto_Task);
+      vTaskDelay(5000 / portTICK_PERIOD_MS); //pause task for 5 seconds
+      vTaskResume(Auto_Task);
+   }
 }

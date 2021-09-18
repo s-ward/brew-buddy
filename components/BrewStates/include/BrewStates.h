@@ -14,7 +14,6 @@ void Transfer (void);
 int Defult_Setting;
 int Wait;
 int Valves_Set;
-int Pause;
 int Volume_Reached;
 int Timer;
 int Minutes_Remaining;

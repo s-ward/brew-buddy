@@ -13,8 +13,9 @@
 
 void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
 {
+    Absolute_Seconds_Remaining =-1;  //Prevents 0 minute hop additions being called immediately...
  
-    TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
+    //TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
     
     HeaterRelay(Off);   //Turns off while moving valves for safety, Maybe move to vlave function?
     PumpRelay(Off);
@@ -46,10 +47,13 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
         NULL                       //task handle
     );
 
-    //Wait for temp to be reached
-    while (!Temp_Reached)
+    if (Auto_Run_Task->Target_Temp !=0)         //Check to make default call work (zeroed I/P's)
     {
-        vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+    
+        while (!Temp_Reached) //Wait for temp to be reached
+        {
+            vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+        }
     }
 
     //If a volume transefer is required, wait for completion
@@ -70,17 +74,24 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     {
         while ((Auto_Run_Task->Target_Time*60) > Timer)    //conversion to seconds
         {
-            vTaskDelayUntil(&xLastWakeTime, 100); //pause task for exactly 1 second
-
-            Timer ++;           //Increment timer
+            TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
+           
             Absolute_Seconds_Remaining = ((Auto_Run_Task->Target_Time*60)-Timer);
             Minutes_Remaining = (((Auto_Run_Task->Target_Time*60)-Timer)/60);
             Seconds_Remaining = (Absolute_Seconds_Remaining-(Minutes_Remaining*60));
             printf("Time Remaining: %d:%d\n", Minutes_Remaining, Seconds_Remaining);
+
+            vTaskDelayUntil(&xLastWakeTime, 100); //pause task for exactly 1 second
+
+            Timer ++;           //Increment timer
+            
             
         }
     }
 
+    Temp_Reached = 0;
+    Volume_Reached = 0;
+    Valves_Set = 0;
     Timer = 0;
     PWM_En = 0;             //Turn off heater PWM
     Stage_complete = 1;

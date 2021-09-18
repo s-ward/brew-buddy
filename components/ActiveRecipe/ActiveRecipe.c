@@ -32,8 +32,8 @@ void ActiveRecipe (void)
     Mash_Flow_Rate = 50;
 
     //minutes
-    Mash_Time_1 = 1;
-    Mash_Time_2 = 40;
+    Mash_Time_1 = 0;
+    Mash_Time_2 = 0;
     Mash_Time_3 = 0;
     Mash_Time_4 = 0;
     Mash_Time_5 = 0;
@@ -57,7 +57,7 @@ void ActiveRecipe (void)
     //*********BOIL*********
 
     //Minutes
-    Boil_Time = 60;
+    Boil_Time = 3;
 
     //Adjunct Names
     strcpy (Adjunct_Name_1,"Mosaic 20g");
@@ -70,10 +70,10 @@ void ActiveRecipe (void)
     strcpy (Adjunct_Name_8,"");
 
     //minutes
-    Adjunct_Time_1 = 60;    //@x minutes remaining in boil
-    Adjunct_Time_2 = 20;
-    Adjunct_Time_3 = 20;
-    Adjunct_Time_4 = 10;
+    Adjunct_Time_1 = 3;    //@x minutes remaining in boil
+    Adjunct_Time_2 = 2;
+    Adjunct_Time_3 = 1;
+    Adjunct_Time_4 = 1;
     Adjunct_Time_5 = 0;
     Adjunct_Time_6 = 0;
     Adjunct_Time_7 = 0;

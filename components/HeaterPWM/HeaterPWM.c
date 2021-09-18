@@ -18,10 +18,11 @@ void Heater_PWM (void)
     gpio_reset_pin(HEATER_PWM_PIN);
     gpio_set_direction(HEATER_PWM_PIN, GPIO_MODE_OUTPUT);
    
-    TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
+    
 
     while(PWM_En) 
     {
+        TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
 
         if (Auto_PID == 1)      //Case to use PID not manual setting
         {

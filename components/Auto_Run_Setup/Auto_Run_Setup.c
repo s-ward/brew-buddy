@@ -94,6 +94,18 @@ void Auto_Run_Setup (void)
         Boiling.Target_Volume = 0;
         Boiling.Target_Time = Boil_Time;
 
+//*********Zeroise*********
+        Zeroise.Valve1 = 0; //from kettle
+        Zeroise.Valve2 = 0; //to valve 3
+        Zeroise.Valve3 = 0; //from valve 2
+        Zeroise.FlowCtrl = 100;
+        Zeroise.Target_Temp = 0;
+        Zeroise.Target_Sensor = 1;  //Middle sensor
+        Zeroise.Pump = 0;
+        Zeroise.Heater = 0;
+        Zeroise.Target_Volume = 0;
+        Zeroise.Target_Time = 0;
+
         if (Main_Config !=1)    //BIAB differences
         {
             Strike_Heat.Target_Volume = 0;
