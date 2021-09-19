@@ -13,7 +13,7 @@
 
 void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
 {
-    Absolute_Seconds_Remaining =-1;  //Prevents 0 minute hop additions being called immediately...
+    Absolute_Seconds_Remaining =-1;  //Initilised to non zero, prevents 0 minute hop additions being called immediately...
  
     //TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
     

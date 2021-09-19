@@ -204,8 +204,11 @@ void Brew_States (void)
          break;
       }
       
-      if (Timer==10) //Pause state (Replace if statement with pause command flag)
+      if ((Timer==10)||(Pause_In)) //Pause state (Replace if statement with pause command flag)
       {
+         if (Stage_complete)
+            Auto_Task = NULL;
+
          Pause_In = 1;
          Pump_State = Pump_Is_On;
          Heater_State = Heater_Is_On;
@@ -291,6 +294,7 @@ void Passive (void)
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
+   Stage_complete = 0;
    Brew_In = 1;   //test variable
    
    if (WPS_In)
@@ -581,6 +585,34 @@ void Boil (void)
          if ((Absolute_Seconds_Remaining == Adjunct_Time_8*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_8 == 0)&&(strcmp (Adjunct_Name_8,""))))
             printf("Please add %s\n", Adjunct_Name_8);
          Count_Update=0;
+
+         if ((Absolute_Seconds_Remaining == 300)&& Cooling_Rqd) //5 minutes remaining, Prompts and pause to connect cooler
+            {
+               if (Main_Config == 1)
+               {
+                  printf("Please disconnect mash tun and connect cooler\n");
+               }
+               else if (Cooling_Method)   //BIAB and Pumped wort
+               {
+                  printf("Please connect cooler to kettle return line\n");
+               }
+               else     ///BIAB pumped water
+               {
+                  printf("Please connect cooler to external source input\n");
+               }
+               if (!Cooling_Method)    //Pumped water, sterilise kettle
+                  printf("Please immerse cooler in kettle\n");
+               Pause_In = 1;
+               if (Cooling_Method)
+               {
+                  //Valve function call(Valve2 and 3 to "Mash Tun") Once resuemed, if wort recirculation
+                  //Maybe remove these for "Wort recirculation" as wort will be boiling when pumped 
+                  //Amd pumping at T-5 will cause loss of boil temp
+                  //all needs a revamp actually as will be pumping through rims
+               }
+            }
+
+         //Prompt to add cooler
       }
 
       vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
@@ -596,8 +628,29 @@ void Boil (void)
 void Cooling (void)
 {
    printf("Cooling\n");
-   PumpRelay(Off);
-   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   if (Cooling_Rqd)
+   {
+      
+      printf("Ensure cooler is connected and positioned correctly\n");
+      Auto_Task = NULL;
+      Pause_In = 1;  //Wait for user confirmation
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      xTaskCreate(
+         Auto_Run,                  //function name
+         "Auto Control",            //function description
+         2048,                      //stack size
+         &Cool,                  //task parameters
+         1,                         //task priority
+         &Auto_Task                  //task handle
+      );
+      
+      while (Cool.Target_Sensor != Cooling_Temp)
+      { 
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      }
+      PumpRelay(Off);
+   }
+   //Check for pumped Wort and transfer, if true carry our sanitise function
    Step_Active = 0;
    BrewState = Transfer_State;
    vTaskDelete(NULL);
