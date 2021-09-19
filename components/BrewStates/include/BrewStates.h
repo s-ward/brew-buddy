@@ -22,7 +22,13 @@ int Absolute_Seconds_Remaining;
 int Stage_complete;
 int Auto_PID;               //Automatic 1, or manual 0
 int PWM_En;
+int Count_Update;
+int PWM_State;
+int Paused;
+int Pump_State;
+int Heater_State;
 
+int Step_Active;
 
 //Variables for calculations
 float Kettle_Safe;

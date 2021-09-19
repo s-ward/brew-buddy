@@ -22,35 +22,42 @@ void Heater_PWM (void)
 
     while(PWM_En) 
     {
-        TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
-
-        if (Auto_PID == 1)      //Case to use PID not manual setting
+        if (!Paused)
         {
-            Heater_Duty_Cycle = Heater_PID(Temp, Sensor);
-        }
+            TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
 
-        else                       //Use manual duty cycle
-        {
-            Heater_Duty_Cycle = Manual_Duty;
+            if (Auto_PID == 1)      //Case to use PID not manual setting
+            {
+                Heater_Duty_Cycle = Heater_PID(Temp, Sensor);
+            }
+
+            else                       //Use manual duty cycle
+            {
+                Heater_Duty_Cycle = Manual_Duty;
+            }
+            
+            /* Heater off (output low) */
+            if (Heater_Duty_Cycle !=100)      //removes error if PWM = 100%
+            {    
+                //printf("Turning heater off\n");
+                PWM_Set_Low;
+                vTaskDelayUntil(&xLastWakeTime,(100-Heater_Duty_Cycle)); 
+                //vTaskDelayUntil resumes task immediatly after specified time
+            }
+
+            /* Heater on (output high) */
+            if (Heater_Duty_Cycle !=0)        //Removes error if PWM = 0%
+            {
+                //printf("Turning heater on\n");
+                PWM_Set_High;
+                vTaskDelayUntil(&xLastWakeTime, Heater_Duty_Cycle);
+            }
         }
-        
-        /* Heater off (output low) */
-        if (Heater_Duty_Cycle !=100)      //removes error if PWM = 100%
-        {    
-            //printf("Turning heater off\n");
+        else        //Paused state
+        {
             PWM_Set_Low;
-            vTaskDelayUntil(&xLastWakeTime,(100-Heater_Duty_Cycle)); 
-            //vTaskDelayUntil resumes task immediatly after specified time
+            vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds wait for unpause, feeds watchdog timer
         }
-
-        /* Heater on (output high) */
-        if (Heater_Duty_Cycle !=0)        //Removes error if PWM = 0%
-        {
-            //printf("Turning heater on\n");
-            PWM_Set_High;
-            vTaskDelayUntil(&xLastWakeTime, Heater_Duty_Cycle);
-        }
-
     }
     
     PWM_Set_Low;

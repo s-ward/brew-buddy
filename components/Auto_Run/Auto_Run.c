@@ -44,7 +44,7 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
         2048,                      //stack size
         NULL,                      //task parameters
         1,                         //task priority
-        NULL                       //task handle
+        NULL                      //task handle
     );
 
     if (Auto_Run_Task->Target_Temp !=0)         //Check to make default call work (zeroed I/P's)
@@ -75,15 +75,19 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
         while ((Auto_Run_Task->Target_Time*60) > Timer)    //conversion to seconds
         {
             TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
-           
+
             Absolute_Seconds_Remaining = ((Auto_Run_Task->Target_Time*60)-Timer);
             Minutes_Remaining = (((Auto_Run_Task->Target_Time*60)-Timer)/60);
             Seconds_Remaining = (Absolute_Seconds_Remaining-(Minutes_Remaining*60));
             printf("Time Remaining: %d:%d\n", Minutes_Remaining, Seconds_Remaining);
+            
+            Count_Update = 1;       //Fix for hop appition call happening twice
 
             vTaskDelayUntil(&xLastWakeTime, 100); //pause task for exactly 1 second
 
             Timer ++;           //Increment timer
+
+            
             
             
         }
