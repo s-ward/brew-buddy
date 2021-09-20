@@ -14,8 +14,8 @@ void PumpRelay (int Pump_Ctrl)
     if (!Pump_Ctrl)
     {
         Pump_Off;
-        HeaterRelay(Pump_Ctrl);
         Pump_Is_On = 0;
+        HeaterRelay(Pump_Ctrl);
     }
     else
     {

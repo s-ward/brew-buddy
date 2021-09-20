@@ -57,7 +57,7 @@ void ActiveRecipe (void)
     //*********BOIL*********
 
     //Minutes
-    Boil_Time = 6;
+    Boil_Time = 0;
 
     //Adjunct Names
     strcpy (Adjunct_Name_1,"Mosaic 20g");

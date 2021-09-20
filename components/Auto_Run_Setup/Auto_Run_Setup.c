@@ -112,6 +112,18 @@ void Auto_Run_Setup (void)
         Cool.Target_Volume = 0;
         Cool.Target_Time = Mash_Time_5;
 
+//*********Sanitize*********
+        Sanitize.Valve1 = 1;   //from external
+        Sanitize.Valve2 = 0;   //to valve 3
+        Sanitize.Valve3 = 0;   //to valve 3
+        Sanitize.FlowCtrl = 100;          
+        Sanitize.Target_Temp = 0;         
+        Sanitize.Target_Sensor = 2;
+        Sanitize.Pump = 1;
+        Sanitize.Heater = 0;
+        Sanitize.Target_Volume = 0;
+        Sanitize.Target_Time = 5;       //5 minute sanitisation cycle
+
 
 
 //*********Zeroise*********

@@ -12,7 +12,7 @@ void EquipConfig (void)
     Mash_Tun_Volume = 60; //0-127
     External_Connection = 0; //0 = tank, 1 = tap
     Cooling_Rqd = 1;  // 0 = n, 1 = y
-    Cooling_Method = 0; // 0 = pumped water, 1 = pumped wort
+    Cooling_Method = 1; // 0 = pumped water, 1 = pumped wort
     Transfer_Method = 1; //0 = manual, 1 = pumped
     Heating_Method = 1; //0 = boiler, 1 = RIMS
     

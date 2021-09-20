@@ -11,4 +11,6 @@ struct Auto_Run_Controls Cool;
 
 struct Auto_Run_Controls Zeroise;
 
+struct Auto_Run_Controls Sanitize;
+
 struct Auto_Run_Controls Boiling;

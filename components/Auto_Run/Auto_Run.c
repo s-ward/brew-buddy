@@ -32,23 +32,26 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     //Set Flow valve to position (FlowCtrl)
 
     //Initilise temp pid
-    Auto_PID = 1;
-    PWM_En = 1;
-    Temp = Auto_Run_Task->Target_Temp;             //Assign global target temp
-    Sensor = Auto_Run_Task->Target_Sensor;         //Assign global target sensor
+
+    Temp = Auto_Run_Task->Target_Temp;             
+    Sensor = Auto_Run_Task->Target_Sensor;         
     PumpRelay(Auto_Run_Task->Pump);
     HeaterRelay(Auto_Run_Task->Heater);
-    xTaskCreate(
-        Heater_PWM,                //function name
-        "Heater PWM Control",      //function description
-        2048,                      //stack size
-        NULL,                      //task parameters
-        1,                         //task priority
-        NULL                      //task handle
-    );
-
-    if (Auto_Run_Task->Target_Temp !=0)         //Check to make default call work (zeroed I/P's)
+    
+    if (Auto_Run_Task->Target_Temp !=0)   //Check to make zeroed I/P's work
     {
+        Auto_PID = 1;
+        PWM_En = 1;
+        xTaskCreate(
+            Heater_PWM,                //function name
+            "Heater PWM Control",      //function description
+            2048,                      //stack size
+            NULL,                      //task parameters
+            1,                         //task priority
+            NULL                      //task handle
+        );
+
+    
     
         while (!Temp_Reached) //Wait for temp to be reached
         {
@@ -93,6 +96,7 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
         }
     }
 
+    
     Temp_Reached = 0;
     Volume_Reached = 0;
     Valves_Set = 0;
