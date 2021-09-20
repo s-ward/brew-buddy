@@ -133,22 +133,22 @@ void valve_generic_example_task(void* arg) {
 void app_main(void)
 {
 
-    led_config();
-    nvs_config();
-    load_gpio_state(GPIO_LED);
-    server_config();
+   led_config();
+   nvs_config();
+   load_gpio_state(GPIO_LED);
+   server_config();
    interrupts_config();
 
-    struct Interrupts int1;
-    strcpy(int1.message, "test message");
-    int1.gpio_num = 55;
+   struct Interrupts int1;
+   strcpy(int1.message, "test message");
+   int1.gpio_num = 55;
 
-    button(&int1);
+   button(&int1);
 
-    //ds18b20
-    ds18b20_init(DS_PIN);
+   //ds18b20
+   ds18b20_init(DS_PIN);
 
-    //int count = 0;
+   //int count = 0;
 
    servo_init();
 
