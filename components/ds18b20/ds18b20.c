@@ -46,6 +46,8 @@
 #define TEMP_12_BIT 0x7F // 12 bit
 
 uint8_t DS_GPIO;
+
+
 uint8_t init=0;
 uint8_t bitResolution=12;
 uint8_t devices=0;
@@ -315,6 +317,7 @@ float ds18b20_get_temp(void) {
 
 void ds18b20_init(int GPIO) {
 	DS_GPIO = GPIO;
+
 	gpio_pad_select_gpio(DS_GPIO);
 	init = 1;
 }
