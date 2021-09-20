@@ -51,7 +51,15 @@
 #include "string.h"
 #include "ds18b20.h"
 
+//For Heater Control
+#include "HeaterPWM.h"
+
+
+//For Primary State Machine
+#include "BrewStates.h"
+
 #include "servo.h"
+
 
 
 const int DS_PIN = 22;
@@ -111,6 +119,7 @@ while(1) {
    }
 }
 
+
 void valve_generic_example_task(void* arg) {
 
    servo_params* valve = arg;
@@ -137,6 +146,7 @@ void app_main(void)
    nvs_config();
    load_gpio_state(GPIO_LED);
    server_config();
+
    interrupts_config();
 
    struct Interrupts int1;
@@ -159,7 +169,24 @@ void app_main(void)
 
 
 
+   
 
+   xTaskCreate(
+      Brew_States,              //function name
+      "State Machine for Brew", //function description
+      2048,                      //stack size
+      NULL,                      //task parameters
+      2,                         //task priority
+      NULL                       //task handle
+   );
+    
+   //Heater_PWM(Manual_Duty);
+
+    //ds18b20
+    ds18b20_init(DS_PIN);
+
+    //int count = 0;
+ 
 
     //flow rate
     flowM(); // add flow rate interrupt
