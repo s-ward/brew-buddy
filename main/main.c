@@ -51,6 +51,8 @@
 #include "string.h"
 #include "ds18b20.h"
 
+#include "servo.h"
+
 
 const int DS_PIN = 22;
 
@@ -109,26 +111,51 @@ while(1) {
    }
 }
 
+void valve_generic_example_task(void* arg) {
+
+   servo_params* valve = arg;
+
+      while(1) {
+         printf("%s GPIO Number: %d\n", valve->name, valve->gpio_num);
+         printf("%s Pointer Address: %p\n", valve->name, valve);
+
+         valve_set_position(VALVE_CLOSE, valve);  
+         vTaskDelay(((esp_random() % 1000) + 1000) / portTICK_PERIOD_MS);
+         printf("%s Position: %d\n", valve->name, valve_get_position(valve));
+   
+         valve_set_position(170, valve);  
+         vTaskDelay(((esp_random() % 1000) + 1000) / portTICK_PERIOD_MS);
+         printf("%s Position: %d\n", valve->name, valve_get_position(valve)); 
+   }
+} 
+
+
 void app_main(void)
 {
 
-    led_config();
-    nvs_config();
-    load_gpio_state(GPIO_LED);
-    server_config();
+   led_config();
+   nvs_config();
+   load_gpio_state(GPIO_LED);
+   server_config();
    interrupts_config();
 
-    struct Interrupts int1;
-    strcpy(int1.message, "test message");
-    int1.gpio_num = 55;
+   struct Interrupts int1;
+   strcpy(int1.message, "test message");
+   int1.gpio_num = 55;
 
-    button(&int1);
+   button(&int1);
 
-    //ds18b20
-    ds18b20_init(DS_PIN);
+   //ds18b20
+   ds18b20_init(DS_PIN);
 
-    //int count = 0;
+   //int count = 0;
 
+   servo_init();
+
+   //valve example tasks
+   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
+   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
+   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);
 
 
 
