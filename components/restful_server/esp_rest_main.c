@@ -139,7 +139,7 @@ void server_config(void)
 
     ESP_ERROR_CHECK(example_connect());
     ESP_ERROR_CHECK(init_fs());
-    printf("got to herem before server start");
+    //printf("got to herem before server start");
     ESP_ERROR_CHECK(start_rest_server(CONFIG_EXAMPLE_WEB_MOUNT_POINT));
-    printf("after server start");
+    //printf("after server start");
 }

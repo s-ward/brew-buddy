@@ -127,7 +127,7 @@ static void gpio_task_example(void *arg) {
     //gpio_isr_handler_add(GPIO_INPUT_BUTTON, gpio_isr_handler, (void*) GPIO_INPUT_BUTTON);
     gpio_isr_handler_add(GPIO_INPUT_BUTTON, button_isr_handler, (void*) message);
 
-    printf(message);
+    //printf(message);
 
 
 }
@@ -191,8 +191,6 @@ void interrupts_config(void){
     xTaskCreate(gpio_task_example, "gpio_task_example", 2048, NULL, 10, NULL); // start task
     
     gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
-
-    
 
     //add handlers for each input here
     //gpio_isr_handler_add(GPIO_INPUT_BUTTON, gpio_isr_handler, (void*) GPIO_INPUT_BUTTON);
