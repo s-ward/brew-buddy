@@ -180,7 +180,7 @@ void interrupts_config(void){
     gpio_config(&io_config);
 
 
-    //flow meter
+    //flow mete;
     //volatile uint16_t pulseCount = 0;
     //float flowRate = 0;
     //uint32_t flowMl = 0;

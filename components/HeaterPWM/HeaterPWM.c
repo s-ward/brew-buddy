@@ -15,11 +15,8 @@ int Heater_Duty_Cycle; //0-100 PWM value that is changed through Heater_PID func
 
 void Heater_PWM (void)
 {
-    gpio_reset_pin(HEATER_PWM_PIN);
     gpio_set_direction(HEATER_PWM_PIN, GPIO_MODE_OUTPUT);
    
-    
-
     while(PWM_En) 
     {
         if (!Paused)

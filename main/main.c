@@ -125,16 +125,16 @@ void valve_generic_example_task(void* arg) {
    servo_params* valve = arg;
 
       while(1) {
-         printf("%s GPIO Number: %d\n", valve->name, valve->gpio_num);
-         printf("%s Pointer Address: %p\n", valve->name, valve);
+         //printf("%s GPIO Number: %d\n", valve->name, valve->gpio_num);
+         //printf("%s Pointer Address: %p\n", valve->name, valve);
 
          valve_set_position(VALVE_CLOSE, valve);  
          vTaskDelay(((esp_random() % 1000) + 1000) / portTICK_PERIOD_MS);
-         printf("%s Position: %d\n", valve->name, valve_get_position(valve));
+         //printf("%s Position: %d\n", valve->name, valve_get_position(valve));
    
          valve_set_position(170, valve);  
          vTaskDelay(((esp_random() % 1000) + 1000) / portTICK_PERIOD_MS);
-         printf("%s Position: %d\n", valve->name, valve_get_position(valve)); 
+         //printf("%s Position: %d\n", valve->name, valve_get_position(valve)); 
    }
 } 
 

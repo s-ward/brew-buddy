@@ -8,6 +8,20 @@
 
 void Auto_Run_Setup (void)
 {
+    //*********Fill Kettle*********
+        Fill.Valve1 = 1; //from external
+        Fill.Valve2 = 0; //to valve 3
+        Fill.Valve3 = 0; //from valve 2
+        Fill.FlowCtrl = 100;
+        Fill.Target_Temp = 0; 
+        Fill.Target_Sensor = 2;  //Middle sensor
+        if (External_Connection)    //tap
+            Fill.Pump = 0;
+        if (!External_Connection)   //tank
+            Fill.Pump = 1;
+        Fill.Heater = 0;
+        Fill.Target_Volume = Mash_Water_Volume;
+        Fill.Target_Time = 0;
 
     //*********Strike Water*********
         Strike_Heat.Valve1 = 0; //from kettle
@@ -96,21 +110,23 @@ void Auto_Run_Setup (void)
 
 //*********Cooling*********
         if (Cooling_Method)     //Pumped wort
+        {
             Cool.Valve1 = 0;   //from kettle
+            Cool.Pump = 1;
+        }
         if (!Cooling_Method)    //Pumped water
+        {
             Cool.Valve1 = 1;   //from external
+            Cool.Pump = 0;
+        }
         Cool.Valve2 = 1;   //to mash tun
         Cool.Valve3 = 1;   //from mash tun
         Cool.FlowCtrl = 100;
         Cool.Target_Temp = 0;
-        if (Cooling_Method)
-            Cool.Target_Sensor = 2;    //Pumped wort, Middle sensor
-        if (!Cooling_Method)
-            Cool.Target_Sensor = 3;    //Pumped water, Top sensor
-        Cool.Pump = 1;
+        Cool.Target_Sensor = 2; 
         Cool.Heater = 0;
         Cool.Target_Volume = 0;
-        Cool.Target_Time = Mash_Time_5;
+        Cool.Target_Time = 0;
 
 //*********Sanitize*********
         Sanitize.Valve1 = 1;   //from external
@@ -160,7 +176,7 @@ void Auto_Run_Setup (void)
             Mash5.Valve2 = 0; //to valve 3
             Mash5.Valve3 = 0; //from valve 2
 
-            Cool.Valve2 = 0;   //to mash tun
-            Cool.Valve3 = 0;   //from mash tun
+            Cool.Valve2 = 0;   //to valve 3
+            Cool.Valve3 = 0;   //from valve 2
         }
 }

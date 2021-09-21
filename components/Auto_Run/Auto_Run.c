@@ -8,25 +8,19 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-//void Auto_Run (struct Auto_Run_Controls);
-// int Target_Temp;
 
 void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
 {
     Absolute_Seconds_Remaining =-1;  //Initilised to non zero, prevents 0 minute hop additions being called immediately...
- 
-    //TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
     
-    HeaterRelay(Off);   //Turns off while moving valves for safety, Maybe move to vlave function?
+    HeaterRelay(Off);   //Turns off while moving valves for safety
     PumpRelay(Off);
+
+
+    //If valves not set
     //valve call, set all 3(Valve1, Valve2, Valve3)
+    vTaskDelay(3000 / portTICK_PERIOD_MS); //pause for 3 seconds while valves move
 
-    Valves_Set=1;
-
-    while (!Valves_Set)      //Wait for valves to change
-    {
-       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-    }
 
 
     //Set Flow valve to position (FlowCtrl)
@@ -38,7 +32,7 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     PumpRelay(Auto_Run_Task->Pump);
     HeaterRelay(Auto_Run_Task->Heater);
     
-    if (Auto_Run_Task->Target_Temp !=0)   //Check to make zeroed I/P's work
+    if (Auto_Run_Task->Target_Temp !=0) 
     {
         Auto_PID = 1;
         PWM_En = 1;
@@ -96,6 +90,8 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
         }
     }
 
+    HeaterRelay(Off);
+    PumpRelay(Off);
     
     Temp_Reached = 0;
     Volume_Reached = 0;

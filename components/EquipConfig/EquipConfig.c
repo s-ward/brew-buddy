@@ -15,6 +15,8 @@ void EquipConfig (void)
     Cooling_Method = 1; // 0 = pumped water, 1 = pumped wort
     Transfer_Method = 1; //0 = manual, 1 = pumped
     Heating_Method = 1; //0 = boiler, 1 = RIMS
+
+    Auto_Fill = 1;  //0 = manual, 1 = autofill kettle for mash
     
     Safety_Margin = 5; //xL of safety margin for kettle and mash tun (Hardcoded)
 }
