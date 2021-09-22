@@ -133,11 +133,14 @@ void valve_generic_example_task(void* arg) {
 void app_main(void)
 {
 
-    led_config();
-    nvs_config();
-    load_gpio_state(GPIO_LED);
+
+
+
     server_config();
    interrupts_config();
+       led_config();
+       load_gpio_state(GPIO_LED);
+       nvs_config();
 
     struct Interrupts int1;
     strcpy(int1.message, "test message");
@@ -149,13 +152,17 @@ void app_main(void)
     ds18b20_init(DS_PIN);
 
     //int count = 0;
+    //valve_tap_in.gpio_num = 17;
+    //update_servo_params(&valve_tap_in, 17 );
+   // update_servo_params();
 
    servo_init();
 
+
    //valve example tasks
-   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
-   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
-   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);
+   //xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
+   //xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
+   //xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);
 
 
 

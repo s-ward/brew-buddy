@@ -25,6 +25,9 @@ typedef struct {
 } servo_params;
 
 //forward declare and define structs for each servo
+//static servo_params valve_tap_in;
+//static servo_params valve_sparge_in;
+//static servo_params valve_sparge_out;
 static servo_params valve_tap_in = {MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, VALVE_TAP_IN, MCPWM_OPR_A, "Valve Tap In"};
 static servo_params valve_sparge_in = {MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0B, VALVE_SPARGE_IN, MCPWM_OPR_B, "Valve Sparge In"};
 static servo_params valve_sparge_out = {MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM1A, VALVE_SPARGE_OUT, MCPWM_OPR_A, "Valve Sparge Out"};
@@ -33,6 +36,9 @@ void valve_set_position (int angle, servo_params* servo);
 uint32_t valve_get_position(servo_params* valve);
 
 void servo_init(void);
+//void update_servo_params(servo_params* sp, int gp);
+void update_servo_params();
+void init_servo_params();
 
 
 

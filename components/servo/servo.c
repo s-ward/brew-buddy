@@ -103,7 +103,18 @@ uint32_t valve_get_position (servo_params* servo) {
     return duty_percent_to_angle(mcpwm_get_duty(servo->mcpwm_num, servo->timer_num, servo->gen));
 }
 
+void init_servo_params() {
+
+    static servo_params valve_tap_in = {MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, VALVE_TAP_IN, MCPWM_OPR_A, "Valve Tap In"};
+    static servo_params valve_sparge_in = {MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0B, VALVE_SPARGE_IN, MCPWM_OPR_B, "Valve Sparge In"};
+    static servo_params valve_sparge_out = {MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM1A, VALVE_SPARGE_OUT, MCPWM_OPR_A, "Valve Sparge Out"};
+}
+
+
+
 void servo_init(void) {
+
+   // init_servo_params();
 
     printf("%s Pointer Address: %p\n", valve_tap_in.name, &valve_tap_in);
     printf("%s Pointer Address: %p\n", valve_sparge_in.name, &valve_sparge_in);

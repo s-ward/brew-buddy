@@ -73,11 +73,10 @@ static esp_err_t rest_common_get_handler(httpd_req_t *req)
     strlcpy(filepath, rest_context->base_path, sizeof(filepath));
     if (req->uri[strlen(req->uri) - 1] == '/') {
         strlcat(filepath, "/index.html", sizeof(filepath));
-        //printf("home page");
         printf(filepath);
     } else {
-        strlcat(filepath, req->uri, sizeof(filepath));
-        //printf("not home page");
+        strlcat(filepath, req->uri, sizeof(filepath)); //when files stored on esp
+        //strlcat(filepath, "/index.html", sizeof(filepath)); //when cdn - refresh button work
         printf(filepath);
     }
     int fd = open(filepath, O_RDONLY, 0);
@@ -185,7 +184,7 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
     buf[total_len] = '\0';
 
     cJSON *root = cJSON_Parse(buf);
-    int targetTemp = cJSON_GetObjectItem(root, "targetTemp")->valueint;
+    int targetTemp = cJSON_GetObjectItem(root, "targettemp")->valueint;
     char *heater = cJSON_GetObjectItem(root, "heater")->valuestring;
     char *pump = cJSON_GetObjectItem(root, "pump")->valuestring;
 
@@ -194,6 +193,7 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
         //pump function on
     } else {
         printf("Pump: %s", pump);
+        printf("Target Temp: %d", targetTemp);
         //pump function off
     }
 
@@ -215,6 +215,74 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+
+    /* URI handler for saving setup 
+    httpd_uri_t setup_save_post_uri = {
+        .uri = "/api/v1/setup/save",
+        .method = HTTP_POST,
+        .handler = setup_save_post_handler,
+        .user_ctx = rest_context
+    };
+    httpd_register_uri_handler(server, &setup_save_post_uri); */
+/* handler for saving brewery setup*/
+static esp_err_t setup_save_post_handler(httpd_req_t *req)
+{
+    int total_len = req->content_len;
+    int cur_len = 0;
+    char *buf = ((rest_server_context_t *)(req->user_ctx))->scratch;
+    int received = 0;
+    if (total_len >= SCRATCH_BUFSIZE) {
+        /* Respond with 500 Internal Server Error */
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "content too long");
+        return ESP_FAIL;
+    }
+    while (cur_len < total_len) {
+        received = httpd_req_recv(req, buf + cur_len, total_len);
+        if (received <= 0) {
+            /* Respond with 500 Internal Server Error */
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control value");
+            return ESP_FAIL;
+        }
+        cur_len += received;
+    }
+    buf[total_len] = '\0';
+
+    cJSON *root = cJSON_Parse(buf);
+    int kettlevolume = cJSON_GetObjectItem(root, "kettlevolume")->valueint;
+    int mashtunvolume = cJSON_GetObjectItem(root, "mashtunvolume")->valueint;
+    bool pumpedtransfer =cJSON_GetObjectItem(root, "pumpedtransfer")->valueint;
+    char *units = cJSON_GetObjectItem(root, "units")->valuestring;
+    int leadtime = cJSON_GetObjectItem(root, "leadtime")->valueint;
+    char *heatingmethod = cJSON_GetObjectItem(root, "heatingmethod")->valuestring;
+    char *coolingmethod = cJSON_GetObjectItem(root, "coolingmethod")->valuestring;
+
+    int n = cJSON_GetArraySize(root);
+    //printf("arraysize %d\n", n);
+
+    // new version of ->valueint
+    double x = cJSON_GetNumberValue(cJSON_GetObjectItem(root, "mashtunvolume"));
+
+    //->valuestring
+    char *xx = cJSON_GetStringValue(cJSON_GetObjectItem(root, "mashtunvolume"));
+    if (xx) {
+          //  printf("mashtun item %s\n", xx)
+        }
+
+    printf("server print - kettlevolume: %d, mashtunvolume: %d, pumpedtransfer: %s, units: %s, leadtime: %d, heating: %s, cooling: %s\n",
+            kettlevolume, mashtunvolume, pumpedtransfer ? "true" : "false", units, 
+            leadtime, heatingmethod, coolingmethod);
+
+           //load_brewery_setup();
+
+            save_brewery_setup(kettlevolume, mashtunvolume, pumpedtransfer, units, 
+            leadtime, heatingmethod, coolingmethod);
+
+    ESP_LOGI(REST_TAG, "Kettle Volume: %d", kettlevolume);
+    cJSON_Delete(root);
+    httpd_resp_sendstr(req, "Post control value successfully");
+    return ESP_OK;
+}
+
 /* Simple handler for getting manual data (temp, valve position, flow rate*/
 static esp_err_t temperature_data_get_handler(httpd_req_t *req)
 {
@@ -225,6 +293,27 @@ static esp_err_t temperature_data_get_handler(httpd_req_t *req)
     const char *sys_info = cJSON_Print(root);
     httpd_resp_sendstr(req, sys_info);
     free((void *)sys_info);
+    cJSON_Delete(root);
+    return ESP_OK;
+}
+
+/* Simple handler for getting system handler */
+static esp_err_t setup_load_get_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "application/json");
+    cJSON *root = cJSON_CreateObject();
+
+   cJSON_AddNumberToObject(root, "kettlevolume", brewery_setup.kettle_volume);
+   cJSON_AddNumberToObject(root, "mashtunvolume", brewery_setup.mash_tun_volume);
+   cJSON_AddBoolToObject(root, "pumpedtransfer", brewery_setup.pumped_transfer);
+   cJSON_AddStringToObject(root, "units", brewery_setup.units);
+   cJSON_AddNumberToObject(root, "leadtime", brewery_setup.lead_time);
+   cJSON_AddStringToObject(root, "heatingmethod", brewery_setup.heating_method);
+   cJSON_AddStringToObject(root, "coolingmethod", brewery_setup.cooling_method);
+
+    const char *brewery_setup = cJSON_Print(root);
+    httpd_resp_sendstr(req, brewery_setup);
+    free((void *)brewery_setup);
     cJSON_Delete(root);
     return ESP_OK;
 }
@@ -318,6 +407,25 @@ esp_err_t start_rest_server(const char *base_path)
     };
     httpd_register_uri_handler(server, &manual_data_get_uri);
 
+    /* URI handler for saving setup */
+    httpd_uri_t setup_save_post_uri = {
+        .uri = "/api/v1/setup/save",
+        .method = HTTP_POST,
+        .handler = setup_save_post_handler,
+        .user_ctx = rest_context
+    };
+    httpd_register_uri_handler(server, &setup_save_post_uri);
+
+    
+    /* URI handler for fetching brewery setup */
+    httpd_uri_t setup_load_get_uri = {
+        .uri = "/api/v1/setup/load",
+        .method = HTTP_GET,
+        .handler = setup_load_get_handler,
+        .user_ctx = rest_context
+    };
+    httpd_register_uri_handler(server, &setup_load_get_uri);
+
     /* URI handler for getting web server files */
     httpd_uri_t common_get_uri = {
         .uri = "/*",
@@ -326,7 +434,8 @@ esp_err_t start_rest_server(const char *base_path)
         .user_ctx = rest_context
     };
     httpd_register_uri_handler(server, &common_get_uri);
-    //printf ("here1");
+
+    
 
     return ESP_OK;
 err_start:

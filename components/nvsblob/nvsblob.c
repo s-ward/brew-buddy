@@ -3,11 +3,13 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "driver/gpio.h"
+#include <string.h>
 
 
 #include "nvsblob.h"
 
 #define STORAGE_NAMESPACE "storage"
+#define BREWERY_SETUP_NAMESPACE "brewery setup"
 
 
 
@@ -119,9 +121,191 @@ esp_err_t load_gpio_state(int gpio_num)
 }
 
 
+esp_err_t save_brewery_setup(int kettlevolume, int mashtunvolume, bool pumpedtransfer,
+    char *units, int leadtime, char *heatingmethod, char *coolingmethod)
+//esp_err_t save_gpio_state(void)
+{
+    nvs_handle_t my_handle;
+    esp_err_t err;
+
+        printf("save print - kettlevolume: %d, mashtunvolume: %d, pumpedtransfer: %s, units: %s, leadtime: %d, heating: %s, cooling: %s\n",
+            kettlevolume, mashtunvolume, pumpedtransfer ? "true" : "false", units, 
+            leadtime, heatingmethod, coolingmethod);
+
+    // Open
+    err = nvs_open(BREWERY_SETUP_NAMESPACE, NVS_READWRITE, &my_handle);
+    if (err != ESP_OK) return err;
+
+    // Read
+    //int32_t restart_counter = 1; // value will default to 0, if not set yet in NVS
+    //int32_t restart_counter = gpio_state;
+    //int32_t gpio_state = 0; // value will default to 0, if not set yet in NVS
+   // err = nvs_get_i32(my_handle, "restart_conter", &restart_counter);
+   // if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) return err;
+
+    // Write
+    //restart_counter++;
+    //err = nvs_set_i32(my_handle, "restart_conter", restart_counter);
+    err = nvs_set_str(my_handle, "units", units); ///change key to gpio num
+    if (err != ESP_OK) return err;
+    err = nvs_set_str(my_handle, "heating_method", heatingmethod); ///change key to gpio num
+    if (err != ESP_OK) return err;
+    err = nvs_set_str(my_handle, "cooling_method", coolingmethod); ///change key to gpio num
+    if (err != ESP_OK) return err;
+    err = nvs_set_i32(my_handle, "kettle_volume", kettlevolume); ///change key to gpio num
+    if (err != ESP_OK) return err;
+    err = nvs_set_i32(my_handle, "mash_tun_volume", mashtunvolume); ///change key to gpio num
+    if (err != ESP_OK) return err;
+    err = nvs_set_i32(my_handle, "pumped_transfer", pumpedtransfer); ///change key to gpio num
+    if (err != ESP_OK) return err;
+    err = nvs_set_i32(my_handle, "lead_time", leadtime); ///change key to gpio num
+    if (err != ESP_OK) return err;
+
+ update_brewery_setup(kettlevolume, mashtunvolume, pumpedtransfer, units, leadtime,
+        heatingmethod, coolingmethod);
+    // Commit written value.
+    // After setting any values, nvs_commit() must be called to ensure changes are written
+    // to flash storage. Implementations may write to storage at other times,
+    // but this is not guaranteed.
+    err = nvs_commit(my_handle);
+    if (err != ESP_OK) return err;
+
+    // Close
+    nvs_close(my_handle);
+    printf("gpio_state saved: %d", 1);
+    return ESP_OK;
+}
+
+/* Read from NVS and print restart counter
+   and the table with run times.
+   Return an error if anything goes wrong
+   during this process.
+ */
+esp_err_t load_brewery_setup(void)
+{
+    nvs_handle_t my_handle;
+    esp_err_t err;
+
+    // Open
+    err = nvs_open(BREWERY_SETUP_NAMESPACE, NVS_READWRITE, &my_handle);
+    if (err != ESP_OK) return err;
+
+    // Read ints
+    int32_t kettle_volume = 0; // default value if not stored in nvs
+    int32_t mash_tun_volume = 0; 
+    int32_t pumped_transfer = 0; 
+    int32_t lead_time = 5; 
+    
+    err = nvs_get_i32(my_handle, "kettle_volume", &kettle_volume);
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) return err;
+    err = nvs_get_i32(my_handle, "mash_tun_volume", &mash_tun_volume);
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) return err;
+    err = nvs_get_i32(my_handle, "pumped_transfer", &pumped_transfer);
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) return err;
+    err = nvs_get_i32(my_handle, "lead_time", &lead_time);
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) return err;
+
+    //read strings
+    char* units;
+    char* heating_method;
+    char* cooling_method;
+
+    size_t req_size;
+
+    err = nvs_get_str(my_handle, "units", NULL, &req_size);
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) return err;
+    if (req_size == 0) {
+        // default value if not stored in nvs
+        units = malloc(strlen("Metric")+1);
+        strcpy(units, "Metric");
+    } else {
+        units = malloc(req_size);
+        err = nvs_get_str(my_handle, "units", units, &req_size);
+        if (err != ESP_OK) {
+            free(units);
+            return err;
+        }
+    }
+
+    err = nvs_get_str(my_handle, "heating_method", NULL, &req_size);
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) return err;
+    if (req_size == 0) {
+        heating_method = malloc(strlen("None")+1);
+        strcpy(heating_method, "None");
+    } else {
+        heating_method = malloc(req_size);
+        err = nvs_get_str(my_handle, "heating_method", heating_method, &req_size);
+        if (err != ESP_OK) {
+            free(heating_method);
+            return err;
+        }
+    }
+
+    err = nvs_get_str(my_handle, "cooling_method", NULL, &req_size);
+    if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) return err;
+    if (req_size == 0) {
+        cooling_method = malloc(strlen("None")+1);
+        strcpy(cooling_method, "None");
+    } else {
+        cooling_method = malloc(req_size);
+        err = nvs_get_str(my_handle, "cooling_method", cooling_method, &req_size);
+        if (err != ESP_OK) {
+            free(cooling_method);
+            return err;
+        }
+    }
+
+    printf("load print after - kettlevolume: %d, mashtunvolume: %d, pumpedtransfer: %s, units: %s, leadtime: %d, heating: %s, cooling: %s\n",
+        kettle_volume, mash_tun_volume, pumped_transfer ? "true" : "false", units, 
+        lead_time, heating_method, cooling_method);
+
+    //do stuff with data before freeing mallocs
+    //set boonies globals
+    update_brewery_setup(kettle_volume, mash_tun_volume, pumped_transfer, units, lead_time,
+        heating_method, cooling_method);
+
+    free(units);
+    free(heating_method);
+    free(cooling_method);
+
+    // Close
+    nvs_close(my_handle);
+    return ESP_OK;
+}
+
+void update_brewery_setup(int kettlevolume, int mashtunvolume, bool pumpedtransfer,
+    char *units, int leadtime, char *heatingmethod, char *coolingmethod) {
+printf("updating brewery - kettle: %d, mashtun: %d\n", kettlevolume, mashtunvolume);
+        brewery_setup.kettle_volume = kettlevolume;
+        brewery_setup.mash_tun_volume = mashtunvolume;
+        brewery_setup.pumped_transfer = pumpedtransfer;
+        strcpy(brewery_setup.units, units);
+        brewery_setup.lead_time = leadtime;
+        strcpy(brewery_setup.heating_method, heatingmethod);
+        strcpy(brewery_setup.cooling_method, coolingmethod);
+
+
+        printf("setup values - kettle: %d, mashtun: %d\n",  brewery_setup.kettle_volume, brewery_setup.mash_tun_volume);
+      //  brewery_setup.pumped_transfer = pumpedtransfer;
+        //strcpy
+       // brewery_setup.units = units;
+      //  brewery_setup.lead_time
+       // brewery_setup.heating_method
+       // brewery_setup.cooling_method
+
+}
+
+
 //void app_main(void)
 void nvs_config(void)
 {
+
+   // update_brewery_setup();
+
+   //update_brewery_setup(10,10);
+   printf("load brewery setup");
+   load_brewery_setup();
+
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         // NVS partition was truncated and needs to be erased

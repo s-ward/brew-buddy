@@ -11,7 +11,7 @@
                   <h1> Manual Control</h1>
                 </v-flex>
                 <v-flex xs3>
-                  <v-icon large color="orange darker-2" @click="gohome">home</v-icon>             
+                  <v-icon large color="orange darker-2" @click="gohome">home</v-icon>
                 </v-flex>
                  <v-flex xs9>
                   <v-select :items="items" filled label="Mode"></v-select>
@@ -35,7 +35,7 @@
                   <v-text-field v-model="targetflow" class="mt-0" type="number" hint="mL/m" persistent-hint></v-text-field>
                 </v-flex>
                 <v-flex xs3>
-                  <v-text-field v-model="currenttemp" label = "Current Temp" class="mt-0" type="number" value="0" readonly outlined></v-text-field>                
+                  <v-text-field v-model="currenttemp" label = "Current Temp" class="mt-0" type="number" value="0" readonly outlined></v-text-field>
                 </v-flex>
                 <v-flex xs9>
                   <chart></chart>
@@ -68,8 +68,7 @@
 </template>
 
 <script>
-import Chart from './Chart.vue';
-
+import Chart from './Chart.vue'
 
 export default {
   data () {
@@ -85,9 +84,9 @@ export default {
     }
   },
   methods: {
-    set_color: function() {
+    set_color: function () {
       this.$ajax
-        .post("/api/v1/manual/brightness", {
+        .post('/api/v1/manual/brightness', {
           targettemp: this.targettemp,
           heater: this.heater,
           pump: this.pump,
@@ -96,19 +95,18 @@ export default {
           valve3: this.valve3
         })
         .then(data => {
-          console.log(data);
+          console.log(data)
         })
         .catch(error => {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
-  gohome () {
-  this.$router.push("/");
-  },
+    gohome () {
+      this.$router.push('/')
+    }
   },
   components: {
     Chart
-   
   }
-};
+}
 </script>

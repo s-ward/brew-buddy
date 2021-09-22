@@ -9,6 +9,7 @@ export default new Vuex.Store({
     chart_value: [8, 2, 5, 9, 5, 11, 3, 5, 10, 0, 1, 8, 2, 9, 0, 13, 10, 7, 16],
     temp1_chart_value: [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
     temp1_value: 8
+
   },
   mutations: {
     update_chart_value (state, new_value) {
@@ -40,6 +41,15 @@ export default new Vuex.Store({
         .catch(error => {
           console.log(error);
         });
-    }
+    },
+    update_brewery_setup({ commit }) {
+      axios.get("/api/v1/setup/load")
+        .then(data => {
+          commit("update_chart_value", data.data.raw);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
   }
 })
