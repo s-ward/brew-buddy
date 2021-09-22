@@ -27,7 +27,11 @@ int PWM_State;
 int Paused;
 int Pump_State;
 int Heater_State;
+int Manual_Duty;
 
+char Stage[20];
+char Step[30];
+char Auto_Process[30];
 
 int Step_Active;
 

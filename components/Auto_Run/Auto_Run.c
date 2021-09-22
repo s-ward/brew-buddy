@@ -7,6 +7,7 @@
 #include "BrewStates.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "string.h"
 
 
 void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
@@ -34,6 +35,9 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     
     if (Auto_Run_Task->Target_Temp !=0) 
     {
+        strcpy (Auto_Process,"Heating to target temp");
+        printf("*%s*\n", Auto_Process);
+
         Auto_PID = 1;
         PWM_En = 1;
         xTaskCreate(
@@ -55,7 +59,10 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
 
     //If a volume transefer is required, wait for completion
     if (Auto_Run_Task->Target_Volume != 0)
-    {
+    {   
+        strcpy (Auto_Process,"Transfering target volume");
+        printf("*%s*\n", Auto_Process);
+
         //Call volume function
         while (!Volume_Reached)
         {
@@ -64,11 +71,13 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
         }
     }
 
-    Volume_Reached=0; //Test
 
     //Timer delay function
     if (Auto_Run_Task->Target_Time != 0)
     {
+        strcpy (Auto_Process,"Waiting until target time");
+        printf("*%s*\n", Auto_Process);
+
         while ((Auto_Run_Task->Target_Time*60) > Timer)    //conversion to seconds
         {
             TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
