@@ -443,6 +443,13 @@ void Mash (void)
    {
       strcpy (Step,"Auto-fill kettle");
       printf("-----%s: %s-----\n", Stage, Step);
+      if (External_Connection)
+         printf("Ensure hose is connected to extenal source and tap is turned on\n");
+      else
+         printf("Ensure external tank is filled with brewing water and immerse input hose in tank\n");
+      
+      Pause_In = 1;
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
 
       Stage_complete = 0;
       xTaskCreate(
@@ -454,13 +461,13 @@ void Mash (void)
          &Auto_Task                 //task handle
       );
       
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //wait for water to get to heater, and execute above task
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //wait for water to get to heater
 
-      HeaterRelay(On);
+      HeaterRelay(On); //will cut down on time being able to heat water as it enters the kettle
       Auto_PID = 0;
       PWM_En = 1;
       Manual_Duty = 100;
-      xTaskCreate(Heater_PWM, "Heater PWM Control", 2048, NULL, 1, NULL);
+      xTaskCreate(Heater_PWM, "Heater PWM Control", 2048, NULL, 1, NULL);  //
 
       while (!Stage_complete)
       {
@@ -468,6 +475,13 @@ void Mash (void)
       }
 
    }
+   else  //manual fill
+   {
+      printf("Ensure kettle is filled with the desired amount of strike water\n");
+      Pause_In = 1;
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+   }
+
 
    strcpy (Step,"Heating strike water");
    printf("-----%s: %s-----\n", Stage, Step);
@@ -498,14 +512,15 @@ void Mash (void)
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
+   strcpy (Step,"Step 1");
+   printf("-----%s: %s-----\n", Stage, Step);
+
    if (Main_Config != 1)   //BIAB
    {
       Pause_In = 1; //****Wait for user to confirm bag is in place
       printf("Please insert BIAB into kettle and fill with grain\n");
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
-
-   strcpy (Step,"Step 1");
-   printf("-----%s: %s-----\n", Stage, Step);
 
    Stage_complete = 0;
    xTaskCreate(
@@ -608,51 +623,61 @@ void Sparge (void)
    strcpy (Step,"");
    printf("-----%s: %s-----\n", Stage, Step);
 
-   if ((Sparge_Water_Volume == 0)||(Main_Config == 3)) //Sparge not required
+   if ((Sparge_Water_Volume != 0)&&(Main_Config != 3)) //Sparge required
    {
-      Step_Active = 0;
-      BrewState = Boil_State;
-      vTaskDelete(NULL); 
-   }
 
-   else if (!Heating_Method) //Internal boiler
-   {
-      if (External_Connection)
-         printf("Please confirm external water source is connected and on\n");
-      else
+      if (!Heating_Method) //Internal boiler
+      {
          printf("Please confirm external vessel is filled with pre-heated sparge water\n");
+         if (Main_Config == 2)
+            printf("Please position BIAB and return hose securely above kettle\n");
+         
+         Pause_In = 1;  //wait for user confirmation
+         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
 
-      Pause_In = 1;  //wait for user confirmation
-      
-      PumpRelay(On);
-      //volume transfer function of pre-heated sparge water
-   }
-   else
-   {
-      if (External_Connection)
-         printf("Please confirm external water source is connected and on\n");
-      else
-         printf("Please confirm external vessel is filled with sparge water\n");
-
-      Pause_In = 1;
-
-      if (Main_Config == 1)
-      {
-         //Instant_Heat(); //valves set to external mash tun
+         PumpRelay(On);
+         //volume transfer function of pre-heated sparge water
       }
       else
+      {  
+         if (Main_Config == 2)
+            printf("Please position BIAB and return hose securely above kettle\n");
+         if (External_Connection)
+            printf("Please confirm external water source is connected and turned on\n");
+         else
+            printf("Please confirm external vessel is filled with sparge water\n");
+
+         Pause_In = 1;
+         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+
+         if (External_Connection)   //Can possibly set in Instant heat function.
+            PumpRelay(Off);
+         else
+            PumpRelay(On);
+
+         if (Main_Config == 1)
+         {
+            //Instant_Heat(); //valves set to external mash tun
+         }
+         else
+         {
+            //Instant_Heat(); //valves set to kettle, BIAB
+         }
+
+      }
+      if (Main_Config == 2)
       {
-         //Instant_Heat(); //valves set to kettle, BIAB
+         printf("Please place return hose securely in kettle\n");
+         Pause_In = 1;
+         vTaskDelay(100 / portTICK_PERIOD_MS); //Wait for user input
       }
 
+      //if (flow max and (temp > target temp))
+            //Heater power --5;   //ensures flow rate can maintain temp pid if water has been preheated
+            //delay x 
+
+      //SpargeDrain
    }
-   
-   //if (flow max and (temp > target temp))
-         //Heater power --5;   //ensures flow rate can maintain temp pid if water has been preheated
-         //delay x 
-
-   //SpargeDrain
-
    HeaterRelay(Off);
    PumpRelay(Off);
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
@@ -668,6 +693,12 @@ void Boil (void)
    strcpy (Step,"");
    printf("-----%s: %s-----\n", Stage, Step);
 
+   if (Main_Config == 3)   //BIAB
+   {
+      printf("Please remove BIAB from kettle\n");
+      Pause_In = 1;  //wait for user confirmation
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
    Stage_complete = 0;
    xTaskCreate(
       Auto_Run,                  //function name
@@ -749,6 +780,11 @@ void Cooling (void)
          &Auto_Task                  //task handle
       );
       
+      while (!Stage_complete)
+      {   
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //1 sec 
+      }
+      
       while (Cool.Target_Sensor != Cooling_Temp)   //Wait for target temp
       { 
          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
@@ -762,11 +798,13 @@ void Cooling (void)
       strcpy (Step,"Sanitizing lines");
       printf("-----%s: %s-----\n", Stage, Step);
 
-      printf("Please remove cooler\n");
+      if (Main_Config !=1)
+         printf("Please remove cooler\n");
       printf("Fill external vessel with 5L of sanitizer fluid\n");
       printf("Place external source and kettle retun hoses into the sanitiser fluid\n");
       
       Pause_In = 1;  // Wait for user input
+      
       vTaskDelay(1000 / portTICK_PERIOD_MS); //execute pause
       
       Stage_complete = 0;
@@ -785,7 +823,6 @@ void Cooling (void)
       }
    }
 
-   PumpRelay(Off);
 
    Step_Active = 0;
    BrewState = Transfer_State;
