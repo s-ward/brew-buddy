@@ -318,7 +318,9 @@ void Passive (void)
       }
       Safe = 1;
    }
-      Brew_In = 1;   //test variable
+      //Brew_In = 1;   //test variable
+      Cold_Rinse = 1;
+      Clean_In = 1;
 
    while(BrewState == Passive_State)
    {
@@ -359,12 +361,112 @@ void WPS (void)
 void Clean (void)
 {
    Clean_In = 0;             //Reset trigger variable
-
+   
    strcpy (Stage,"Cleaning");
-   strcpy (Step,"");
-   printf("-----%s: %s-----\n", Stage, Step);
+   
+   if (!Cold_Rinse)  //Full clean
+   {
+      printf("Ensure mash tun or cooler is connected to valves 2 & 3\n");
+      Pause_In = 1;  //Wait for user confirmation
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+   }
 
-   vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for 1 second
+   if (Auto_Fill)
+   {
+      strcpy (Step,"Auto-fill kettle");
+      printf("-----%s: %s-----\n", Stage, Step);
+
+      if (External_Connection)
+         printf("Ensure hose is connected to extenal source and tap is turned on\n");
+      else
+         printf("Ensure external tank is filled with cleaning water and connect hose to tank\n");
+
+      Pause_In = 1;  //Wait for user confirmation
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+      
+      Fill.Target_Volume = 5;  //Re-define target volume. Maybe more than 5L required?
+
+      Stage_complete = 0;
+      xTaskCreate(
+         Auto_Run,                  //function name
+         "Auto Control",            //function description
+         2048,                      //stack size
+         &Fill,                     //task parameters
+         1,                         //task priority
+         &Auto_Task                 //task handle
+      );
+      while (!Stage_complete)    //Wait for kettle to fill with target volume
+      {
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      }
+   }
+   else
+   {
+      printf("Ensure kettle tank is filled with cleaning water\n");
+
+      Pause_In = 1;  //Wait for user confirmation
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+   }
+
+   if (Cold_Rinse)
+   {
+      strcpy (Step,"Cold Rinse");
+      printf("-----%s: %s-----\n", Stage, Step);
+      
+      Sanitize.Valve1 = 0;          //Re-define valve1
+      Sanitize.Target_Time = 1;     //Re-define target time
+   }
+
+   else  //Full clean
+   {
+      strcpy (Step,"Full Clean");
+      printf("-----%s: %s-----\n", Stage, Step);
+
+      Sanitize.Valve1 = 0;          //Re-define valve1
+      Sanitize.Target_Temp = 80;    //Hot enough to pasterize
+      Sanitize.Target_Time = 15;     //Re-define target time
+      Sanitize.Heater = 1;
+   }
+
+   Stage_complete = 0;
+   xTaskCreate(
+      Auto_Run,                  //function name
+      "Auto Control",            //function description
+      2048,                      //stack size
+      &Sanitize,                     //task parameters
+      1,                         //task priority
+      &Auto_Task                 //task handle
+   );
+   while (!Stage_complete)    //Wait for target time
+   {
+      if ((Absolute_Seconds_Remaining == 600) && (Main_Config == 1)) //10 min remaining
+      {
+         //Valves set to mash tun
+          printf("Valves move\n");
+          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      }
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+
+
+   printf("Ensure return hose is leading to a drain\n");
+   Pause_In = 1; //Wait for user confirmation
+   vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+   vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+   //need to delay twice for some reason or pump wont turn on
+   PumpRelay(On);
+   
+  
+   vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for .1 second
+
+   // while (FlowRate != 0) //wait for tranfer to complete
+   // {
+   //    vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+   // }
+
+   PumpRelay(Off);
+
+   Cold_Rinse = 0;
    Step_Active = 0;
    BrewState = Passive_State;
    vTaskDelete(NULL);
@@ -446,7 +548,7 @@ void Mash (void)
       if (External_Connection)
          printf("Ensure hose is connected to extenal source and tap is turned on\n");
       else
-         printf("Ensure external tank is filled with brewing water and immerse input hose in tank\n");
+         printf("Ensure external tank is filled with brewing water and connect input hose to tank\n");
       
       Pause_In = 1;
       vTaskDelay(1000 / portTICK_PERIOD_MS);

@@ -28,6 +28,7 @@ int Paused;
 int Pump_State;
 int Heater_State;
 int Manual_Duty;
+int Cold_Rinse;
 
 char Stage[20];
 char Step[30];

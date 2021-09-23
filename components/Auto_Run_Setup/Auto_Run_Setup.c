@@ -136,7 +136,7 @@ void Auto_Run_Setup (void)
         Sanitize.Valve3 = 0;   //to valve 3
         Sanitize.FlowCtrl = 100;          
         Sanitize.Target_Temp = 0;         
-        Sanitize.Target_Sensor = 2;
+        Sanitize.Target_Sensor = 1; //bottom sensor
         Sanitize.Pump = 1;
         Sanitize.Heater = 0;
         Sanitize.Target_Volume = 0;
