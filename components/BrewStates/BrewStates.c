@@ -495,7 +495,7 @@ void Mash (void)
       1,                         //task priority
       &Auto_Task                       //task handle
    );
-   if (Main_Config == 1)   //Full config
+   if ((Main_Config == 1)&&Heating_Method)   //Full config with RIMS
    {
       while (!Temp_Reached) //Wait for temp to be reached
       {

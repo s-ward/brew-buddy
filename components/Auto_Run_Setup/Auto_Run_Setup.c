@@ -33,6 +33,8 @@ void Auto_Run_Setup (void)
         Strike_Heat.Pump = 1;
         Strike_Heat.Heater = 1;
         Strike_Heat.Target_Volume = Mash_Water_Volume;
+        if (!Heating_Method)
+            Strike_Heat.Target_Volume = 0;
         Strike_Heat.Target_Time = 0;
         
     //*********Mash Step 1*********
