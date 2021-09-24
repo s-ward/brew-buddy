@@ -23,6 +23,7 @@ TaskHandle_t Sparge_Task = NULL;
 TaskHandle_t Boil_Task = NULL;
 TaskHandle_t Cooling_Task = NULL;
 TaskHandle_t Transfer_Task = NULL;
+TaskHandle_t Pause_Task = NULL;
 
 //State machine setup variables
 enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
@@ -30,7 +31,7 @@ enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State
 char BrewState;
 
 //User input commands
-int WPS_In, Clean_In, Manual_In, Pause_In, Reset_In, Brew_In;  // set to inerrupts?
+int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;  // set to inerrupts?
 
 int Kettle_Check;
 int Mash_Check;
@@ -38,15 +39,18 @@ int Mash_Check;
 //Test variable for pause functionality
 int Pause_Button;
 #define TEST_PAUSE_PIN 32
+#define TEST_CANCEL_PIN 33
 
 
 void Brew_States (void)
 {
    gpio_set_direction(TEST_PAUSE_PIN, GPIO_MODE_INPUT);
+   gpio_set_direction(TEST_CANCEL_PIN, GPIO_MODE_INPUT);
 
    while(1)
    {
    Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
+   Cancel_In = gpio_get_level (TEST_CANCEL_PIN);
 
       switch (BrewState)
       {
@@ -211,122 +215,92 @@ void Brew_States (void)
             BrewState = Passive_State;
          break;
       }
-      
+
+      //Cancel pressed
+      if (Cancel_In)
+      {
+         printf("Cancel called\n");
+         //Cancel();
+         xTaskCreate(  
+            Cancel,                  //function name
+            "Cancel",            //function description
+            2048,                      //stack size
+            NULL,                    //task parameters
+            1,                         //task priority
+            NULL                       //task handle
+         );
+         vTaskDelay(2000 / portTICK_PERIOD_MS); // only required for manual testing with switch
+         Cancel_In = 0;    //reset flag   
+      }
+
+      //Pause Pressed
       if (Pause_Button || Pause_In) //Pause state (Replace if statement with pause command flag)
       {
-         if (Stage_complete)
-            Auto_Task = NULL;
-
-         //Pause_In = 1;
-         Pump_State = Pump_Is_On;
-         Heater_State = Heater_Is_On;
-         Paused = 1;
-         HeaterRelay(Off);
-         PumpRelay(Off);
-
-         if (Auto_Task != NULL)
-            vTaskSuspend(Auto_Task);
-         if (WPS_Task != NULL)
-            vTaskSuspend(WPS_Task);
-         if (Cleaning_Task != NULL)
-            vTaskSuspend(Cleaning_Task);
-         if (Manual_Task != NULL)
-            vTaskSuspend(Manual_Task);
-         if (Mash_Task != NULL)
-            vTaskSuspend(Mash_Task);
-         if (Sparge_Task != NULL)
-            vTaskSuspend(Sparge_Task);
-         if (Boil_Task != NULL)
-            vTaskSuspend(Boil_Task);
-         if (Cooling_Task != NULL)
-            vTaskSuspend(Cooling_Task);
-         if (Transfer_Task != NULL)
-            vTaskSuspend(Transfer_Task);
-
-         printf("Paused\n");
-
-         while(!Pause_Button && Pause_In)  //Manual reset of hardcoded pause
+         if (!Paused)
          {
-            vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 5 seconds, will be replaced by user unpause 
-            Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
+            Paused = 1;
+            xTaskCreate(  
+               Pause,                  //function name
+               "Pause",            //function description
+               2048,                      //stack size
+               NULL,                    //task parameters
+               1,                         //task priority
+               &Pause_Task                       //task handle
+            );
          }
-         Pause_In = 0;
-         while(Pause_Button)  //Manual Pause and manual reset
-         {
-            vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 5 seconds, will be replaced by user unpause 
-            Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
-         }
-
-         //unpause
-         
-         Paused = 0;
-         printf("Resumed\n");
-         
-         if (WPS_Task != NULL)
-            vTaskResume(WPS_Task);
-         if (Cleaning_Task != NULL)
-            vTaskResume(Cleaning_Task);
-         if (Manual_Task != NULL)
-            vTaskResume(Manual_Task);
-         if (Mash_Task != NULL)
-            vTaskResume(Mash_Task);
-         if (Sparge_Task != NULL)
-            vTaskResume(Sparge_Task);
-         if (Boil_Task != NULL)
-            vTaskResume(Boil_Task);
-         if (Cooling_Task != NULL)
-            vTaskResume(Cooling_Task);
-         if (Transfer_Task != NULL)
-            vTaskResume(Transfer_Task);
-         if (Auto_Task != NULL)
-            vTaskResume(Auto_Task);
-
-         PumpRelay(Pump_State);
-         HeaterRelay(Heater_State);
       }
-     vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
+     vTaskDelay(100 / portTICK_PERIOD_MS); //Check for updated user input of embedded pause call every .1 seconds
    }
 }
 
 void Passive (void)
 {
    int Safe = 0;
+
+   //Reset variables
+   Paused = 0;
+   Pause_In = 0;
+   Temp_Reached = 0;
+   Volume_Reached = 0;
+   Valves_Set = 0;
+   Timer = 0;
+   PWM_En = 0;
+   Stage_complete = 0;
+
+
    strcpy (Stage,"Passive");
    strcpy (Step,"Waiting for user input");
    printf("-----%s: %s-----\n", Stage, Step);
 
-   EquipConfig();
-   ActiveRecipe();
-   Auto_Run_Setup();
-   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-
-   //Zeroise all components
-   if (!Safe)
-   {
-      Stage_complete = 0;
-      xTaskCreate(   
-         Auto_Run,                  //function name
-         "Auto Control",            //function description
-         2048,                      //stack size
-         &Zeroise,                    //task parameters
-         1,                         //task priority
-         &Auto_Task                       //task handle
-      );
-      while (!Stage_complete)
-      {
-         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-      }
-      Safe = 1;
-   }
-      //Brew_In = 1;   //test variable
-      Cold_Rinse = 1;
-      Clean_In = 1;
-
    while(BrewState == Passive_State)
    {
-      EquipConfig();       //Update global recipe and equipment details while in passive
+      EquipConfig();       //will update while in passive if user changes config / recipe
       ActiveRecipe();
       Auto_Run_Setup();
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+
+      //Zeroise all components
+      if (!Safe)
+      {
+         printf("Zeroising\n");
+         xTaskCreate(   
+            Auto_Run,                  //function name
+            "Auto Control",            //function description
+            2048,                      //stack size
+            &Zeroise,                    //task parameters
+            1,                         //task priority
+            &Auto_Task                       //task handle
+         );
+         while (!Stage_complete)
+         {
+            vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+         }
+         Safe = 1;
+      }
+      
+      Brew_In = 1;   //test variable
+      Cold_Rinse = 1;
+      //Clean_In = 1;
 
       if (WPS_In)
          BrewState = WPS_State;
@@ -335,11 +309,9 @@ void Passive (void)
       else if (Manual_In)
          BrewState = Manual_State;
       else if (Brew_In)
-         BrewState = Safety_Check_State;
-      
-      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
-   }      
-   
+         BrewState = Safety_Check_State;     
+   }   
+
    Step_Active = 0;
    vTaskDelete(NULL);
 }
@@ -368,7 +340,7 @@ void Clean (void)
    {
       printf("Ensure mash tun or cooler is connected to valves 2 & 3\n");
       Pause_In = 1;  //Wait for user confirmation
-      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 second
    }
 
    if (Auto_Fill)
@@ -382,7 +354,7 @@ void Clean (void)
          printf("Ensure external tank is filled with cleaning water and connect hose to tank\n");
 
       Pause_In = 1;  //Wait for user confirmation
-      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 second
       
       Fill.Target_Volume = 5;  //Re-define target volume. Maybe more than 5L required?
 
@@ -405,7 +377,7 @@ void Clean (void)
       printf("Ensure kettle tank is filled with cleaning water\n");
 
       Pause_In = 1;  //Wait for user confirmation
-      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 second
    }
 
    if (Cold_Rinse)
@@ -448,14 +420,12 @@ void Clean (void)
       vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
-
    printf("Ensure return hose is leading to a drain\n");
    Pause_In = 1; //Wait for user confirmation
    vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
    vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
    //need to delay twice for some reason or pump wont turn on
    PumpRelay(On);
-   
   
    vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for .1 second
 
@@ -465,8 +435,6 @@ void Clean (void)
    // }
 
    PumpRelay(Off);
-
-   Cold_Rinse = 0;
    Step_Active = 0;
    BrewState = Passive_State;
    vTaskDelete(NULL);
@@ -619,8 +587,8 @@ void Mash (void)
 
    if (Main_Config != 1)   //BIAB
    {
-      Pause_In = 1; //****Wait for user to confirm bag is in place
       printf("Please insert BIAB into kettle and fill with grain\n");
+      Pause_In = 1; //****Wait for user to confirm bag is in place
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
@@ -735,7 +703,7 @@ void Sparge (void)
             printf("Please position BIAB and return hose securely above kettle\n");
          
          Pause_In = 1;  //wait for user confirmation
-         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
 
          PumpRelay(On);
          //volume transfer function of pre-heated sparge water
@@ -750,7 +718,7 @@ void Sparge (void)
             printf("Please confirm external vessel is filled with sparge water\n");
 
          Pause_In = 1;
-         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
 
          if (External_Connection)   //Can possibly set in Instant heat function.
             PumpRelay(Off);
@@ -771,7 +739,7 @@ void Sparge (void)
       {
          printf("Please place return hose securely in kettle\n");
          Pause_In = 1;
-         vTaskDelay(100 / portTICK_PERIOD_MS); //Wait for user input
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //Wait for user input
       }
 
       //if (flow max and (temp > target temp))
@@ -976,5 +944,119 @@ void Transfer (void)
    Step_Active = 0;
    BrewState = 132;        //default test
    Transfer_Task = NULL;
+   vTaskDelete(NULL);
+}
+
+void Pause(void)
+{
+   if (Stage_complete)
+      Auto_Task = NULL;
+
+   Pump_State = Pump_Is_On;
+   Heater_State = Heater_Is_On;
+   //Paused = 1;
+   HeaterRelay(Off);
+   PumpRelay(Off);
+
+   //suspend running tasks
+   if (Auto_Task != NULL)
+      vTaskSuspend(Auto_Task);
+   if (WPS_Task != NULL)
+      vTaskSuspend(WPS_Task);
+   if (Cleaning_Task != NULL)
+      vTaskSuspend(Cleaning_Task);
+   if (Manual_Task != NULL)
+      vTaskSuspend(Manual_Task);
+   if (Mash_Task != NULL)
+      vTaskSuspend(Mash_Task);
+   if (Sparge_Task != NULL)
+      vTaskSuspend(Sparge_Task);
+   if (Boil_Task != NULL)
+      vTaskSuspend(Boil_Task);
+   if (Cooling_Task != NULL)
+      vTaskSuspend(Cooling_Task);
+   if (Transfer_Task != NULL)
+      vTaskSuspend(Transfer_Task);
+
+   printf("Paused\n");
+
+   while(!Pause_Button && Pause_In)  //Manual reset of hardcoded pause
+   {
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 5 seconds, will be replaced by user unpause 
+      Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
+   }
+   Pause_In = 0;
+   while(Pause_Button)  //Manual Pause and manual reset
+   {
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task
+      Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
+   }
+
+   //unpause
+   
+   Paused = 0;
+   printf("Resumed\n");
+
+   PumpRelay(Pump_State);
+   HeaterRelay(Heater_State);
+   
+   //resume running tasks
+   if (WPS_Task != NULL)
+      vTaskResume(WPS_Task);
+   if (Cleaning_Task != NULL)
+      vTaskResume(Cleaning_Task);
+   if (Manual_Task != NULL)
+      vTaskResume(Manual_Task);
+   if (Mash_Task != NULL)
+      vTaskResume(Mash_Task);
+   if (Sparge_Task != NULL)
+      vTaskResume(Sparge_Task);
+   if (Boil_Task != NULL)
+      vTaskResume(Boil_Task);
+   if (Cooling_Task != NULL)
+      vTaskResume(Cooling_Task);
+   if (Transfer_Task != NULL)
+      vTaskResume(Transfer_Task);
+   if (Auto_Task != NULL)
+      vTaskResume(Auto_Task);
+
+   Pause_Task = NULL;
+   vTaskDelete(NULL);
+}
+
+void Cancel(void)
+{
+   printf("Cancel\n");
+
+   while (Pause_Button)        //Only required for testing. Prevents SS from physical button
+   {
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task
+   }
+   
+
+   Step_Active = 0;
+
+   if (WPS_Task != NULL)
+      vTaskDelete(WPS_Task);
+   if (Cleaning_Task != NULL)
+      vTaskDelete(Cleaning_Task);
+   if (Manual_Task != NULL)
+      vTaskDelete(Manual_Task);
+   if (Mash_Task != NULL)
+      vTaskDelete(Mash_Task);
+   if (Sparge_Task != NULL)
+      vTaskDelete(Sparge_Task);
+   if (Boil_Task != NULL)
+      vTaskDelete(Boil_Task);
+   if (Cooling_Task != NULL)
+      vTaskDelete(Cooling_Task);
+   if (Transfer_Task != NULL)
+      vTaskDelete(Transfer_Task);
+   if (Auto_Task != NULL)
+      vTaskDelete(Auto_Task);
+   if (Pause_Task != NULL)
+      vTaskDelete(Pause_Task);
+
+   BrewState = Passive_State;
    vTaskDelete(NULL);
 }

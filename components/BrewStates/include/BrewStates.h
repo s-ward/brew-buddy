@@ -10,6 +10,8 @@ void Sparge (void);
 void Boil (void);
 void Cooling (void);
 void Transfer (void);
+void Pause (void);
+void Cancel (void);
 
 int Defult_Setting;
 int Wait;
