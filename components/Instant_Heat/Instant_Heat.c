@@ -84,21 +84,25 @@ void FlowPID(int Targ_Temp)
 
     while(FlowPID_En)
     {
-        if (PID_Flow != Current_Flow1)
+        if (!Paused)
         {
-            Current_Flow1 = PID_Flow;
-            valve_set_position(Current_Flow1, &valve_tap_in);   //Only using valve 1
-        }
-        //PID fnk
+            if (PID_Flow != Current_Flow1)
+            {
+                Current_Flow1 = PID_Flow;
+                valve_set_position(Current_Flow1, &valve_tap_in);   //Only using valve 1
+            }
+            
+            //PID fnk
 
-        //Safety check for unable to maintain temp with flow rate alone
-        if (ReCheck != 0)
-            ReCheck = ReCheck - 1;
-        if(PID_Flow == 100 &&(Sensor2 > Targ_Temp) && (!ReCheck))   //if flow max and temp too great
-        {    
-            Manual_Duty = (Manual_Duty-5);  //Reduce heater power by 5%
-            ReCheck = 50;                   //Wait 5 seconds before checking again
-        }        
+            //Safety check for unable to maintain temp with flow rate alone
+            if (ReCheck != 0)
+                ReCheck = ReCheck - 1;
+            if(PID_Flow == 100 &&(Sensor2 > Targ_Temp) && (!ReCheck))   //if flow max and temp too great
+            {    
+                Manual_Duty = (Manual_Duty-5);  //Reduce heater power by 5%
+                ReCheck = 50;                   //Wait 5 seconds before checking again
+            }        
+        }
         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
     }
     vTaskDelete(NULL);

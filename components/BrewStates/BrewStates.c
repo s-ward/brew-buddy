@@ -26,6 +26,7 @@ TaskHandle_t Boil_Task = NULL;
 TaskHandle_t Cooling_Task = NULL;
 TaskHandle_t Transfer_Task = NULL;
 TaskHandle_t Pause_Task = NULL;
+TaskHandle_t Instant_Heat_Task = NULL;
 
 //State machine setup variables
 // enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
@@ -259,6 +260,7 @@ void Passive (void)
 
    //Reset variables
    Paused = 0;
+   FlowPID_En = 0;
    Pause_In = 0;
    Temp_Reached = 0;
    Volume_Reached = 0;
@@ -780,7 +782,7 @@ void Sparge (void)
          Pause_In = 1;
          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 seconds
 
-         valve_set_position(50, &valve_tap_in); //Set valve 1 external at 20% flowrate. Instant heat will then overide setting
+         valve_set_position(20, &valve_tap_in); //Set valve 1 external at 20% flowrate. Instant heat will then overide setting
 
          Stage_complete = 0;
          xTaskCreate(
@@ -789,7 +791,7 @@ void Sparge (void)
             2048,                      //stack size
             &Sparging,        //task parameters
             1,                         //task priority
-            NULL                      //task handle
+            &Instant_Heat_Task         //task handle
          );
 
          while (!Stage_complete) //Wait for sparge to complete
@@ -1017,17 +1019,21 @@ void Transfer (void)
 void Pause(void)
 {
    if (Stage_complete)
+   {
       Auto_Task = NULL;
-
+      Instant_Heat_Task = NULL;
+   }
    Pump_State = Pump_Is_On;   //Save relay states
    Heater_State = Heater_Is_On;
-   //Paused = 1;
+   Paused = 1;
    HeaterRelay(Off);
    PumpRelay(Off);
 
    //suspend running tasks
    if (Auto_Task != NULL)
       vTaskSuspend(Auto_Task);
+   if (Instant_Heat_Task != NULL)
+      vTaskSuspend(Instant_Heat_Task);
    if (WPS_Task != NULL)
       vTaskSuspend(WPS_Task);
    if (Cleaning_Task != NULL)
@@ -1084,6 +1090,8 @@ void Pause(void)
       vTaskResume(Cooling_Task);
    if (Transfer_Task != NULL)
       vTaskResume(Transfer_Task);
+   if (Instant_Heat_Task != NULL)
+      vTaskResume(Instant_Heat_Task);
    if (Auto_Task != NULL)
       vTaskResume(Auto_Task);
 
@@ -1123,6 +1131,17 @@ void Cancel(void)
       vTaskDelete(Auto_Task);
    if (Pause_Task != NULL)
       vTaskDelete(Pause_Task);
+
+   Pause_Task = NULL;      //Fixes issue with multiple cancels causing reboot
+   Auto_Task = NULL;
+   Transfer_Task = NULL;
+   Cooling_Task = NULL;
+   Boil_Task = NULL;
+   Sparge_Task = NULL;
+   Mash_Task = NULL;
+   Manual_Task = NULL;
+   Cleaning_Task = NULL;
+   WPS_Task = NULL;
 
    BrewState = Passive_State;
    vTaskDelete(NULL);
