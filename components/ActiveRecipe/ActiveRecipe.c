@@ -29,7 +29,7 @@ void ActiveRecipe (void)
     Strike_Temp = 75;
 
     //0-100% of valve open
-    Mash_Flow_Rate = 0;
+    Mash_Flow_Rate = 99;
 
     //minutes
     Mash_Time_1 = 1;

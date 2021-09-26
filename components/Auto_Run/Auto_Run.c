@@ -40,13 +40,8 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
         valve_set_position(Current_Flow3, &valve_sparge_out); //Position defined by flow rate setting
     }
 
-    //If valves not set
-    //valve call, set all 3(Valve1, Valve2, Valve3)
-    vTaskDelay(3000 / portTICK_PERIOD_MS); //pause for 3 seconds while valves move
+    vTaskDelay(3000 / portTICK_PERIOD_MS); //pause for 2 seconds while valves move
 
-
-
-    //Set Flow valve to position (FlowCtrl)
 
     //Initilise temp pid
 
@@ -123,7 +118,6 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
 
     Temp_Reached = 0;
     Volume_Reached = 0;
-    Valves_Set = 0;
     Timer = 0;
     PWM_En = 0;             //Turn off heater PWM
     Stage_complete = 1;

@@ -3,6 +3,7 @@
 #include "ActiveRecipe.h"
 #include "EquipConfig.h"
 #include "Auto_Run.h"
+#include "Instant_Heat.h"
 
 
 
@@ -181,4 +182,8 @@ void Auto_Run_Setup (void)
             Cool.Valve2 = 1;   //to valve 3
             Cool.Valve3 = 1;   //from valve 2
         }
+
+    //Sparge Heat setup
+        Sparging.Instant_Temp = Sparge_Temp;
+        Sparging.Instant_Volume = Sparge_Water_Volume;
 }

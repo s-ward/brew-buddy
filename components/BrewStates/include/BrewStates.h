@@ -13,9 +13,13 @@ void Transfer (void);
 void Pause (void);
 void Cancel (void);
 
+enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
+                  Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
+char BrewState;
+
+
 int Defult_Setting;
 int Wait;
-int Valves_Set;
 int Volume_Reached;
 int Timer;
 int Minutes_Remaining;
@@ -31,6 +35,7 @@ int Pump_State;
 int Heater_State;
 int Manual_Duty;
 int Cold_Rinse;
+int FlowPID_En;
 
 int Current_Flow1;
 int Current_Flow2;

@@ -10,6 +10,7 @@
 #include "Auto_Run.h"
 #include "Auto_Run_Setup.h"
 #include "servo.h"
+#include "Instant_Heat.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -27,9 +28,9 @@ TaskHandle_t Transfer_Task = NULL;
 TaskHandle_t Pause_Task = NULL;
 
 //State machine setup variables
-enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
-                  Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
-char BrewState;
+// enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
+//                   Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
+// char BrewState;
 
 //User input commands
 int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;  // set to inerrupts?
@@ -261,7 +262,6 @@ void Passive (void)
    Pause_In = 0;
    Temp_Reached = 0;
    Volume_Reached = 0;
-   Valves_Set = 0;
    Timer = 0;
    PWM_En = 0;
    Stage_complete = 0;
@@ -713,6 +713,8 @@ void Mash (void)
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
+   
+
    strcpy (Step,"Step 5");
    printf("-----%s: %s-----\n", Stage, Step);
 
@@ -729,7 +731,6 @@ void Mash (void)
    {
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
-
 
    HeaterRelay(Off);
    PumpRelay(Off);
@@ -751,6 +752,7 @@ void Sparge (void)
 
    if ((Sparge_Water_Volume != 0)&&(Main_Config != 3)) //Sparge required
    {
+      valve_tap_in.internal = 0; //Set to external
 
       if (!Heating_Method) //Internal boiler
       {
@@ -758,13 +760,15 @@ void Sparge (void)
          if (Main_Config == 2)
             printf("Please position BIAB and return hose securely above kettle\n");
          
+         valve_set_position(50, &valve_tap_in); //Set valve 1 external at 50% flowrate
+
          Pause_In = 1;  //wait for user confirmation
          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
 
          PumpRelay(On);
          //volume transfer function of pre-heated sparge water
       }
-      else
+      else  //Instant heat sparge
       {  
          if (Main_Config == 2)
             printf("Please position BIAB and return hose securely above kettle\n");
@@ -774,22 +778,25 @@ void Sparge (void)
             printf("Please confirm external vessel is filled with sparge water\n");
 
          Pause_In = 1;
-         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 seconds
 
-         if (External_Connection)   //Can possibly set in Instant heat function.
-            PumpRelay(Off);
-         else
-            PumpRelay(On);
+         valve_set_position(50, &valve_tap_in); //Set valve 1 external at 20% flowrate. Instant heat will then overide setting
 
-         if (Main_Config == 1)
+         Stage_complete = 0;
+         xTaskCreate(
+            Instant_Heat,                //function name
+            "Instant_Heat",      //function description
+            2048,                      //stack size
+            &Sparging,        //task parameters
+            1,                         //task priority
+            NULL                      //task handle
+         );
+
+         while (!Stage_complete) //Wait for sparge to complete
          {
-            //Instant_Heat(); //valves set to external mash tun
+            vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
          }
-         else
-         {
-            //Instant_Heat(); //valves set to kettle, BIAB
-         }
-
+         
       }
       if (Main_Config == 2)
       {
@@ -797,13 +804,16 @@ void Sparge (void)
          Pause_In = 1;
          vTaskDelay(1000 / portTICK_PERIOD_MS); //Wait for user input
       }
-
-      //if (flow max and (temp > target temp))
-            //Heater power --5;   //ensures flow rate can maintain temp pid if water has been preheated
-            //delay x 
-
-      //SpargeDrain
-         //Wait for x time or wait till flow < x value
+   
+      if (Main_Config == 1)  //SpargeDrain
+      {
+         strcpy (Step,"Draining Mash");
+         printf("-----%s: %s-----\n", Stage, Step);
+         // while (Flowrate > xL) //Wait for x time or wait till flow < x value
+         // {
+         //    vTaskDelay(1000 / portTICK_PERIOD_MS);
+         // }       
+      }
    }
    HeaterRelay(Off);
    PumpRelay(Off);

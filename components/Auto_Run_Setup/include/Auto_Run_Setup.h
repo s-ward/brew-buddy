@@ -16,3 +16,5 @@ struct Auto_Run_Controls Zeroise;
 struct Auto_Run_Controls Sanitize;
 
 struct Auto_Run_Controls Boiling;
+
+struct Instant_Heat_Controls Sparging;
