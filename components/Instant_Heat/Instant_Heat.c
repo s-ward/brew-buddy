@@ -64,7 +64,6 @@ void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
     }
 
     FlowPID_En = 0;
-
     PWM_En = 0;
     Volume_Reached = 0;
 

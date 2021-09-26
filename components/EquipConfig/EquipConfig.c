@@ -20,3 +20,31 @@ void EquipConfig (void)
     
     Safety_Margin = 5; //xL of safety margin for kettle and mash tun (Hardcoded)
 }
+
+void Manual_Config(void)
+{
+    Man_Valve1 = 1;
+    Man_Valve2 = 1;
+    Man_Valve3 = 1;
+
+    Man_Valve1_Flow = 100;
+    Man_Valve2_Flow = 70;
+    Man_Valve3_Flow = 30;
+
+    Man_Pump = 1;
+
+    Man_Heater = 1;
+    Man_Heater_Power = 70;
+
+    Man_Sensor = 1;
+    Man_Temp = 0;
+
+    Man_Time = 3;
+
+    Man_Volume = 0;
+
+   
+    Manual_Mode = Manual_Timer;
+    //Manual_Mode = Manual_Volume,
+    //Manual_Mode = Manual_Instant_Heat;
+}

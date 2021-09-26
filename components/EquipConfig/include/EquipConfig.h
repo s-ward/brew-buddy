@@ -13,3 +13,28 @@ int Auto_Fill; //0 = manual, 1 = autofill kettle for mash
 
 int Safety_Margin; //xL of safety margin for kettle and mash tun (Hardcoded)
 
+void Manual_Config(void);
+
+int Man_Valve1;
+int Man_Valve2;
+int Man_Valve3;
+
+int Man_Valve1_Flow;
+int Man_Valve2_Flow;
+int Man_Valve3_Flow;
+
+int Man_Pump;
+
+int Man_Heater;
+int Man_Heater_Power;
+
+int Man_Sensor;
+int Man_Temp;
+
+int Man_Time;
+
+int Man_Volume;
+
+enum Manual_Modes {Manual_Timer, Manual_Volume, Manual_Instant_Heat};
+char Manual_Mode;
+

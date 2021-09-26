@@ -299,7 +299,8 @@ void Passive (void)
          Safe = 1;
       }
       
-      Brew_In = 1;   //test variable
+      Manual_In = 1;
+      //Brew_In = 1;   //test variable
       Cold_Rinse = 1;
       //Clean_In = 1;
 
@@ -446,65 +447,69 @@ void Manual (void)
    Manual_In = 0;             //Reset trigger variable
    
    strcpy (Stage,"Manual");
-   strcpy (Step,"");
+   strcpy (Step,"Full Manual");
    printf("-----%s: %s-----\n", Stage, Step);
 
-   // while (1)
-   // {
-   //    if ((Man_Valve1 != valve_tap_in.internal) ||(Man_Valve1_Flow != Current_Flow1)) //if position or flow changed
-   //    {
-   //       valve_tap_in.internal = Man_Valve1; //Internal / external toggle
-   //       Current_Flow1 = Man_Valve1_Flow;
-   //       valve_set_position(Man_Valve1_Flow, valve_tap_in); //Position defined by flow rate setting
-   //    }
-   //    if ((Man_Valve2 != valve_sparge_in.internal)||(Man_Valve2_Flow != Current_Flow2)) //if position or flow changed
-   //    {
-   //       valve_sparge_in.internal = Man_Valve2; //Internal / external toggle
-   //       Current_Flow2 = Man_Valve2_Flow;
-   //       valve_set_position(Man_Valve2_Flow, valve_sparge_in); //Position defined by flow rate setting
-   //    }
+   while (1)
+   {
+      Manual_Config(); // apply user setting updates
+
+      //Check and set valve direction and flow rate
+      if ((Man_Valve1 != valve_tap_in.internal) ||(Man_Valve1_Flow != Current_Flow1)) //if position or flow changed
+      {
+         valve_tap_in.internal = Man_Valve1; //Internal / external toggle
+         Current_Flow1 = Man_Valve1_Flow;
+         valve_set_position(Man_Valve1_Flow, &valve_tap_in); //Position defined by flow rate setting
+      }
+      if ((Man_Valve2 != valve_sparge_in.internal)||(Man_Valve2_Flow != Current_Flow2)) //if position or flow changed
+      {
+         valve_sparge_in.internal = Man_Valve2; //Internal / external toggle
+         Current_Flow2 = Man_Valve2_Flow;
+         valve_set_position(Man_Valve2_Flow, &valve_sparge_in); //Position defined by flow rate setting
+      }
       
-   //    if (Man_Valve3 != valve_sparge_out.internal)||(Man_Valve3_Flow != Current_Flow3)) //if position or flow changed
-   //    {
-   //       valve_sparge_out.internal = Man_Valve3; //Internal / external toggle
-   //       Current_Flow3 = Man_Valve3_Flow;
-   //       valve_set_position(Man_Valve3_Flow, valve_sparge_out); //Position defined by flow rate setting
-   //    }
-   //    //CHeck and set valve flow restriction somehow
+      if ((Man_Valve3 != valve_sparge_out.internal)||(Man_Valve3_Flow != Current_Flow3)) //if position or flow changed
+      {
+         valve_sparge_out.internal = Man_Valve3; //Internal / external toggle
+         Current_Flow3 = Man_Valve3_Flow;
+         valve_set_position(Man_Valve3_Flow, &valve_sparge_out); //Position defined by flow rate setting
+      }
 
-   //    if (Man_Pump != Pump_Is_On)
-   //       PumpRelay(Man_Pump); 
+      if (Man_Pump != Pump_Is_On)
+         PumpRelay(Man_Pump); 
 
-   //    if (Man_Heater != Heater_Is_On)
-   //       PumpRelay(Man_Heater);
+      if (Man_Heater != Heater_Is_On)
+         HeaterRelay(Man_Heater);
       
-   //    Manual_Duty = Man_Heater_Power;
+      Manual_Duty = Man_Heater_Power;
       
-   //    Sensor = Man_Sensor;
-   //    Temp = Man_Temp;
+      Sensor = Man_Sensor;
+      Temp = Man_Temp;
 
-   //    if (Temp != 0)
-   //       Auto_PID = 1;  //Use heater PID
-   //    else
-   //       Auto_PID = 0;  //Use manual duty cycle
+      if (Temp != 0)
+         Auto_PID = 1;  //Use heater PID
+      else
+         Auto_PID = 0;  //Use manual duty cycle
 
-   //    PWM_En = 1;
-   //    xTaskCreate(
-   //       Heater_PWM,                //function name
-   //       "Heater PWM Control",      //function description
-   //       2048,                      //stack size
-   //       NULL,                      //task parameters
-   //       1,                         //task priority
-   //       NULL                      //task handle
-   //    );
+      PWM_En = 1;
+      xTaskCreate(
+         Heater_PWM,                //function name
+         "Heater PWM Control",      //function description
+         2048,                      //stack size
+         NULL,                      //task parameters
+         1,                         //task priority
+         NULL                      //task handle
+      );
 
-   // }
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
 
 
 
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    Step_Active = 0;
    BrewState = Passive_State;
+   Manual_Task = NULL;
    vTaskDelete(NULL);
 }
 
