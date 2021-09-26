@@ -9,6 +9,7 @@
 #include "HeaterPID.h"
 #include "Auto_Run.h"
 #include "Auto_Run_Setup.h"
+#include "servo.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -219,8 +220,6 @@ void Brew_States (void)
       //Cancel pressed
       if (Cancel_In)
       {
-         printf("Cancel called\n");
-         //Cancel();
          xTaskCreate(  
             Cancel,                  //function name
             "Cancel",            //function description
@@ -448,6 +447,59 @@ void Manual (void)
    strcpy (Step,"");
    printf("-----%s: %s-----\n", Stage, Step);
 
+   // while (1)
+   // {
+   //    if ((Man_Valve1 != valve_tap_in.internal) ||(Man_Valve1_Flow != Current_Flow1)) //if position or flow changed
+   //    {
+   //       valve_tap_in.internal = Man_Valve1; //Internal / external toggle
+   //       Current_Flow1 = Man_Valve1_Flow;
+   //       valve_set_position(Man_Valve1_Flow, valve_tap_in); //Position defined by flow rate setting
+   //    }
+   //    if ((Man_Valve2 != valve_sparge_in.internal)||(Man_Valve2_Flow != Current_Flow2)) //if position or flow changed
+   //    {
+   //       valve_sparge_in.internal = Man_Valve2; //Internal / external toggle
+   //       Current_Flow2 = Man_Valve2_Flow;
+   //       valve_set_position(Man_Valve2_Flow, valve_sparge_in); //Position defined by flow rate setting
+   //    }
+      
+   //    if (Man_Valve3 != valve_sparge_out.internal)||(Man_Valve3_Flow != Current_Flow3)) //if position or flow changed
+   //    {
+   //       valve_sparge_out.internal = Man_Valve3; //Internal / external toggle
+   //       Current_Flow3 = Man_Valve3_Flow;
+   //       valve_set_position(Man_Valve3_Flow, valve_sparge_out); //Position defined by flow rate setting
+   //    }
+   //    //CHeck and set valve flow restriction somehow
+
+   //    if (Man_Pump != Pump_Is_On)
+   //       PumpRelay(Man_Pump); 
+
+   //    if (Man_Heater != Heater_Is_On)
+   //       PumpRelay(Man_Heater);
+      
+   //    Manual_Duty = Man_Heater_Power;
+      
+   //    Sensor = Man_Sensor;
+   //    Temp = Man_Temp;
+
+   //    if (Temp != 0)
+   //       Auto_PID = 1;  //Use heater PID
+   //    else
+   //       Auto_PID = 0;  //Use manual duty cycle
+
+   //    PWM_En = 1;
+   //    xTaskCreate(
+   //       Heater_PWM,                //function name
+   //       "Heater PWM Control",      //function description
+   //       2048,                      //stack size
+   //       NULL,                      //task parameters
+   //       1,                         //task priority
+   //       NULL                      //task handle
+   //    );
+
+   // }
+
+
+
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    Step_Active = 0;
    BrewState = Passive_State;
@@ -575,7 +627,11 @@ void Mash (void)
       strcpy (Step,"Pumping strike water to mash");
       printf("-----%s: %s-----\n", Stage, Step);
 
-      //Call to move valves 2 and 3 to external
+   //Move valves to mash tun
+      valve_sparge_in.internal = 0;
+      valve_set_position(Current_Flow2, &valve_sparge_in);
+      valve_sparge_out.internal = 0;
+      valve_set_position(Current_Flow3, &valve_sparge_out);
    }
    while (!Stage_complete)
    {
@@ -747,6 +803,7 @@ void Sparge (void)
             //delay x 
 
       //SpargeDrain
+         //Wait for x time or wait till flow < x value
    }
    HeaterRelay(Off);
    PumpRelay(Off);
@@ -952,7 +1009,7 @@ void Pause(void)
    if (Stage_complete)
       Auto_Task = NULL;
 
-   Pump_State = Pump_Is_On;
+   Pump_State = Pump_Is_On;   //Save relay states
    Heater_State = Heater_Is_On;
    //Paused = 1;
    HeaterRelay(Off);
@@ -997,7 +1054,7 @@ void Pause(void)
    Paused = 0;
    printf("Resumed\n");
 
-   PumpRelay(Pump_State);
+   PumpRelay(Pump_State);     //Reapply relay states
    HeaterRelay(Heater_State);
    
    //resume running tasks
@@ -1026,7 +1083,7 @@ void Pause(void)
 
 void Cancel(void)
 {
-   printf("Cancel\n");
+   printf("Canceled\n");
 
    while (Pause_Button)        //Only required for testing. Prevents SS from physical button
    {

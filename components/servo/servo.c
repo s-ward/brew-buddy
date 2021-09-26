@@ -41,6 +41,14 @@ servo - the valve to move (valve_tap_in, valve_sparge_in, valve_sparge_out)
 */
 void valve_set_position (int angle, servo_params* servo) {
 
+    float AnglePercent = angle;
+    angle = (AnglePercent/100)*90;     //Convert % to 0-90 deg
+
+    if (!servo->internal)  //If valve set to external
+        angle = 270 - angle;    // Flow control setting for externally set valve
+
+    printf("%s - Angle: %d\n", servo->name, angle);
+
     mcpwm_set_duty_in_us(servo->mcpwm_num, servo->timer_num, servo->gen, servo_per_degree_init(angle));
 }
 

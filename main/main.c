@@ -163,9 +163,9 @@ void app_main(void)
    servo_init();
 
    //valve example tasks
-   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
-   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
-   xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);
+   // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
+   // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
+   // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);
 
 
 
@@ -180,7 +180,6 @@ void app_main(void)
       NULL                       //task handle
    );
     
-   //Heater_PWM(Manual_Duty);
 
     //ds18b20
     ds18b20_init(DS_PIN);

@@ -21,6 +21,7 @@ typedef struct {
     int gpio_num;
     mcpwm_generator_t gen; 
     char name[20];
+    int internal;
 
 } servo_params;
 
