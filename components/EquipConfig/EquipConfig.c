@@ -37,14 +37,13 @@ void Manual_Config(void)
     Man_Heater_Power = 70;
 
     Man_Sensor = 1;
-    Man_Temp = 0;
+    Man_Temp = 2;
 
-    Man_Time = 3;
+    Man_Time = 1;
 
     Man_Volume = 0;
 
-   
-    Manual_Mode = Manual_Timer;
-    //Manual_Mode = Manual_Volume,
-    //Manual_Mode = Manual_Instant_Heat;
+    Manual_Timer = 1;
+    Manual_Volume = 0;
+    Manual_Instant_Heat = 0;
 }

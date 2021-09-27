@@ -35,6 +35,6 @@ int Man_Time;
 
 int Man_Volume;
 
-enum Manual_Modes {Manual_Timer, Manual_Volume, Manual_Instant_Heat};
-char Manual_Mode;
+int Manual_Timer, Manual_Volume, Manual_Instant_Heat;
+
 

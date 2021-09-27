@@ -4,6 +4,7 @@ void Passive (void);
 void WPS (void);
 void Clean (void);
 void Manual (void);
+void Manual_User_Input(void);
 void Safety_Check (void);
 void Mash (void);
 void Sparge (void);
@@ -17,6 +18,7 @@ enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State
                   Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
 char BrewState;
 
+int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;
 
 int Defult_Setting;
 int Wait;
@@ -36,6 +38,7 @@ int Heater_State;
 int Manual_Duty;
 int Cold_Rinse;
 int FlowPID_En;
+int Man_EN;
 
 int Current_Flow1;
 int Current_Flow2;
