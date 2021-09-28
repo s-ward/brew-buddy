@@ -19,21 +19,23 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     PumpRelay(Off);
 
 
-    if ((Auto_Run_Task->Valve1 != valve_tap_in.internal) ||(Auto_Run_Task->FlowCtrl != Current_Flow1)) //if position or flow changed
+    if ((Auto_Run_Task->Valve1 != Valve1_State) ||(Auto_Run_Task->FlowCtrl != Current_Flow1)) //if position or flow changed
     {
         valve_tap_in.internal = Auto_Run_Task->Valve1; //Internal / external toggle
         Current_Flow1 = Auto_Run_Task->FlowCtrl;
         valve_set_position(Current_Flow1, &valve_tap_in); //Position defined by flow rate setting
     }
+
+    vTaskDelay(200 / portTICK_PERIOD_MS);
     
-    if ((Auto_Run_Task->Valve2 != valve_sparge_in.internal)||(100 != Current_Flow2)) //if position or flow changed
+    if ((Auto_Run_Task->Valve2 != Valve2_State)||(100 != Current_Flow2)) //if position or flow changed
     {
         valve_sparge_in.internal = Auto_Run_Task->Valve2; //Internal / external toggle
         Current_Flow2 = 100;
         valve_set_position(Current_Flow2, &valve_sparge_in); //Position defined by flow rate setting
     }
     
-    if ((Auto_Run_Task->Valve3 != valve_sparge_out.internal)||(100 != Current_Flow3)) //if position or flow changed
+    if ((Auto_Run_Task->Valve3 != Valve3_State)||(100 != Current_Flow3)) //if position or flow changed
     {
         valve_sparge_out.internal = Auto_Run_Task->Valve3; //Internal / external toggle
         Current_Flow3 = 100;
@@ -115,7 +117,6 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     HeaterRelay(Off);
     PumpRelay(Off);
     
-
     Temp_Reached = 0;
     Volume_Reached = 0;
     Timer = 0;

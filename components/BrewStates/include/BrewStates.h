@@ -18,6 +18,9 @@ enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State
                   Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
 char BrewState;
 
+enum ManStates {Full_Man, Manual_Timer, Manual_Volume, Manual_Instant_Heat};
+char ManState;
+
 int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;
 
 int Defult_Setting;
@@ -43,6 +46,10 @@ int Man_EN;
 int Current_Flow1;
 int Current_Flow2;
 int Current_Flow3;
+
+int Valve1_State;
+int Valve2_State;
+int Valve3_State;
 
 char Stage[20];
 char Step[30];

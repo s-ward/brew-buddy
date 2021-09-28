@@ -250,6 +250,13 @@ void Brew_States (void)
             );
          }
       }
+
+      if (Stage_complete)  // Required for pause
+      {
+         Auto_Task = NULL;
+         Instant_Heat_Task = NULL;
+      }
+
      vTaskDelay(100 / portTICK_PERIOD_MS); //Check for updated user input of embedded pause call every .1 seconds
    }
 }
@@ -259,6 +266,7 @@ void Passive (void)
    int Safe = 0;
 
    //Reset variables
+   Man_EN = 0;
    Paused = 0;
    FlowPID_En = 0;
    Pause_In = 0;
@@ -294,7 +302,7 @@ void Passive (void)
          );
          while (!Stage_complete)
          {
-            vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+            vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
          }
          Safe = 1;
       }
@@ -446,7 +454,7 @@ void Manual (void)
 {
    Manual_In = 0;             //Reset trigger variable
 
-   Man_EN = 1;
+   Man_EN = 1;    //Manual settings that are always able to be updated by user
    xTaskCreate(
       Manual_User_Input,                //function name
       "Manual_User_Input",      //function description
@@ -457,59 +465,79 @@ void Manual (void)
    );
    
    strcpy (Stage,"Manual");
-   strcpy (Step,"Full Manual");
-   printf("-----%s: %s-----\n", Stage, Step);
+   
+   ManState = Manual_Instant_Heat; // Test
 
-   while (1)
+   while (BrewState == Manual_State)
    {
-      if (Manual_Timer)
+      switch (ManState)
       {
-         strcpy (Step,"Timer");
-         printf("-----%s: %s-----\n", Stage, Step);
-
-         if(Man_Temp != 0)
+         case Full_Man:
          {
-            strcpy (Auto_Process,"Waiting until target temp");
+            strcpy (Step,"Full Manual");
+            printf("-----%s: %s-----\n", Stage, Step);
+            
+            while(ManState == Full_Man)
+            {
+               vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+            }
+            break;
+         }
+         
+         
+         
+         case Manual_Timer:
+         {
+            strcpy (Step,"Timer");
+            printf("-----%s: %s-----\n", Stage, Step);
+
+            if(Man_Temp != 0)
+            {
+               strcpy (Auto_Process,"Waiting until target temp");
+               printf("*%s*\n", Auto_Process);
+
+               while (!Temp_Reached) //Wait for temp to be reached
+               {
+                  vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+               }
+            }
+
+            strcpy (Auto_Process,"Waiting until target time");
             printf("*%s*\n", Auto_Process);
 
-            while (!Temp_Reached) //Wait for temp to be reached
+            while ((Man_Time*60) > Timer)    //conversion to seconds
             {
-               vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+               TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
+
+               Absolute_Seconds_Remaining = ((Man_Time*60)-Timer);
+               Minutes_Remaining = (((Man_Time*60)-Timer)/60);
+               Seconds_Remaining = (Absolute_Seconds_Remaining-(Minutes_Remaining*60));
+               printf("Time Remaining: %d:%d\n", Minutes_Remaining, Seconds_Remaining);
+               
+               Count_Update = 1;       //Fix for hop appition call happening twice
+
+               vTaskDelayUntil(&xLastWakeTime, 100); //pause task for exactly 1 second
+
+               Timer ++;           //Increment timer   
             }
+
+            Timer = 0;
+            Man_Heater = 0;   //Turn heater off
+            Man_Pump = 0;     //Turn pump off
+            ManState = Full_Man;
+            break;
          }
 
-         strcpy (Auto_Process,"Waiting until target time");
-         printf("*%s*\n", Auto_Process);
-
-         while ((Man_Time*60) > Timer)    //conversion to seconds
+         case Manual_Volume:
          {
-            TickType_t xLastWakeTime = xTaskGetTickCount(); //Saves LastWakeTime for use with vTaskDelayUntil
+            strcpy (Step,"Volume Tranfer");
+            printf("-----%s: %s-----\n", Stage, Step);
 
-            Absolute_Seconds_Remaining = ((Man_Time*60)-Timer);
-            Minutes_Remaining = (((Man_Time*60)-Timer)/60);
-            Seconds_Remaining = (Absolute_Seconds_Remaining-(Minutes_Remaining*60));
-            printf("Time Remaining: %d:%d\n", Minutes_Remaining, Seconds_Remaining);
-            
-            Count_Update = 1;       //Fix for hop appition call happening twice
+            while (Man_Volume == 0) //wait for user to input volume
+            {
+               vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+            }
 
-            vTaskDelayUntil(&xLastWakeTime, 100); //pause task for exactly 1 second
-
-            Timer ++;           //Increment timer   
-         }
-         Man_Pump = 0;
-         Man_Heater = 0;
-         Manual_Timer = 0;
-      }
-      
-      printf("outside\n");
-
-      if (Manual_Volume)
-      {
-         strcpy (Step,"Volume");
-         printf("-----%s: %s-----\n", Stage, Step);
-
-         if (Man_Volume != 0)
-         {   
             strcpy (Auto_Process,"Transfering target volume");
             printf("*%s*\n", Auto_Process);
 
@@ -520,20 +548,23 @@ void Manual (void)
                   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
                   Volume_Reached=1;  //test
             }
+
+            Man_Heater = 0;      //Turn heater off
+            Man_Pump = 0;        //Turn pump off
+            ManState = Full_Man;
+            break;
          }
-         Man_Pump = 0;
-         Man_Heater = 0;
-         Manual_Volume = 0;
-
-      }
-      
-      if (Manual_Instant_Heat)
-      {
-         strcpy (Step,"Instant_Heat");
-         printf("-----%s: %s-----\n", Stage, Step);
-
-         if (Sparging.Instant_Temp !=0)
+         
+         case Manual_Instant_Heat:
          {
+            strcpy (Step,"Instant_Heat");
+            printf("-----%s: %s-----\n", Stage, Step);
+
+            while (Sparging.Instant_Temp == 0) //wait for user to input temp
+            {
+               vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+            }
+
             Stage_complete = 0;
             xTaskCreate(
                Instant_Heat,                //function name
@@ -543,19 +574,25 @@ void Manual (void)
                1,                         //task priority
                &Instant_Heat_Task         //task handle
             );
-            while (!Stage_complete) //Wait for sparge to complete
+            while (!Stage_complete) //Wait for instant_heat to complete
             {
                vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
             }
-         }
-      }
 
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+            Man_Heater = 0;      //Turn heater off
+            Man_Pump = 0;        //Turn pump off
+            ManState = Full_Man;
+            break;
+         }
+
+         default:
+            ManState = Full_Man;
+         break;
+      }
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
 
-
-   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    Step_Active = 0;
    Man_EN = 0;
    BrewState = Passive_State;
@@ -566,74 +603,85 @@ void Manual (void)
 
 void Manual_User_Input (void) //continuosly update controls with user input
 {
+   Manual_Config(); // apply user setting updates
+
    while (Man_EN)
    {
       if(!Paused)
       {
-         Manual_Config(); // apply user setting updates
+         //Manual_Config(); // apply user setting updates
 
          Sparging.Instant_Temp = Man_Temp;
          Sparging.Instant_Volume = Man_Volume;
 
          //Check and set valve direction and flow rate
-         if ((Man_Valve1 != valve_tap_in.internal) ||(Man_Valve1_Flow != Current_Flow1)) //if position or flow changed
+
+         if ((Man_Valve1 != Valve1_State) ||(Man_Valve1_Flow != Current_Flow1)) //if position or flow changed
          {
             valve_tap_in.internal = Man_Valve1; //Internal / external toggle
-            if (!Manual_Instant_Heat)
+            if (ManState != Manual_Instant_Heat)
             {
                Current_Flow1 = Man_Valve1_Flow;
-               valve_set_position(Man_Valve1_Flow, &valve_tap_in); //Position defined by flow rate setting
+               valve_set_position(Current_Flow1, &valve_tap_in); //Position defined by flow rate setting
             }
          }
-         if ((Man_Valve2 != valve_sparge_in.internal)||(Man_Valve2_Flow != Current_Flow2)) //if position or flow changed
+         if ((Man_Valve2 != Valve2_State)||(Man_Valve2_Flow != Current_Flow2)) //if position or flow changed
          {
             valve_sparge_in.internal = Man_Valve2; //Internal / external toggle
-            if (!Manual_Instant_Heat)
-            {
+            if (ManState != Manual_Instant_Heat)
                Current_Flow2 = Man_Valve2_Flow;
-               valve_set_position(Man_Valve2_Flow, &valve_sparge_in); //Position defined by flow rate setting
+            else
+            {
+               Current_Flow2 = 100;
+               Man_Valve2_Flow = 100;
             }
+            valve_set_position(Current_Flow2, &valve_sparge_in); //Position defined by flow rate setting
          }
          
-         if ((Man_Valve3 != valve_sparge_out.internal)||(Man_Valve3_Flow != Current_Flow3)) //if position or flow changed
+         if ((Man_Valve3 != Valve3_State)||(Man_Valve3_Flow != Current_Flow3)) //if position or flow changed
          {
             valve_sparge_out.internal = Man_Valve3; //Internal / external toggle
-            if (!Manual_Instant_Heat)
-            {
+            if (ManState != Manual_Instant_Heat)
                Current_Flow3 = Man_Valve3_Flow;
-               valve_set_position(Man_Valve3_Flow, &valve_sparge_out); //Position defined by flow rate setting
+            else
+            {
+               Current_Flow3 = 100;
+               Man_Valve3_Flow = 100;
             }
+            valve_set_position(Current_Flow3, &valve_sparge_out); //Position defined by flow rate setting
          }
+
+         Temp = Man_Temp;
 
          if (Man_Pump != Pump_Is_On)
             PumpRelay(Man_Pump); 
 
-         if (Man_Heater != Heater_Is_On)
-            HeaterRelay(Man_Heater);
-         
-         if (!Manual_Instant_Heat)
-            Manual_Duty = Man_Heater_Power;
-         
-         Sensor = Man_Sensor;
-         Temp = Man_Temp;
-
-         if (Temp != 0)
-            Auto_PID = 1;  //Use heater PID
-         else
-            Auto_PID = 0;  //Use manual duty cycle
-         if(!PWM_En)
+         if (ManState != Manual_Instant_Heat)
          {
-            PWM_En = 1;
-            xTaskCreate(
-               Heater_PWM,                //function name
-               "Heater PWM Control",      //function description
-               2048,                      //stack size
-               NULL,                      //task parameters
-               1,                         //task priority
-               NULL                      //task handle
-            );
-         }
+            if (Man_Heater != Heater_Is_On)
+               HeaterRelay(Man_Heater);
+            
+            Manual_Duty = Man_Heater_Power;
+            Sensor = Man_Sensor;
 
+            if (Temp != 0)
+               Auto_PID = 1;  //Use heater PID
+            else
+               Auto_PID = 0;  //Use manual duty cycle
+
+            if(!PWM_En)
+            {
+               PWM_En = 1;
+               xTaskCreate(
+                  Heater_PWM,                //function name
+                  "Heater PWM Control",      //function description
+                  2048,                      //stack size
+                  NULL,                      //task parameters
+                  1,                         //task priority
+                  NULL                      //task handle
+               );
+            }
+         }
       }
 
       vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
@@ -894,8 +942,6 @@ void Sparge (void)
          printf("Please confirm external vessel is filled with pre-heated sparge water\n");
          if (Main_Config == 2)
             printf("Please position BIAB and return hose securely above kettle\n");
-         
-         valve_set_position(50, &valve_tap_in); //Set valve 1 external at 50% flowrate
 
          Pause_In = 1;  //wait for user confirmation
          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
@@ -1151,11 +1197,6 @@ void Transfer (void)
 
 void Pause(void)
 {
-   if (Stage_complete)
-   {
-      Auto_Task = NULL;
-      Instant_Heat_Task = NULL;
-   }
    Pump_State = Pump_Is_On;   //Save relay states
    Heater_State = Heater_Is_On;
    Paused = 1;
@@ -1243,6 +1284,7 @@ void Cancel(void)
    
 
    Step_Active = 0;
+   Man_EN = 0;
 
    if (WPS_Task != NULL)
       vTaskDelete(WPS_Task);

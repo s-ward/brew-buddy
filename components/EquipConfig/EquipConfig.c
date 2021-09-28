@@ -41,9 +41,5 @@ void Manual_Config(void)
 
     Man_Time = 1;
 
-    Man_Volume = 0;
-
-    Manual_Timer = 1;
-    Manual_Volume = 0;
-    Manual_Instant_Heat = 0;
+    Man_Volume = 4;
 }

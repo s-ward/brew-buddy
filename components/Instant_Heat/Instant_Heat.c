@@ -15,10 +15,13 @@ void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
 {
     Wait = 1;
 
-    if (External_Connection && (BrewState != Manual_State))
-        PumpRelay(Off);
-    else
-        PumpRelay(On);
+    if (BrewState != Manual_State)
+    {
+        if (External_Connection)
+            PumpRelay(Off);
+        else
+            PumpRelay(On);
+    }
 
     //Initilise Heater for manual mode
     HeaterRelay(On);
@@ -53,6 +56,7 @@ void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
             printf("*%s*\n", Auto_Process);
 
             //Call volume function
+
             while (!Volume_Reached)
             {
                 vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
@@ -60,8 +64,19 @@ void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
             }
             Wait = 0;
         }
+        else
+        {
+            strcpy (Auto_Process,"Maintaining instant heat temp");
+            printf("*%s*\n", Auto_Process);
+
+            while (ManState == Manual_Instant_Heat)    //Indefinite instant heat 
+            {
+                vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
+            }
+            Wait = 0;
+        }
         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-    }
+    }   
 
     FlowPID_En = 0;
     PWM_En = 0;
@@ -85,6 +100,10 @@ void FlowPID(int Targ_Temp)
     {
         if (!Paused)
         {
+            if (BrewState == Manual_State)
+            {
+                valve_tap_in.internal = Man_Valve1;
+            }
             if (PID_Flow != Current_Flow1)
             {
                 Current_Flow1 = PID_Flow;

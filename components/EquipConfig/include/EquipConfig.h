@@ -35,6 +35,5 @@ int Man_Time;
 
 int Man_Volume;
 
-int Manual_Timer, Manual_Volume, Manual_Instant_Heat;
 
 

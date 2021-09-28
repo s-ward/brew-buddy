@@ -5,6 +5,8 @@
 
 #include "servo.h"
 
+#include "BrewStates.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -46,6 +48,13 @@ void valve_set_position (int angle, servo_params* servo) {
 
     if (!servo->internal)  //If valve set to external
         angle = 270 - angle;    // Flow control setting for externally set valve
+
+    if (servo->gpio_num == VALVE_TAP_IN)
+        Valve1_State = servo->internal;
+    if (servo->gpio_num == VALVE_SPARGE_IN)
+        Valve2_State = servo->internal;
+    if (servo->gpio_num == VALVE_SPARGE_OUT)
+        Valve3_State = servo->internal;
 
     printf("%s - Angle: %d\n", servo->name, angle);
 
