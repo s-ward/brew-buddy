@@ -14,7 +14,7 @@ void Transfer (void);
 void Pause (void);
 void Cancel (void);
 
-enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
+enum BrewStates {Passive_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
                   Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
 char BrewState;
 

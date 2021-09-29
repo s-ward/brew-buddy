@@ -23,6 +23,8 @@ void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
             PumpRelay(On);
     }
 
+    vTaskDelay(100 / portTICK_PERIOD_MS); //Sometimes heater would not initilise due to Pump != On yet, delay solves issue
+
     //Initilise Heater for manual mode
     HeaterRelay(On);
     PWM_En = 1;

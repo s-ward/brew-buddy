@@ -6,14 +6,7 @@ void ActiveRecipe (void)
 {
     //Loads active recipe data into global variables
     //Manual entry at the moment
-    //will eventually refrence register where default config is stored
-    
-
-    //Passive Variables
-    //These may be required to pass to the webserver? otherwise can be removed 
-
-    //Recipe Name
-    strcpy (Recipe_Name, "Test recipe");
+    //will eventually refrence register where brew is stored
 
     //Control Variables, required for recipe
     
@@ -45,7 +38,6 @@ void ActiveRecipe (void)
     Mash_Temp_4 = 0;
     Mash_Temp_5 = 0;
 
-
     //*********SPARGE*********
 
     //Liters
@@ -65,9 +57,6 @@ void ActiveRecipe (void)
     strcpy (Adjunct_Name_3,"Hallertau 10g");
     strcpy (Adjunct_Name_4,"Irish Moss 5g");
     strcpy (Adjunct_Name_5,"Kent Golding 30g");
-    strcpy (Adjunct_Name_6,"");
-    strcpy (Adjunct_Name_7,"");
-    strcpy (Adjunct_Name_8,"");
 
     //minutes
     Adjunct_Time_1 = 3;    //@x minutes remaining in boil
@@ -75,19 +64,12 @@ void ActiveRecipe (void)
     Adjunct_Time_3 = 1;
     Adjunct_Time_4 = 1;
     Adjunct_Time_5 = 0;
-    Adjunct_Time_6 = 0;
-    Adjunct_Time_7 = 0;
-    Adjunct_Time_8 = 0;
+
 
     //*********COOLING*********
 
     //Deg C
     Cooling_Temp = 25;
-
-
-    //Notes
-    strcpy (Notes,"Big loooong string o' notes");
-
 
     //*********Calculation Variables*********
     Total_Brew_Volume = (Mash_Water_Volume + Sparge_Water_Volume - Grain_Weight);

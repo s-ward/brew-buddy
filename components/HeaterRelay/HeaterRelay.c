@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "HeaterRelay.h"
+#include "BrewStates.h"
 #include "driver/gpio.h"
 #include "PumpRelay.h"
 #include "EquipConfig.h"
@@ -17,9 +18,13 @@ void HeaterRelay (int Heater_Ctrl)
         Heater_Off;
         Heater_Is_On = 0;
     }
-    else if (Pump_Is_On || External_Safe || !Heating_Method) //Safety check, if pump is on, externally connected water flowing or boiler config
+    else if (Pump_Is_On || External_Safe || !Heating_Method || (BrewState == Manual_State)) //Safety check, if pump is on, externally connected water flowing or boiler config
     {
         Heater_On;
         Heater_Is_On = 1;
     }
 }
+
+
+//Check for flow rate == 0 for 5 seconds
+//Heater Off

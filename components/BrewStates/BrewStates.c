@@ -28,11 +28,6 @@ TaskHandle_t Transfer_Task = NULL;
 TaskHandle_t Pause_Task = NULL;
 TaskHandle_t Instant_Heat_Task = NULL;
 
-//State machine setup variables
-// enum BrewStates {Passive_State, Test_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
-//                   Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
-// char BrewState;
-
 //User input commands
 int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;  // set to inerrupts?
 
@@ -308,9 +303,9 @@ void Passive (void)
       }
       
       //Manual_In = 1;
-      Brew_In = 1;   //test variable
+      //Brew_In = 1;   //test variable
       Cold_Rinse = 1;
-      //Clean_In = 1;
+      Clean_In = 1;
 
       if (WPS_In)
          BrewState = WPS_State;
@@ -321,7 +316,8 @@ void Passive (void)
       else if (Brew_In)
          BrewState = Safety_Check_State;     
    }   
-
+   
+   vTaskDelay(100 / portTICK_PERIOD_MS);
    Step_Active = 0;
    vTaskDelete(NULL);
 }
@@ -395,7 +391,7 @@ void Clean (void)
       strcpy (Step,"Cold Rinse");
       printf("-----%s: %s-----\n", Stage, Step);
       
-      Sanitize.Valve1 = 0;          //Re-define valve1
+      Sanitize.Valve1 = 1;          //Re-define valve1
       Sanitize.Target_Time = 1;     //Re-define target time
    }
 
@@ -404,9 +400,9 @@ void Clean (void)
       strcpy (Step,"Full Clean");
       printf("-----%s: %s-----\n", Stage, Step);
 
-      Sanitize.Valve1 = 0;          //Re-define valve1
+      Sanitize.Valve1 = 1;          //Re-define valve1
       Sanitize.Target_Temp = 80;    //Hot enough to pasterize
-      Sanitize.Target_Time = 15;     //Re-define target time
+      Sanitize.Target_Time = 11;     //Re-define target time
       Sanitize.Heater = 1;
    }
 
@@ -423,20 +419,26 @@ void Clean (void)
    {
       if ((Absolute_Seconds_Remaining == 600) && (Main_Config == 1)) //10 min remaining
       {
-         //Valves set to mash tun
-          printf("Valves move\n");
-          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+         valve_sparge_in.internal = 1; //Internal / external toggle
+         valve_set_position(100, &valve_sparge_in); //Position defined by flow rate setting
+         valve_sparge_out.internal = 1; //Internal / external toggle
+         valve_set_position(100, &valve_sparge_out); //Position defined by flow rate setting
+
+         printf("Valves move\n");
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
       }
       vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    printf("Ensure return hose is leading to a drain\n");
    Pause_In = 1; //Wait for user confirmation
-   vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
-   vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
-   //need to delay twice for some reason or pump wont turn on
+   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
+ 
+   //need to delay twice for some reason or task keeps running after pause....
    PumpRelay(On);
   
+   printf("After Resume\n");
+
    vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for .1 second
 
    // while (FlowRate != 0) //wait for tranfer to complete
@@ -456,17 +458,17 @@ void Manual (void)
 
    Man_EN = 1;    //Manual settings that are always able to be updated by user
    xTaskCreate(
-      Manual_User_Input,                //function name
-      "Manual_User_Input",      //function description
+      Manual_User_Input,         //function name
+      "Manual_User_Input",       //function description
       2048,                      //stack size
       NULL,                      //task parameters
       1,                         //task priority
-      NULL                      //task handle
+      NULL                       //task handle
    );
    
    strcpy (Stage,"Manual");
    
-   ManState = Manual_Instant_Heat; // Test
+   ManState = Full_Man; // Test
 
    while (BrewState == Manual_State)
    {
@@ -483,9 +485,7 @@ void Manual (void)
             }
             break;
          }
-         
-         
-         
+              
          case Manual_Timer:
          {
             strcpy (Step,"Timer");
@@ -518,7 +518,7 @@ void Manual (void)
 
                vTaskDelayUntil(&xLastWakeTime, 100); //pause task for exactly 1 second
 
-               Timer ++;           //Increment timer   
+               Timer ++;          //Increment timer   
             }
 
             Timer = 0;
@@ -603,7 +603,7 @@ void Manual (void)
 
 void Manual_User_Input (void) //continuosly update controls with user input
 {
-   Manual_Config(); // apply user setting updates
+   Manual_Config(); // apply user setting updates. Shift to inside while loop for final build
 
    while (Man_EN)
    {
@@ -1042,12 +1042,6 @@ void Boil (void)
             printf("Please add %s\n", Adjunct_Name_4);
          if ((Absolute_Seconds_Remaining == Adjunct_Time_5*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_5 == 0)&&(strcmp (Adjunct_Name_5,""))))
             printf("Please add %s\n", Adjunct_Name_5);
-         if ((Absolute_Seconds_Remaining == Adjunct_Time_6*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_6 == 0)&&(strcmp (Adjunct_Name_6,""))))
-            printf("Please add %s\n", Adjunct_Name_6);
-         if ((Absolute_Seconds_Remaining == Adjunct_Time_7*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_7 == 0)&&(strcmp (Adjunct_Name_7,""))))
-            printf("Please add %s\n", Adjunct_Name_7);
-         if ((Absolute_Seconds_Remaining == Adjunct_Time_8*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_8 == 0)&&(strcmp (Adjunct_Name_8,""))))
-            printf("Please add %s\n", Adjunct_Name_8);
 
          if ((Absolute_Seconds_Remaining == 300)&& Cooling_Rqd) //5 minutes remaining, Prompts and pause to connect cooler
              printf("Sterilize cooler in boiling wort if desired \n");
@@ -1202,7 +1196,7 @@ void Pause(void)
    Paused = 1;
    HeaterRelay(Off);
    PumpRelay(Off);
-
+   
    //suspend running tasks
    if (Auto_Task != NULL)
       vTaskSuspend(Auto_Task);

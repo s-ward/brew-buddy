@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "PumpRelay.h"
 #include "HeaterRelay.h"
+#include "BrewStates.h"
 #include "driver/gpio.h"
 
 #define Pump_Relay_Pin 26
@@ -15,7 +16,8 @@ void PumpRelay (int Pump_Ctrl)
     {
         Pump_Off;
         Pump_Is_On = 0;
-        HeaterRelay(Pump_Ctrl);
+        if (BrewState != Manual_State)
+            HeaterRelay(Pump_Ctrl);
     }
     else
     {

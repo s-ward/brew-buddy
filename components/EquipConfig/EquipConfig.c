@@ -23,23 +23,23 @@ void EquipConfig (void)
 
 void Manual_Config(void)
 {
-    Man_Valve1 = 1;
+    Man_Valve1 = 1;     //Valve 1 position 1 internal, 0 external
     Man_Valve2 = 1;
     Man_Valve3 = 1;
 
-    Man_Valve1_Flow = 100;
+    Man_Valve1_Flow = 10;   //Valve 1 flow control 0 - 100%
     Man_Valve2_Flow = 70;
     Man_Valve3_Flow = 30;
 
-    Man_Pump = 1;
+    Man_Pump = 0;       //1 0n 0 off
 
-    Man_Heater = 1;
-    Man_Heater_Power = 70;
+    Man_Heater = 1;         //1 on 0 off
+    Man_Heater_Power = 70;  // 0 - 100%
 
-    Man_Sensor = 1;
-    Man_Temp = 2;
+    Man_Sensor = 1;     //Temp sensor select 1-3
+    Man_Temp = 2;       //Target temp 0 -100
 
-    Man_Time = 1;
+    Man_Time = 1;       //Target time minutes
 
-    Man_Volume = 4;
+    Man_Volume = 1;     //Target volume liters
 }
