@@ -55,6 +55,9 @@ char Stage[20];
 char Step[30];
 char Auto_Process[30];
 
+char User_Int_Required[200];
+int User_Int_Rqd;
+
 int Step_Active;
 
 //Variables for calculations

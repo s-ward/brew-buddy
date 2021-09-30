@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include "ActiveRecipe.h"
+#include "Auto_Run.h"
+#include "Auto_Run_Setup.h"
+#include "Instant_Heat.h"
 #include "string.h"
 
 void ActiveRecipe (void)
@@ -22,7 +25,7 @@ void ActiveRecipe (void)
     Strike_Temp = 75;
 
     //0-100% of valve open
-    Mash_Flow_Rate = 99;
+    Mash_Flow_Rate = 9;
 
     //minutes
     Mash_Time_1 = 1;
@@ -73,5 +76,6 @@ void ActiveRecipe (void)
 
     //*********Calculation Variables*********
     Total_Brew_Volume = (Mash_Water_Volume + Sparge_Water_Volume - Grain_Weight);
- 
+
+    Auto_Run_Setup(); //Assign equip config and recipe data to auto_run struct
 }

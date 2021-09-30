@@ -20,6 +20,7 @@ TaskHandle_t Passive_Task = NULL;
 TaskHandle_t WPS_Task = NULL;
 TaskHandle_t Cleaning_Task = NULL;
 TaskHandle_t Manual_Task = NULL;
+TaskHandle_t Safety_Task = NULL;
 TaskHandle_t Mash_Task = NULL;
 TaskHandle_t Sparge_Task = NULL;
 TaskHandle_t Boil_Task = NULL;
@@ -121,8 +122,21 @@ void Brew_States (void)
          }
 
          case Safety_Check_State:
-            Safety_Check();
+         {
+            if (!Step_Active)
+            {
+               Step_Active = 1;
+               xTaskCreate(
+                  Safety_Check,                  //function name
+                  "Safety_Check",            //function description
+                  2048,                      //stack size
+                  NULL,                  //task parameters
+                  1,                         //task priority
+                  &Safety_Task                  //task handle
+               );
+            }
             break;
+         }
 
          case Mash_State:
          {
@@ -268,9 +282,14 @@ void Passive (void)
    Temp_Reached = 0;
    Volume_Reached = 0;
    Timer = 0;
+   Absolute_Seconds_Remaining = 0;
+   Minutes_Remaining = 0;
+   Seconds_Remaining = 0;
    PWM_En = 0;
    Stage_complete = 0;
-
+   User_Int_Rqd = 0;
+   strcpy (Auto_Process,"");
+   strcpy (User_Int_Required,"");
 
    strcpy (Stage,"Passive");
    strcpy (Step,"Waiting for user input");
@@ -279,14 +298,16 @@ void Passive (void)
    while(BrewState == Passive_State)
    {
       EquipConfig();       //will update while in passive if user changes config / recipe
-      ActiveRecipe();
-      Auto_Run_Setup();
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      ActiveRecipe();      // Will move to Sams function call
+      Auto_Run_Setup();    //Assign equip config to auto_run struct for use with clean and manual modes
+      
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds to assign vars
 
       //Zeroise all components
       if (!Safe)
       {
          printf("Zeroising\n");
+         strcpy (Auto_Process,"Zeroising");
          xTaskCreate(   
             Auto_Run,                  //function name
             "Auto Control",            //function description
@@ -303,9 +324,9 @@ void Passive (void)
       }
       
       //Manual_In = 1;
-      //Brew_In = 1;   //test variable
+      Brew_In = 1;   //test variable
       Cold_Rinse = 1;
-      Clean_In = 1;
+      //Clean_In = 1;
 
       if (WPS_In)
          BrewState = WPS_State;
@@ -345,6 +366,8 @@ void Clean (void)
    if (!Cold_Rinse)  //Full clean
    {
       printf("Ensure mash tun or cooler is connected to valves 2 & 3\n");
+      strcpy (User_Int_Required,"Ensure mash tun or cooler is connected to valves 2 & 3");
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1;  //Wait for user confirmation
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 second
    }
@@ -355,10 +378,17 @@ void Clean (void)
       printf("-----%s: %s-----\n", Stage, Step);
 
       if (External_Connection)
+      {
          printf("Ensure hose is connected to extenal source and tap is turned on\n");
+         strcpy (User_Int_Required,"Ensure hose is connected to extenal source and tap is turned on");
+      }
       else
+      {
+         strcpy (User_Int_Required,"Ensure external tank is filled with cleaning water and connect hose to tank");
          printf("Ensure external tank is filled with cleaning water and connect hose to tank\n");
+      }
 
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1;  //Wait for user confirmation
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 second
       
@@ -375,20 +405,22 @@ void Clean (void)
       );
       while (!Stage_complete)    //Wait for kettle to fill with target volume
       {
-         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
       }
    }
    else
    {
       printf("Ensure kettle tank is filled with cleaning water\n");
+      strcpy (User_Int_Required,"Ensure kettle tank is filled with cleaning water");
 
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1;  //Wait for user confirmation
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 second
    }
 
    if (Cold_Rinse)
    {
-      strcpy (Step,"Cold Rinse");
+      strcpy (Step,"Cold Rinse");      //1 min cold rinse through main loop
       printf("-----%s: %s-----\n", Stage, Step);
       
       Sanitize.Valve1 = 1;          //Re-define valve1
@@ -397,12 +429,12 @@ void Clean (void)
 
    else  //Full clean
    {
-      strcpy (Step,"Full Clean");
+      strcpy (Step,"Full Clean");         //15 mins at 80 deg C, cycle through mash tun as well
       printf("-----%s: %s-----\n", Stage, Step);
 
       Sanitize.Valve1 = 1;          //Re-define valve1
       Sanitize.Target_Temp = 80;    //Hot enough to pasterize
-      Sanitize.Target_Time = 11;     //Re-define target time
+      Sanitize.Target_Time = 15;     //Re-define target time
       Sanitize.Heater = 1;
    }
 
@@ -419,27 +451,25 @@ void Clean (void)
    {
       if ((Absolute_Seconds_Remaining == 600) && (Main_Config == 1)) //10 min remaining
       {
-         valve_sparge_in.internal = 1; //Internal / external toggle
+         valve_sparge_in.internal = 0; //Internal / external toggle
          valve_set_position(100, &valve_sparge_in); //Position defined by flow rate setting
-         valve_sparge_out.internal = 1; //Internal / external toggle
+         valve_sparge_out.internal = 0; //Internal / external toggle
          valve_set_position(100, &valve_sparge_out); //Position defined by flow rate setting
-
-         printf("Valves move\n");
          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
       }
       vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    printf("Ensure return hose is leading to a drain\n");
+   strcpy (User_Int_Required,"Ensure return hose is leading to a drain");
+
+   User_Int_Rqd = 1; //Flag that interaction is required
    Pause_In = 1; //Wait for user confirmation
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
  
-   //need to delay twice for some reason or task keeps running after pause....
    PumpRelay(On);
   
-   printf("After Resume\n");
-
-   vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for .1 second
+   vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for 10 seconds test
 
    // while (FlowRate != 0) //wait for tranfer to complete
    // {
@@ -498,7 +528,7 @@ void Manual (void)
 
                while (!Temp_Reached) //Wait for temp to be reached
                {
-                  vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+                  vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
                }
             }
 
@@ -545,7 +575,7 @@ void Manual (void)
 
             while (!Volume_Reached)
             {
-                  vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+                  vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
                   Volume_Reached=1;  //test
             }
 
@@ -699,8 +729,8 @@ void Safety_Check (void)
    strcpy (Step,"");
    printf("-----%s: %s-----\n", Stage, Step);
 
-   printf("Grain Weight: %f\n", Grain_Weight);
-   printf("Kettle Recipe Volume: %f\n", Total_Brew_Volume);
+   printf("Grain Weight: %.2fKG\n", Grain_Weight);
+   printf("Kettle Recipe Volume: %.1fL\n", Total_Brew_Volume);
   
    Kettle_Safe = (Kettle_Volume - Safety_Margin);
    Mash_Displacement = (Grain_Weight + Mash_Water_Volume);
@@ -727,14 +757,26 @@ void Safety_Check (void)
    {
       if (!Kettle_Check)
       {
-         printf("***WARNING*** Recipe exceeds kettle volume by %f, L\n", (Total_Brew_Volume-Kettle_Safe));
+         sprintf(User_Int_Required, "***WARNING*** Recipe exceeds kettle volume by: %.1fL", (Total_Brew_Volume-Kettle_Safe));
+         printf("%s\n", User_Int_Required);
+         User_Int_Rqd = 1; //Flag that interaction is required
+         Pause_In = 1;
+         vTaskDelay(1000 / portTICK_PERIOD_MS);
       }
       if (!Mash_Check)
       {
-         printf("***WARNING*** Recipe exceeds mash volume by %f, L\n", Mash_Exceeded);
+         sprintf(User_Int_Required, "***WARNING*** Recipe exceeds mash volume by: %.1fL", Mash_Exceeded);
+         printf("%s\n", User_Int_Required);
+         User_Int_Rqd = 1; //Flag that interaction is required
+         Pause_In = 1;
+         vTaskDelay(1000 / portTICK_PERIOD_MS);
       }
       BrewState = Passive_State;
    }
+
+   Step_Active = 0;
+   Safety_Task = NULL;
+   vTaskDelete(NULL);
 }
 
 
@@ -751,10 +793,17 @@ void Mash (void)
       strcpy (Step,"Auto-fill kettle");
       printf("-----%s: %s-----\n", Stage, Step);
       if (External_Connection)
+      { 
          printf("Ensure hose is connected to extenal source and tap is turned on\n");
+         strcpy (User_Int_Required,"Ensure hose is connected to extenal source and tap is turned on");
+      }
       else
+      {
          printf("Ensure external tank is filled with brewing water and connect input hose to tank\n");
-      
+         strcpy (User_Int_Required,"Ensure external tank is filled with brewing water and connect input hose to tank");
+      }
+
+      User_Int_Rqd = 1; //Flag that interaction is required         
       Pause_In = 1;
       vTaskDelay(1000 / portTICK_PERIOD_MS);
 
@@ -778,13 +827,15 @@ void Mash (void)
 
       while (!Stage_complete)
       {
-         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
       }
 
    }
    else  //manual fill
    {
       printf("Ensure kettle is filled with the desired amount of strike water\n");
+      strcpy (User_Int_Required,"Ensure kettle is filled with the desired amount of strike water");
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1;
       vTaskDelay(1000 / portTICK_PERIOD_MS);
    }
@@ -820,7 +871,7 @@ void Mash (void)
    }
    while (!Stage_complete)
    {
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    strcpy (Step,"Step 1");
@@ -829,8 +880,10 @@ void Mash (void)
    if (Main_Config != 1)   //BIAB
    {
       printf("Please insert BIAB into kettle and fill with grain\n");
+      strcpy (User_Int_Required,"Please insert BIAB into kettle and fill with grain");
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1; //****Wait for user to confirm bag is in place
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    Stage_complete = 0;
@@ -844,7 +897,7 @@ void Mash (void)
    );
    while (!Stage_complete)
    {
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    strcpy (Step,"Step 2");
@@ -861,7 +914,7 @@ void Mash (void)
    );
    while (!Stage_complete)
    {
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    strcpy (Step,"Step 3");
@@ -878,7 +931,7 @@ void Mash (void)
    );
    while (!Stage_complete)
    {
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    strcpy (Step,"Step 4");
@@ -895,7 +948,7 @@ void Mash (void)
    );
    while (!Stage_complete)
    {
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    strcpy (Step,"Step 5");
@@ -912,7 +965,7 @@ void Mash (void)
    );
    while (!Stage_complete)
    {
-      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
    }
 
    HeaterRelay(Off);
@@ -940,24 +993,47 @@ void Sparge (void)
       if (!Heating_Method) //Internal boiler
       {
          printf("Please confirm external vessel is filled with pre-heated sparge water\n");
+         strcpy (User_Int_Required,"Please confirm external vessel is filled with pre-heated sparge water");
+         
          if (Main_Config == 2)
-            printf("Please position BIAB and return hose securely above kettle\n");
+         {
+            printf("Please confirm external vessel is filled with pre-heated sparge water. Position BIAB and return hose securely above kettle\n");
+            strcpy (User_Int_Required,"Please confirm external vessel is filled with pre-heated sparge water. Position BIAB and return hose securely above kettle");
+         }
 
+         User_Int_Rqd = 1; //Flag that interaction is required
          Pause_In = 1;  //wait for user confirmation
          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
 
          PumpRelay(On);
          //volume transfer function of pre-heated sparge water
       }
-      else  //Instant heat sparge
-      {  
-         if (Main_Config == 2)
-            printf("Please position BIAB and return hose securely above kettle\n");
-         if (External_Connection)
-            printf("Please confirm external water source is connected and turned on\n");
-         else
-            printf("Please confirm external vessel is filled with sparge water\n");
 
+      else  //Instant heat sparge 
+      {  
+         if ((Main_Config == 2)&&(External_Connection))
+         {
+            printf("Please position BIAB and return hose securely above kettle. Confirm external water source is connected and turned on\n");
+            strcpy (User_Int_Required,"Please position BIAB and return hose securely above kettle. Confirm external water source is connected and turned on");
+         }
+         else if ((Main_Config == 2)&&(!External_Connection))
+         {
+            printf("Please position BIAB and return hose securely above kettle. Confirm external vessel is filled with sparge water\n");
+            strcpy (User_Int_Required,"Please position BIAB and return hose securely above kettle. Confirm external vessel is filled with sparge water");
+         }
+         
+         else if (External_Connection)
+         {
+            printf("Please confirm external water source is connected and turned on\n");
+            strcpy (User_Int_Required,"Please confirm external water source is connected and turned on");
+         }
+         else
+         {
+            printf("Please confirm external vessel is filled with sparge water\n");
+            strcpy (User_Int_Required,"Please confirm external vessel is filled with sparge water");
+         }
+
+         User_Int_Rqd = 1; //Flag that interaction is required
          Pause_In = 1;
          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 seconds
 
@@ -982,6 +1058,8 @@ void Sparge (void)
       if (Main_Config == 2)
       {
          printf("Please place return hose securely in kettle\n");
+         strcpy (User_Int_Required,"Please place return hose securely in kettle");
+         User_Int_Rqd = 1; //Flag that interaction is required
          Pause_In = 1;
          vTaskDelay(1000 / portTICK_PERIOD_MS); //Wait for user input
       }
@@ -1014,6 +1092,8 @@ void Boil (void)
    if (Main_Config == 3)   //BIAB
    {
       printf("Please remove BIAB from kettle\n");
+      strcpy (User_Int_Required,"Please remove BIAB from kettle");
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1;  //wait for user confirmation
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    }
@@ -1033,18 +1113,35 @@ void Boil (void)
       if (Count_Update)
       {   
          if ((Absolute_Seconds_Remaining == Adjunct_Time_1*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_1 == 0)&&(strcmp (Adjunct_Name_1,""))))
+         {
             printf("Please add %s\n", Adjunct_Name_1);
+            strcpy (User_Int_Required,"");
+         }
          if ((Absolute_Seconds_Remaining == Adjunct_Time_2*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_2 == 0)&&(strcmp (Adjunct_Name_2,""))))
+         {   
             printf("Please add %s\n", Adjunct_Name_2);
+            strcpy (User_Int_Required,"");
+         }
          if ((Absolute_Seconds_Remaining == Adjunct_Time_3*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_3 == 0)&&(strcmp (Adjunct_Name_3,""))))
+         {
             printf("Please add %s\n", Adjunct_Name_3);
+            strcpy (User_Int_Required,"");
+         }
          if ((Absolute_Seconds_Remaining == Adjunct_Time_4*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_4 == 0)&&(strcmp (Adjunct_Name_4,""))))
+         {
             printf("Please add %s\n", Adjunct_Name_4);
+            strcpy (User_Int_Required,"");
+         }
          if ((Absolute_Seconds_Remaining == Adjunct_Time_5*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_5 == 0)&&(strcmp (Adjunct_Name_5,""))))
+         {
             printf("Please add %s\n", Adjunct_Name_5);
-
-         if ((Absolute_Seconds_Remaining == 300)&& Cooling_Rqd) //5 minutes remaining, Prompts and pause to connect cooler
-             printf("Sterilize cooler in boiling wort if desired \n");
+            strcpy (User_Int_Required,"");
+         }
+         if ((Absolute_Seconds_Remaining == 300)&& Cooling_Rqd) //5 minutes remaining, Prompts user to sterilize cooler
+         {
+            printf("Sterilize cooler in boiling wort if desired\n");
+            strcpy (User_Int_Required,"Sterilize cooler in boiling wort if desired");
+         }
 
          Count_Update=0;    
       }
@@ -1071,16 +1168,35 @@ void Cooling (void)
    if (Cooling_Rqd)
    {
       if (Main_Config == 1)
+      {
          printf("Please disconnect mash tun and connect cooler\n");
+         strcpy (User_Int_Required,"Please disconnect mash tun and connect cooler");
+      }
       else if (Cooling_Method)   //BIAB and Pumped wort
+      {
          printf("Please connect cooler to kettle return line\n");
+         strcpy (User_Int_Required,"Please connect cooler to kettle return line");
+      }
       else    ///BIAB pumped water
+      {
          printf("Please connect cooler to external source input\n");
-      if (!Cooling_Method)    //Pumped water
-         printf("Please immerse cooler in kettle, ensure kettle return line leads to a drain\n");
-      
+         strcpy (User_Int_Required,"Please connect cooler to external source input");
+      }
+
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1;  //Wait for user confirmation
       vTaskDelay(1000 / portTICK_PERIOD_MS); //executes pause before task create
+
+      if (!Cooling_Method)    //Pumped water
+      {
+         printf("Please immerse cooler in kettle, ensure kettle return line leads to a drain\n");
+         strcpy (User_Int_Required,"Please immerse cooler in kettle, ensure kettle return line leads to a drain");
+      }
+
+      User_Int_Rqd = 1; //Flag that interaction is required
+      Pause_In = 1;  //Wait for user confirmation
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //executes pause before task create
+      
 
       Stage_complete = 0;
       xTaskCreate(
@@ -1094,7 +1210,7 @@ void Cooling (void)
       
       while (!Stage_complete)
       {   
-         vTaskDelay(1000 / portTICK_PERIOD_MS); //1 sec 
+         vTaskDelay(100 / portTICK_PERIOD_MS); //.1 sec 
       }
       
       while (Cool.Target_Sensor != Cooling_Temp)   //Wait for target temp
@@ -1104,19 +1220,26 @@ void Cooling (void)
       }
       
    }
-   //Check for pumped Water and transfer, if true carry our sanitize function
+   //Check for pumped Water and transfer, if true carry out sanitize function
    if (((Cooling_Rqd)&&!Cooling_Method)&&Transfer_Method)
    {
       strcpy (Step,"Sanitizing lines");
       printf("-----%s: %s-----\n", Stage, Step);
 
-      if (Main_Config !=1)
+      if (Main_Config !=1) 
+      {
          printf("Please remove cooler\n");
-      printf("Fill external vessel with 5L of sanitizer fluid\n");
-      printf("Place external source and kettle retun hoses into the sanitiser fluid\n");
-      
+         strcpy (User_Int_Required,"Please remove cooler");
+
+         User_Int_Rqd = 1; //Flag that interaction is required
+         Pause_In = 1;  // Wait for user input
+         vTaskDelay(1000 / portTICK_PERIOD_MS); //execute pause
+      }
+      printf("Fill external vessel with 5L of sanitizer fluid. Place external source and kettle retun hoses into the sanitiser fluid\n");
+      strcpy (User_Int_Required,"Fill external vessel with 5L of sanitizer fluid. Place external source and kettle retun hoses into the sanitiser fluid");
+
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1;  // Wait for user input
-      
       vTaskDelay(1000 / portTICK_PERIOD_MS); //execute pause
       
       Stage_complete = 0;
@@ -1131,7 +1254,7 @@ void Cooling (void)
 
       while (!Stage_complete)
       {   
-         vTaskDelay(1000 / portTICK_PERIOD_MS); //1 sec 
+         vTaskDelay(100 / portTICK_PERIOD_MS); //1 sec 
       }
    }
 
@@ -1151,7 +1274,9 @@ void Transfer (void)
    if (Transfer_Method)
    {
       printf("Please configure kettle return hose for transfer\n");
+      strcpy (User_Int_Required,"Please configure kettle return hose for transfer");
       
+      User_Int_Rqd = 1; //Flag that interaction is required
       Pause_In = 1;
       vTaskDelay(1000 / portTICK_PERIOD_MS); //execute pause
       
@@ -1166,7 +1291,7 @@ void Transfer (void)
       );
       while (!Stage_complete)
       {   
-         vTaskDelay(1000 / portTICK_PERIOD_MS); //1 sec 
+         vTaskDelay(100 / portTICK_PERIOD_MS); //1 sec 
       }
 
       PumpRelay(On);
@@ -1208,6 +1333,8 @@ void Pause(void)
       vTaskSuspend(Cleaning_Task);
    if (Manual_Task != NULL)
       vTaskSuspend(Manual_Task);
+   if (Safety_Task != NULL)
+      vTaskSuspend(Safety_Task);
    if (Mash_Task != NULL)
       vTaskSuspend(Mash_Task);
    if (Sparge_Task != NULL)
@@ -1240,6 +1367,9 @@ void Pause(void)
 
    PumpRelay(Pump_State);     //Reapply relay states
    HeaterRelay(Heater_State);
+
+   strcpy (User_Int_Required,"");
+   User_Int_Rqd = 0;
    
    //resume running tasks
    if (WPS_Task != NULL)
@@ -1248,6 +1378,8 @@ void Pause(void)
       vTaskResume(Cleaning_Task);
    if (Manual_Task != NULL)
       vTaskResume(Manual_Task);
+   if (Safety_Task != NULL)
+      vTaskResume(Safety_Task);
    if (Mash_Task != NULL)
       vTaskResume(Mash_Task);
    if (Sparge_Task != NULL)
@@ -1286,6 +1418,8 @@ void Cancel(void)
       vTaskDelete(Cleaning_Task);
    if (Manual_Task != NULL)
       vTaskDelete(Manual_Task);
+   if (Safety_Task != NULL)
+      vTaskDelete(Safety_Task);
    if (Mash_Task != NULL)
       vTaskDelete(Mash_Task);
    if (Sparge_Task != NULL)

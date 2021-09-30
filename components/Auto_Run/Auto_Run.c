@@ -118,9 +118,13 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     HeaterRelay(Off);
     PumpRelay(Off);
     
+    strcpy (Auto_Process,"");
     Temp_Reached = 0;
     Volume_Reached = 0;
     Timer = 0;
+    Absolute_Seconds_Remaining = 0;
+    Minutes_Remaining = 0;
+    Seconds_Remaining = 0;
     PWM_En = 0;             //Turn off heater PWM
     Stage_complete = 1;
     vTaskDelete(NULL);
