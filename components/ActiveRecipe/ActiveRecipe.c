@@ -28,7 +28,7 @@ void ActiveRecipe (void)
     Mash_Flow_Rate = 9;
 
     //minutes
-    Mash_Time_1 = 1;
+    Mash_Time_1 = 0;
     Mash_Time_2 = 0;
     Mash_Time_3 = 0;
     Mash_Time_4 = 0;
@@ -62,10 +62,10 @@ void ActiveRecipe (void)
     strcpy (Adjunct_Name_5,"Kent Golding 30g");
 
     //minutes
-    Adjunct_Time_1 = 3;    //@x minutes remaining in boil
+    Adjunct_Time_1 = 1;    //@x minutes remaining in boil
     Adjunct_Time_2 = 2;
-    Adjunct_Time_3 = 1;
-    Adjunct_Time_4 = 1;
+    Adjunct_Time_3 = 3;
+    Adjunct_Time_4 = 4;
     Adjunct_Time_5 = 0;
 
 

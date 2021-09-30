@@ -20,8 +20,8 @@ int Man_Valve2;
 int Man_Valve3;
 
 int Man_Valve1_Flow;
-int Man_Valve2_Flow;
-int Man_Valve3_Flow;
+int Man_Valve2_Flow;        //ignore
+int Man_Valve3_Flow;        //ignore
 
 int Man_Pump;
 

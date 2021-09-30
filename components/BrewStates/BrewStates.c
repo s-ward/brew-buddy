@@ -1114,33 +1114,44 @@ void Boil (void)
       {   
          if ((Absolute_Seconds_Remaining == Adjunct_Time_1*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_1 == 0)&&(strcmp (Adjunct_Name_1,""))))
          {
-            printf("Please add %s\n", Adjunct_Name_1);
-            strcpy (User_Int_Required,"");
+            strcpy (User_Adjunct_Reruired, "Please add: ");
+            strcat(User_Adjunct_Reruired, Adjunct_Name_1);
+            printf("%s\n",User_Adjunct_Reruired);
+            User_Adjunct_Rqd = 1;
          }
          if ((Absolute_Seconds_Remaining == Adjunct_Time_2*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_2 == 0)&&(strcmp (Adjunct_Name_2,""))))
          {   
-            printf("Please add %s\n", Adjunct_Name_2);
-            strcpy (User_Int_Required,"");
+            strcpy (User_Adjunct_Reruired, "Please add: ");
+            strcat (User_Adjunct_Reruired, Adjunct_Name_2);
+            printf("%s\n",User_Adjunct_Reruired);
+            User_Adjunct_Rqd = 1;
          }
          if ((Absolute_Seconds_Remaining == Adjunct_Time_3*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_3 == 0)&&(strcmp (Adjunct_Name_3,""))))
          {
-            printf("Please add %s\n", Adjunct_Name_3);
-            strcpy (User_Int_Required,"");
+            strcpy (User_Adjunct_Reruired, "Please add: ");
+            strcat (User_Adjunct_Reruired, Adjunct_Name_3);
+            printf("%s\n",User_Adjunct_Reruired);
+            User_Adjunct_Rqd = 1;
          }
          if ((Absolute_Seconds_Remaining == Adjunct_Time_4*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_4 == 0)&&(strcmp (Adjunct_Name_4,""))))
          {
-            printf("Please add %s\n", Adjunct_Name_4);
-            strcpy (User_Int_Required,"");
+            strcpy (User_Adjunct_Reruired, "Please add: ");
+            strcat (User_Adjunct_Reruired, Adjunct_Name_4);
+            printf("%s\n",User_Adjunct_Reruired);
+            User_Adjunct_Rqd = 1;
          }
          if ((Absolute_Seconds_Remaining == Adjunct_Time_5*60)||((Absolute_Seconds_Remaining == 1)&&(Adjunct_Time_5 == 0)&&(strcmp (Adjunct_Name_5,""))))
          {
-            printf("Please add %s\n", Adjunct_Name_5);
-            strcpy (User_Int_Required,"");
+            strcpy (User_Adjunct_Reruired, "Please add: ");
+            strcat (User_Adjunct_Reruired, Adjunct_Name_5);
+            printf("%s\n",User_Adjunct_Reruired);
+            User_Adjunct_Rqd = 1;
          }
          if ((Absolute_Seconds_Remaining == 300)&& Cooling_Rqd) //5 minutes remaining, Prompts user to sterilize cooler
          {
-            printf("Sterilize cooler in boiling wort if desired\n");
-            strcpy (User_Int_Required,"Sterilize cooler in boiling wort if desired");
+            strcpy (User_Adjunct_Reruired,"Sterilize cooler in boiling wort if desired");
+            printf("%s\n",User_Adjunct_Reruired);
+            User_Adjunct_Rqd = 1;
          }
 
          Count_Update=0;    

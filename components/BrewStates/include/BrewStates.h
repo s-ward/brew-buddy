@@ -15,11 +15,9 @@ void Pause (void);
 void Cancel (void);
 
 enum BrewStates {Passive_State, WPS_State, Clean_State, Manual_State, Safety_Check_State, 
-                  Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State};
-char BrewState;
+                  Mash_State, Sparge_State, Boil_State, Cooling_State, Transfer_State} BrewState;
 
-enum ManStates {Full_Man, Manual_Timer, Manual_Volume, Manual_Instant_Heat};
-char ManState;
+enum ManStates {Full_Man, Manual_Timer, Manual_Volume, Manual_Instant_Heat} ManState;
 
 int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;
 
@@ -57,6 +55,9 @@ char Auto_Process[30];
 
 char User_Int_Required[200];
 int User_Int_Rqd;
+
+char User_Adjunct_Reruired[50];
+int User_Adjunct_Rqd;
 
 int Step_Active;
 
