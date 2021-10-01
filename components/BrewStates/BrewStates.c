@@ -35,21 +35,26 @@ int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;  // set to inerru
 int Kettle_Check;
 int Mash_Check;
 
+
 //Test variable for pause functionality
 int Pause_Button;
+int Mash_High;
 #define TEST_PAUSE_PIN 32
 #define TEST_CANCEL_PIN 33
+#define Float1 35
 
 
 void Brew_States (void)
 {
    gpio_set_direction(TEST_PAUSE_PIN, GPIO_MODE_INPUT);
    gpio_set_direction(TEST_CANCEL_PIN, GPIO_MODE_INPUT);
+   gpio_set_direction(Float1, GPIO_MODE_INPUT);
 
    while(1)
    {
    Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
    Cancel_In = gpio_get_level (TEST_CANCEL_PIN);
+   Mash_High = gpio_get_level (Float1);
 
       switch (BrewState)
       {
@@ -241,6 +246,14 @@ void Brew_States (void)
          );
          vTaskDelay(2000 / portTICK_PERIOD_MS); // only required for manual testing with switch
          Cancel_In = 0;    //reset flag   
+      }
+      
+      if (!Mash_High)   //Safety for mash tun overfill
+      {
+         strcpy (User_Int_Required,"***WARNING*** Mash tun is too full, please check for stuck sparge");
+         User_Int_Rqd = 1; //Flag that interaction is required
+         printf("%s\n", User_Int_Required);
+         Pause_In = 1;
       }
 
       //Pause Pressed

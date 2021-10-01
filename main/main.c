@@ -189,6 +189,7 @@ void app_main(void)
 
     //flow rate
     flowM(); // add flow rate interrupt
+    getFlowRate(1000);
 
 //temp task
 //xTaskCreate(getTempTask, "Temp task", 2048, NULL, 10, NULL );
