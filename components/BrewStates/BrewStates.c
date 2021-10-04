@@ -305,7 +305,7 @@ void Passive (void)
    strcpy (User_Int_Required,"");
 
    strcpy (Stage,"Passive");
-   strcpy (Step,"Waiting for user input");
+   strcpy (Step,"Awaiting user input");
    printf("-----%s: %s-----\n", Stage, Step);
 
    while(BrewState == Passive_State)
@@ -387,7 +387,7 @@ void Clean (void)
 
    if (Auto_Fill)
    {
-      strcpy (Step,"Auto-fill kettle");
+      strcpy (Step,"Auto-fill");
       printf("-----%s: %s-----\n", Stage, Step);
 
       if (External_Connection)
@@ -600,7 +600,7 @@ void Manual (void)
          
          case Manual_Instant_Heat:
          {
-            strcpy (Step,"Instant_Heat");
+            strcpy (Step,"Instant Heat");
             printf("-----%s: %s-----\n", Stage, Step);
 
             while (Sparging.Instant_Temp == 0) //wait for user to input temp
@@ -803,7 +803,7 @@ void Mash (void)
 
    if (Auto_Fill)
    {
-      strcpy (Step,"Auto-fill kettle");
+      strcpy (Step,"Auto-fill");
       printf("-----%s: %s-----\n", Stage, Step);
       if (External_Connection)
       { 
@@ -854,7 +854,7 @@ void Mash (void)
    }
 
 
-   strcpy (Step,"Heating strike water");
+   strcpy (Step,"Strike");
    printf("-----%s: %s-----\n", Stage, Step);
 
    Stage_complete = 0;
@@ -866,15 +866,12 @@ void Mash (void)
       1,                         //task priority
       &Auto_Task                       //task handle
    );
-   if ((Main_Config == 1)&&Heating_Method)   //Full config with RIMS
+   if ((Main_Config == 1)&&Heating_Method)   //Full config with RIMS, testing required to see how well this works
    {
       while (!Temp_Reached) //Wait for temp to be reached
       {
          vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
       }
-
-      strcpy (Step,"Pumping strike water to mash");
-      printf("-----%s: %s-----\n", Stage, Step);
 
    //Move valves to mash tun
       valve_sparge_in.internal = 0;
@@ -1186,7 +1183,7 @@ void Boil (void)
 void Cooling (void)
 {
    strcpy (Stage,"Cooling");
-   strcpy (Step,"Cooling to target temp");
+   strcpy (Step,"");
    printf("-----%s: %s-----\n", Stage, Step);
 
    if (Cooling_Rqd)
@@ -1333,7 +1330,7 @@ void Transfer (void)
 
    vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
    Step_Active = 0;
-   BrewState = 132;        //default test
+   BrewState = Passive_State;      
    Transfer_Task = NULL;
    vTaskDelete(NULL);
 }
