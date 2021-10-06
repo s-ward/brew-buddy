@@ -18,6 +18,7 @@
 #include "cJSON.h"
 
 #include "EquipConfig.h"
+#include "ActiveRecipe.h"
 #include "BrewStates.h"
 
 #include "led.h"
@@ -497,13 +498,13 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
     int cooltemp = cJSON_GetObjectItem(root, "cooltemp")->valueint;
 
     // #include ActiveRecipe
-    // ActiveRecipe (grainweight, mashwatervol, striketemp, mashflowrate,
-    //      mashtime1, mashtime2, mashtime3, mashtime4, mashtime5,
-    //      mashtemp1, mashtemp2, mashtemp3, mashtemp4, mashtemp5,
-    //      spargewatervol, spargetemp, boiltime,
-    //      adjunctname1, adjunctname2, adjunctname3, adjunctname4, adjunctname5,
-    //     adjuncttime1, adjuncttime2, adjuncttime3, adjuncttime4, adjuncttime5,
-    //     cooltemp)
+    ActiveRecipe (grainweight, mashwatervol, striketemp, flowrate,
+        mashtime1, mashtime2, mashtime3, mashtime4, mashtime5,
+        mashtemp1, mashtemp2, mashtemp3, mashtemp4, mashtemp5,
+        spargewatervol, spargetemp, boiltime,
+        adjunctname1, adjunctname2, adjunctname3, adjunctname4, adjunctname5,
+        adjuncttime1, adjuncttime2, adjuncttime3, adjuncttime4, adjuncttime5,
+        cooltemp)
 
     // #include BrewStates.h
     // call to change to brew state

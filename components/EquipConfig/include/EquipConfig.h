@@ -1,4 +1,5 @@
-void EquipConfig(void);
+EquipConfig (int main_config, int kettlevolume, int mashtunvolume, int external_connection, int pumpedtransfer,
+                    char *units, int leadtime, char *heatingmethod, char *coolingmethod, int auto_fill, int safety_margin)
 
 int Main_Config;    //1 = full, 2 = BIAB + Sparge, 3 = BIAB
 int Kettle_Volume; //0-127

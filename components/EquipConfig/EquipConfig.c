@@ -1,24 +1,45 @@
 #include <stdio.h>
 #include "EquipConfig.h"
+#include "string.h"
 
-void EquipConfig (void)
+EquipConfig (int main_config, int kettlevolume, int mashtunvolume, int external_connection, int pumpedtransfer,
+                    char *units, int leadtime, char *heatingmethod, char *coolingmethod, int auto_fill, int safety_margin)
 {
     //Loads config data into global variables
     //Manual entry at the moment
     //will eventually refrence register where default config is stored
 
-    Main_Config = 1;    //1 = full, 2 = BIAB + Sparge, 3 = BIAB
-    Kettle_Volume = 37; //0-127
-    Mash_Tun_Volume = 60; //0-127
-    External_Connection = 0; //0 = tank, 1 = tap
-    Cooling_Rqd = 1;  // 0 = n, 1 = y
-    Cooling_Method = 0; // 0 = pumped water, 1 = pumped wort
-    Transfer_Method = 1; //0 = manual, 1 = pumped
-    Heating_Method = 1; //0 = boiler, 1 = RIMS
+    Main_Config = main_config;    //1 = full, 2 = BIAB + Sparge, 3 = BIAB
+    Kettle_Volume = kettlevolume; //0-127
+    Mash_Tun_Volume = mashtunvolume; //0-127
+    External_Connection = external_connection; //0 = tank, 1 = tap
 
-    Auto_Fill = 1;  //0 = manual, 1 = autofill kettle for mash
+    printf("%d\n",Kettle_Volume);
+
+    if (!strcmp (coolingmethod,"None"))
+        Cooling_Rqd = 0;  // 0 = n, 1 = y
+
+    else if (!strcmp (coolingmethod,"Wort Recirc"))
+    {
+        Cooling_Rqd = 1;  // 0 = n, 1 = y
+        Cooling_Method = 1; // 0 = pumped water, 1 = pumped wort
+    }
+    else if (!strcmp (coolingmethod,"Water Recirc"))
+    {
+        Cooling_Rqd = 1;  // 0 = n, 1 = y
+        Cooling_Method = 0; // 0 = pumped water, 1 = pumped wort
+    }
+
+    Transfer_Method = pumpedtransfer; //0 = manual, 1 = pumped
+
+    if (!strcmp (heatingmethod,"RIMS"))
+        Heating_Method = 1; //0 = boiler, 1 = RIMS
+    else
+        Heating_Method = 0; //0 = boiler, 1 = RIMS
+
+    Auto_Fill = auto_fill;  //0 = manual, 1 = autofill kettle for mash
     
-    Safety_Margin = 5; //xL of safety margin for kettle and mash tun (Hardcoded)
+    Safety_Margin = safety_margin; //xL of safety margin for kettle and mash tun (Hardcoded)
 }
 
 void Manual_Config(int valve1, int valve2, int valve3, int targetflow1, int targetflow2, int targetflow3, int pump, 
