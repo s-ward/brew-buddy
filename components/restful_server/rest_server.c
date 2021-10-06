@@ -17,6 +17,9 @@
 #include "esp_vfs.h"
 #include "cJSON.h"
 
+#include "EquipConfig.h"
+#include "BrewStates.h"
+
 #include "led.h"
 #include "nvsblob.h"
 #include "ds18b20.h"
@@ -223,8 +226,8 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
 
 
     // send params to boonies manual function.
-    // void Manual_Config(int valve1, int valve2, int valve3, int targetflow1, int targetflow2, int targetflow3, int pump, 
-    //     int heater, int heater_power, int temp_sensor, int target_temp, int time, int volume);
+    //void Manual_Config(int valve1, int valve2, int valve3, int targetflow1, int targetflow2, int targetflow3, int pump, 
+    //    int heater, int heater_power, int temp_sensor, int target_temp, int time, int volume);
     
     // mode switch - this way allows for expansion of available modes in future
     // mode None - Manual Mode Full_Man with target_temp = 0
@@ -233,13 +236,13 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
         // do i need to set ManState?? e.g. ManState = Full_Man; do i change this or automatic
         ManState = Full_Man; 
         target_temp = 0;
-        Manual_Config(valve1, valve1, valve3, target_flow, 100, 100, pump, heater, heater_power, 1, target_temp, 0, 0);
+        Manual_Config(valve1, valve2, valve3, target_flow, 100, 100, pump, heater, heater_power, 1, target_temp, 0, 0);
     }
     // mode Temperature Control - Manual Mode Full_Man with target_temp > 0
     else if (strcmp(mode, "Temperature Control") == 0)
     {
         ManState = Full_Man;
-        Manual_Config(valve1, valve1, valve3, target_flow, 100, 100, pump, heater, heater_power, 1, target_temp, 0, 0);
+        Manual_Config(valve1, valve2, valve3, target_flow, 100, 100, pump, heater, heater_power, 1, target_temp, 0, 0);
     };
    
     // go to manual state
@@ -639,9 +642,11 @@ static esp_err_t brew_progress_get_handler(httpd_req_t *req)
     // cJSON_AddNumberToObject(root, "secondsremaining", esp_random() % 60); // change to Seconds_Remaining
     cJSON_AddNumberToObject(root, "secondsremaining", Seconds_Remaining);
     cJSON_AddItemToObject(root, "userintreqmessage", cJSON_CreateString(User_Int_Required));
-    cJSON_AddNumberToObject(root, "userintreq", User_Int_Required_Int);
+    //cJSON_AddNumberToObject(root, "userintreq", User_Int_Required_Int);
+    cJSON_AddNumberToObject(root, "userintreq", User_Int_Rqd);
     cJSON_AddItemToObject(root, "adjunctreqmessage", cJSON_CreateString(User_Adjunct_Required));
-    cJSON_AddNumberToObject(root, "adjunctreq", User_Adjunct_Required_Int);
+    //cJSON_AddNumberToObject(root, "adjunctreq", User_Adjunct_Required_Int);
+    cJSON_AddNumberToObject(root, "adjunctreq", User_Adjunct_Rqd);
 
     const char *sys_info = cJSON_Print(root);
     httpd_resp_sendstr(req, sys_info);

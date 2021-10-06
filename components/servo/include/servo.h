@@ -21,6 +21,7 @@ typedef struct {
     int gpio_num;
     mcpwm_generator_t gen; 
     char name[20];
+    int internal;
 
 } servo_params;
 
@@ -39,43 +40,5 @@ void servo_init(void);
 //void update_servo_params(servo_params* sp, int gp);
 void update_servo_params();
 void init_servo_params();
-
-
-
-
-// #define idle_valve 0 //valve remains in current positon??? Needed?
-//define open_valve 1 //open valve
-//#define close_valve 2 //close valve
-
-
-
-
-
-// GPIO pin constants
-//static uint32_t open_valve = SERVO_MAX_PULSEWIDTH;
-//static uint32_t close_valve = SERVO_MIN_PULSEWIDTH;
-
-/* // Read state from 
-int control_valve; 
-
-// Read valve state
-int valve_state;
-
-int angle_TI_valve, angle_SI_valve, angle_SO_valve; //angle of valves
-int PWM_TI ,PWM_SI ,PWM_SO; //PWM Values
-uint32_t count; 
-
-void open_valve();
-
-void close_valve();
-
-void mcpwm_gpio_initialize();
-
-uint32_t servo_per_degree_init(uint32_t degree_of_rotation);
-
-void mcpwm_servo_control(int angle_TI_valve, int angle_SI_valve, int angle_SO_valve); */
-
-
-
 
 #endif

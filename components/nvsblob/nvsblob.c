@@ -4,10 +4,12 @@
 #include "nvs.h"
 #include "driver/gpio.h"
 #include <string.h>
+#include "BrewStates.h"
+#include "EquipConfig.h"
 
 #include "nvsblob.h"
 
-#define STORAGE_NAMESPACE "storage"
+#define STORAGE_NAMESPACE "storage" 
 #define BREWERY_SETUP_NAMESPACE "setup"
 
 #define RECIPES_NAMESPACE "recipes"
@@ -447,10 +449,10 @@ char *get_esp_recipe_list(void)
 }
 
 
-void Manual_Config(int valve1, int valve2, int valve3, int targetflow1, int targetflow2, int targetflow3, int pump, 
-    int heater, int heater_power, int temp_sensor, int target_temp, int time, int volume) {
+// void Manual_Config(int valve1, int valve2, int valve3, int targetflow1, int targetflow2, int targetflow3, int pump, 
+//     int heater, int heater_power, int temp_sensor, int target_temp, int time, int volume) {
 
-};
+// };
 
 
 
@@ -479,9 +481,9 @@ void nvs_config(void)
     load_recipe_list();
 
     // brew progress
-    Auto_Process = "auto process text";
-    Stage = "stage text";
-    Step = "step text";
+    // Auto_Process = "auto process text";
+    // Stage = "stage text";
+    // Step = "step text";
     Status = 0; 
 
     BrewState = Passive_State; // 3

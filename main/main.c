@@ -48,6 +48,13 @@
 #include "string.h"
 #include "ds18b20.h"
 
+//For Heater Control
+#include "HeaterPWM.h"
+
+
+//For Primary State Machine
+#include "BrewStates.h"
+
 #include "servo.h"
 
 const int DS_PIN = 22;
@@ -190,6 +197,33 @@ void app_main(void)
    xTaskCreate(timertesttask, "Timer Test", 2048, NULL, 10, NULL);
    //temp task
    //xTaskCreate(getTempTask, "Temp task", 2048, NULL, 10, NULL );
+   // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
+   // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
+   // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);
+
+
+
+   
+
+   xTaskCreate(
+      Brew_States,              //function name
+      "State Machine for Brew", //function description
+      2048,                      //stack size
+      NULL,                      //task parameters
+      2,                         //task priority
+      NULL                       //task handle
+   );
+    
+
+    //ds18b20
+    ds18b20_init(DS_PIN);
+
+    //int count = 0;
+ 
+
+    //flow rate
+    flowM(); // add flow rate interrupt
+    getFlowRate(1000);
 
    //flow task
    //xTaskCreate(getFlowTask, "flow task", 2048, NULL, 10, NULL );
