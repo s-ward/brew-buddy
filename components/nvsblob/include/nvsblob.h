@@ -1,28 +1,91 @@
 //void func(void);
 
-
-struct brewery_setup_struct {
+struct brewery_setup_struct
+{
+    int main_config;
+    int external_connection;
 
     int kettle_volume;
     int mash_tun_volume;
     bool pumped_transfer;
     char units[10];
     int lead_time;
-    char heating_method[20];
-    char cooling_method[20];
+    char heating_method[20]; // heatingmethods: ['RIMS', 'Element'],
+    char cooling_method[20]; // coolingmethods: ['None', 'Wort Recirc', 'Water Recirc']
+    int auto_fill;
+    int safety_margin;
 };
 
 struct brewery_setup_struct brewery_setup;
+
+//currently fixed max length for recipe list but look at malloc/realloc
+char esprecipelist[20000];
+
+void update_recipe_list(char *recipelist);
+char *get_esp_recipe_list(void);
 
 //esp_err_t save_gpio_state(void);
 //esp_err_t save_gpio_state(int gpio_num);
 esp_err_t save_gpio_state(int gpio_num, int gpio_state);
 esp_err_t save_brewery_setup(int kettlevolume, int mashtunvolume, bool pumpedtransfer,
-    char *units, int leadtime, char *heatingmethod, char*coolingmethod);
+                             char *units, int leadtime, char *heatingmethod, char *coolingmethod);
 //esp_err_t load_gpio_state(void);
 esp_err_t load_gpio_state(int gpio_num);
 esp_err_t load_brewery_setup(void);
+esp_err_t load_recipe_list(void);
+esp_err_t save_recipe_list(char *recipelist);
+
 void nvs_config(void);
 
 void update_brewery_setup(int kettlevolume, int mashtunvolume, bool pumpedtransfer,
-    char *units, int leadtime, char *heatingmethod, char *coolingmethod);
+                          char *units, int leadtime, char *heatingmethod, char *coolingmethod);
+
+// placeholders for Boonies state code
+enum BrewStates
+{
+    WPS_State,
+    Clean_State,
+    Manual_State,
+    Passive_State,
+    Safety_Check_State,
+    Mash_State,
+    Spare_State,
+    Boil_State,
+    Cooling_State,
+    Transfer_State
+} BrewState;
+
+enum ManStates
+{
+    Full_Man,
+    Manual_Timer,
+    Manual_Volume,
+    Manual_Instant_Heat
+} ManState;
+
+int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In, User_Int_Rqd, User_Adjunct_Rqd;
+
+// Pause_In - set to 1 to pause, 0 to resume.
+
+int Minutes_Remaining;
+int Seconds_Remaining;
+
+// brew progress
+char* Auto_Process;
+char* Stage;
+char* Step;
+
+void timertesttask(void);
+
+int Status;
+// 0 is idle (blank), 1 is running (green, play), 2 is paused (yellow, pause), 3 is adjunct req (orange, not paused), 
+// 4 is user int req (red, paused, stop square.)
+
+char *User_Int_Required; // message to be sent
+int User_Int_Required_Int; // 1 for required, 0 for normal - pause
+char *User_Adjunct_Required; // message to be sent
+int User_Adjunct_Required_Int; // 1 for required, 0 for normal - don't pause
+
+void Manual_Config(int valve1, int valve2, int valve3, int targetflow1, int targetflow2, int targetflow3, int pump, 
+    int heater, int heater_power, int temp_sensor, int target_temp, int time, int volume);
+
