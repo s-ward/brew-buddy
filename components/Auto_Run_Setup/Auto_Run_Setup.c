@@ -6,7 +6,6 @@
 #include "Instant_Heat.h"
 
 
-
 void Auto_Run_Setup (void)
 {
     //*********Fill Kettle*********
