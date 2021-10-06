@@ -9,7 +9,7 @@ void ActiveRecipe (int grainweight, int mashwatervol, int striketemp, int flowra
     int mashtime1, int mashtime2, int mashtime3, int mashtime4, int mashtime5,
     int mashtemp1, int mashtemp2, int mashtemp3, int mashtemp4, int mashtemp5,
     int spargewatervol, int spargetemp, int boiltime,
-    char adjunctname1, char adjunctname2, char adjunctname3, char adjunctname4, char adjunctname5,
+    char *adjunctname1, char *adjunctname2, char *adjunctname3, char *adjunctname4, char *adjunctname5,
     int adjuncttime1, int adjuncttime2, int adjuncttime3, int adjuncttime4, int adjuncttime5,
     int cooltemp)
 {
