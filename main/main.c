@@ -194,7 +194,7 @@ void app_main(void)
 
    //flow rate
    //flowM(); // add flow rate interrupt
-   xTaskCreate(timertesttask, "Timer Test", 2048, NULL, 10, NULL);
+   //xTaskCreate(timertesttask, "Timer Test", 2048, NULL, 10, NULL);
    //temp task
    //xTaskCreate(getTempTask, "Temp task", 2048, NULL, 10, NULL );
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);

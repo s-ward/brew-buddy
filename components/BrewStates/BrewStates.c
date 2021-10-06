@@ -1370,16 +1370,21 @@ void Pause(void)
 
    printf("Paused\n");
 
-   while(!Pause_Button && Pause_In)  //Manual reset of hardcoded pause
+   // while(!Pause_Button && Pause_In)  //Manual reset of hardcoded pause
+   // {
+   //    vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 5 seconds, will be replaced by user unpause 
+   //    Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
+   // }
+   // Pause_In = 0;
+   // while(Pause_Button)  //Manual Pause and manual reset
+   // {
+   //    vTaskDelay(100 / portTICK_PERIOD_MS); //pause task
+   //    Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
+   // }
+
+   while(Pause_In)  //Manual reset of hardcoded pause
    {
       vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 5 seconds, will be replaced by user unpause 
-      Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
-   }
-   Pause_In = 0;
-   while(Pause_Button)  //Manual Pause and manual reset
-   {
-      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task
-      Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
    }
 
    //unpause
