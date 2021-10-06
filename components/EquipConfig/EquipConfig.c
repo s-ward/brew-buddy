@@ -2,7 +2,7 @@
 #include "EquipConfig.h"
 #include "string.h"
 
-EquipConfig (int main_config, int kettlevolume, int mashtunvolume, int external_connection, int pumpedtransfer,
+void EquipConfig (int main_config, int kettlevolume, int mashtunvolume, int external_connection, int pumpedtransfer,
                     char *units, int leadtime, char *heatingmethod, char *coolingmethod, int auto_fill, int safety_margin)
 {
     //Loads config data into global variables

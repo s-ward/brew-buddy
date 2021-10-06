@@ -504,7 +504,7 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
         spargewatervol, spargetemp, boiltime,
         adjunctname1, adjunctname2, adjunctname3, adjunctname4, adjunctname5,
         adjuncttime1, adjuncttime2, adjuncttime3, adjuncttime4, adjuncttime5,
-        cooltemp)
+        cooltemp);
 
     // #include BrewStates.h
     // call to change to brew state

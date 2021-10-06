@@ -311,9 +311,9 @@ void Passive (void)
 
    while(BrewState == Passive_State)
    {
-      EquipConfig();       //will update while in passive if user changes config / recipe
-      ActiveRecipe();      // Will move to Sams function call
-      Auto_Run_Setup();    //Assign equip config to auto_run struct for use with clean and manual modes
+      // EquipConfig();       //will update while in passive if user changes config / recipe
+      // ActiveRecipe();      // Will move to Sams function call
+      // Auto_Run_Setup();    //Assign equip config to auto_run struct for use with clean and manual modes
       
       vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds to assign vars
 
