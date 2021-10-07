@@ -11,6 +11,8 @@
 #include "Auto_Run_Setup.h"
 #include "servo.h"
 #include "Instant_Heat.h"
+#include "interrupts.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -37,24 +39,24 @@ int Mash_Check;
 
 
 //Test variable for pause functionality
-int Pause_Button;
-int Mash_High;
-#define TEST_PAUSE_PIN 32
-#define TEST_CANCEL_PIN 33
+//int Pause_Button;
+int Mash_Level_Safe;
 #define Float1 35
+//#define TEST_PAUSE_PIN 32
+//#define TEST_CANCEL_PIN 33
 
 
 void Brew_States (void)
 {
-   gpio_set_direction(TEST_PAUSE_PIN, GPIO_MODE_INPUT);
-   gpio_set_direction(TEST_CANCEL_PIN, GPIO_MODE_INPUT);
+   // gpio_set_direction(TEST_PAUSE_PIN, GPIO_MODE_INPUT);
+   // gpio_set_direction(TEST_CANCEL_PIN, GPIO_MODE_INPUT);
    gpio_set_direction(Float1, GPIO_MODE_INPUT);
 
    while(1)
    {
-   Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
-   Cancel_In = gpio_get_level (TEST_CANCEL_PIN);
-   Mash_High = gpio_get_level (Float1);
+   // Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
+   // Cancel_In = gpio_get_level (TEST_CANCEL_PIN);
+   Mash_Level_Safe = gpio_get_level (Float1);
 
       switch (BrewState)
       {
@@ -248,7 +250,7 @@ void Brew_States (void)
          Cancel_In = 0;    //reset flag   
       }
       
-      if (!Mash_High)   //Safety for mash tun overfill
+      if (!Mash_Level_Safe)   //Safety for mash tun overfill
       {
          strcpy (User_Int_Required,"***WARNING*** Mash tun is too full, please check for stuck sparge");
          User_Int_Rqd = 1; //Flag that interaction is required
@@ -257,7 +259,7 @@ void Brew_States (void)
       }
 
       //Pause Pressed
-      if (Pause_Button || Pause_In) //Pause state (Replace if statement with pause command flag)
+      if (Pause_In) //Pause state (Replace if statement with pause command flag)
       {
          if (!Paused)
          {
@@ -499,6 +501,7 @@ void Clean (void)
 void Manual (void)
 {
    Manual_In = 0;             //Reset trigger variable
+   float Measured_Volume = 0;
 
    Man_EN = 1;    //Manual settings that are always able to be updated by user
    xTaskCreate(
@@ -583,9 +586,23 @@ void Manual (void)
             }
 
             strcpy (Auto_Process,"Transfering target volume");
-            printf("*%s*\n", Auto_Process);
+            printf("*%s: %f*\n", Auto_Process, Sparging.Instant_Volume);
 
+            reset_meter_flow_total(&flowMeterTapIn);
             //Call volume function
+            while (!Volume_Reached)
+            {
+                  if (Sparging.Instant_Volume > (Measured_Volume/1000))
+                  {
+                     vTaskDelay(500 / portTICK_PERIOD_MS); //pause task for .5 second
+                     Measured_Volume = get_meter_flow_total(&flowMeterTapIn);
+                     printf("Transfered Volume: %f\n",(Measured_Volume/1000));
+
+                     Volume_Reached=1; //TEST VARIABLE!!!! remove in actual build
+                  }
+                  else
+                     Volume_Reached=1; 
+            }
 
             while (!Volume_Reached)
             {
@@ -997,6 +1014,9 @@ void Sparge (void)
    strcpy (Step,"");
    printf("-----%s: %s-----\n", Stage, Step);
 
+   int Flow_Rate = 0;
+   float Measured_Volume = 0;
+
    if ((Sparge_Water_Volume != 0)&&(Main_Config != 3)) //Sparge required
    {
       valve_tap_in.internal = 0; //Set to external
@@ -1017,7 +1037,25 @@ void Sparge (void)
          vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for .1 seconds
 
          PumpRelay(On);
+         strcpy (Auto_Process,"Transfering target volume");
+         printf("*%s: %f*\n", Auto_Process, Sparge_Water_Volume);
+
+         reset_meter_flow_total(&flowMeterTapIn);
+
          //volume transfer function of pre-heated sparge water
+         while (!Volume_Reached)
+         {
+               if (Sparge_Water_Volume > (Measured_Volume/1000))
+               {
+                  vTaskDelay(500 / portTICK_PERIOD_MS); //pause task for .5 second
+                  Measured_Volume = get_meter_flow_total(&flowMeterTapIn);
+                  printf("Transfered Volume: %f\n",(Measured_Volume/1000));
+
+                  Volume_Reached=1; //TEST VARIABLE!!!! remove in actual build
+               }
+               else
+                  Volume_Reached=1; 
+        }
       }
 
       else  //Instant heat sparge 
@@ -1079,10 +1117,15 @@ void Sparge (void)
       {
          strcpy (Step,"Draining Mash");
          printf("-----%s: %s-----\n", Stage, Step);
-         // while (Flowrate > xL) //Wait for x time or wait till flow < x value
-         // {
-         //    vTaskDelay(1000 / portTICK_PERIOD_MS);
-         // }       
+         Flow_Rate = get_meter_flow_rate(&flowMeterSpargeOut);
+         vTaskDelay(100 / portTICK_PERIOD_MS); //1 sec 
+
+         while (Flow_Rate > 200) // delay until SpargeOut flow rate is less than 200mL / min
+         {
+            vTaskDelay(500 / portTICK_PERIOD_MS); //pause task for .5 second
+            Flow_Rate = get_meter_flow_rate(&flowMeterSpargeOut);
+            printf("Flow Rate: %dmL/min\n",Flow_Rate);
+         }   
       }
    }
    HeaterRelay(Off);
@@ -1293,6 +1336,8 @@ void Transfer (void)
    strcpy (Step,"");
    printf("-----%s: %s-----\n", Stage, Step);
 
+   int Flow_Rate = 0;
+
    if (Transfer_Method)
    {
       printf("Please configure kettle return hose for transfer\n");
@@ -1317,13 +1362,17 @@ void Transfer (void)
       }
 
       PumpRelay(On);
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //1 sec 
       //Flow volume measure on
-      //while (Flow !=0)
-      {
-         //delay
-      }
+      Flow_Rate = get_meter_flow_rate(&flowMeterSpargeOut);
+      vTaskDelay(100 / portTICK_PERIOD_MS); //1 sec 
 
-      vTaskDelay(5000 / portTICK_PERIOD_MS); //5 sec
+      while (Flow_Rate > 100) // delay until SpargeOut flow rate is less than 100mL / min
+      {
+         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+         Flow_Rate = get_meter_flow_rate(&flowMeterSpargeOut);
+         printf("Flow Rate: %dmL/min\n",Flow_Rate);
+      }
 
       PumpRelay(Off);
    }
@@ -1430,10 +1479,10 @@ void Cancel(void)
 {
    printf("Canceled\n");
 
-   while (Pause_Button)        //Only required for testing. Prevents SS from physical button
-   {
-      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task
-   }
+   // while (Pause_Button)        //Only required for testing. Prevents SS from physical button
+   // {
+   //    vTaskDelay(100 / portTICK_PERIOD_MS); //pause task
+   // }
    
 
    Step_Active = 0;
