@@ -85,7 +85,7 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     if (Auto_Run_Task->Target_Volume != 0)
     {   
         strcpy (Auto_Process,"Transfering target volume");
-        printf("*%s: %f*\n", Auto_Process, Auto_Run_Task->Target_Volume);
+        printf("*%s: %.2fL*\n", Auto_Process, Auto_Run_Task->Target_Volume);
 
         reset_meter_flow_total(&flowMeterTapIn);
         //Call volume function
@@ -95,7 +95,7 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
             {
                 vTaskDelay(500 / portTICK_PERIOD_MS); //pause task for .5 second
                 Measured_Volume = get_meter_flow_total(&flowMeterTapIn);
-                printf("Transfered Volume: %f\n",(Measured_Volume/1000));
+                printf("Transfered Volume: %.2fL\n",(Measured_Volume/1000));
 
                 Volume_Reached=1; //TEST VARIABLE!!!! remove in actual build
             }
