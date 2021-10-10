@@ -39,5 +39,5 @@ struct PIDController TempSensor2;
 struct PIDController TempSensor3;
 struct PIDController FlowHeat;
 
-void  PIDController_Init(struct PIDController *pid);
+void  PIDController_Init(void);
 float PIDController_Update(struct PIDController *pid, float setpoint, float measurement);

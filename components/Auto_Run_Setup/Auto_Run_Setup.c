@@ -150,7 +150,7 @@ void Auto_Run_Setup (void)
         Zeroise.Valve3 = 1; //from valve 2
         Zeroise.FlowCtrl = 100;
         Zeroise.Target_Temp = 0;
-        Zeroise.Target_Sensor = 1;  //Middle sensor
+        Zeroise.Target_Sensor = 1;  //Bottom sensor
         Zeroise.Pump = 0;
         Zeroise.Heater = 0;
         Zeroise.Target_Volume = 0;

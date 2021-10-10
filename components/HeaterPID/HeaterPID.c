@@ -1,25 +1,23 @@
 #include <stdio.h>
 #include "HeaterPID.h"
+#include "BrewStates.h"
 
 
-int Heater_Duty_Cycle;
-
-void PIDController_Init(struct PIDController *pid) {
+void PIDController_Init(void) {
 
 	/* Clear and set controller variables */
 
-
     //SENSOR 1
-    TempSensor1.Kp = 0.0f;
-    TempSensor1.Ki = 0.0f;
-    TempSensor1.Kd = 0.0f;
-    TempSensor1.tau = 0.0f;
+    TempSensor1.Kp = 2.0f;
+    TempSensor1.Ki = 0.5f;
+    TempSensor1.Kd = 0.25f;
+    TempSensor1.tau = 0.02f;
     TempSensor1.limMin = 0.0f;       //Min O/P value
     TempSensor1.limMax = 100.0f;     //Max O/P value           
     TempSensor1.limMinInt = 5.0f;        //Integrator limits
     TempSensor1.limMaxInt = -5.0f;
     TempSensor1.T = 1.0f;         //1 - sec update time
-
+    //Reset below
     TempSensor1.integrator = 0.0f;
     TempSensor1.prevError = 0.0f;
     TempSensor1.differentiator = 0.0f;
@@ -27,24 +25,73 @@ void PIDController_Init(struct PIDController *pid) {
     TempSensor1.out = 0.0f;
 
     //SENSOR 2
+    TempSensor2.Kp = 2.0f;
+    TempSensor2.Ki = 0.5f;
+    TempSensor2.Kd = 0.25f;
+    TempSensor2.tau = 0.02f;
+    TempSensor2.limMin = 0.0f;       //Min O/P value
+    TempSensor2.limMax = 100.0f;     //Max O/P value           
+    TempSensor2.limMinInt = 5.0f;        //Integrator limits
+    TempSensor2.limMaxInt = -5.0f;
+    TempSensor2.T = 1.0f;         //1 - sec update time
+    //Reset below
+    TempSensor2.integrator = 0.0f;
+    TempSensor2.prevError = 0.0f;
+    TempSensor2.differentiator = 0.0f;
+    TempSensor2.prevMeasurement = 0.0f;
+    TempSensor2.out = 0.0f;
 
+    //SENSOR 3
+    TempSensor3.Kp = 2.0f;
+    TempSensor3.Ki = 0.5f;
+    TempSensor3.Kd = 0.25f;
+    TempSensor3.tau = 0.02f;
+    TempSensor3.limMin = 0.0f;       //Min O/P value
+    TempSensor3.limMax = 100.0f;     //Max O/P value           
+    TempSensor3.limMinInt = 5.0f;        //Integrator limits
+    TempSensor3.limMaxInt = -5.0f;
+    TempSensor3.T = 1.0f;         //1 - sec update time
+    //Reset below
+    TempSensor3.integrator = 0.0f;
+    TempSensor3.prevError = 0.0f;
+    TempSensor3.differentiator = 0.0f;
+    TempSensor3.prevMeasurement = 0.0f;
+    TempSensor3.out = 0.0f;
 
-	pid->integrator = 0.0f;
-	pid->prevError  = 0.0f;
-
-	pid->differentiator  = 0.0f;
-	pid->prevMeasurement = 0.0f;
-
-	pid->out = 0.0f;
-
+	//INSTANT HEAT FLOW CONTROL PID
+    FlowHeat.Kp = 2.0f;
+    FlowHeat.Ki = 0.5f;
+    FlowHeat.Kd = 0.25f;
+    FlowHeat.tau = 0.02f;
+    FlowHeat.limMin = 5.0f;       //Min O/P value, don't want 0 flow
+    FlowHeat.limMax = 100.0f;     //Max O/P value           
+    FlowHeat.limMinInt = 5.0f;        //Integrator limits
+    FlowHeat.limMaxInt = -5.0f;
+    FlowHeat.T = 1.0f;         //1 - sec update time
+    //Reset below
+    FlowHeat.integrator = 0.0f;
+    FlowHeat.prevError = 0.0f;
+    FlowHeat.differentiator = 0.0f;
+    FlowHeat.prevMeasurement = 0.0f;
+    FlowHeat.out = 0.0f;
 }
 
 
 
 int Heater_PID (int Target_Temp, int Target_Sensor)
 {
+    int Duty_Cycle;
 
-    Heater_Duty_Cycle = 10;         //manual value atm, proper PID function will update this automatically
+    if (Target_Sensor == 1)
+        Duty_Cycle = PIDController_Update(&TempSensor1, Target_Temp, Temp1);
+    else if (Target_Sensor == 2)
+        Duty_Cycle = PIDController_Update(&TempSensor2, Target_Temp, Temp2);
+    else if (Target_Sensor == 3)
+        Duty_Cycle = PIDController_Update(&TempSensor3, Target_Temp, Temp3);
+    else if (Target_Sensor == 4)
+        Duty_Cycle = PIDController_Update(&TempSensor2, Target_Temp, Temp2);    //Instant heat flow control PID
+
+    Duty_Cycle = 10;         //manual value atm, proper PID function will update this automatically
     //printf("%d\n", Heater_Duty_Cycle);
 
     //if ((Target_Temp-1) <= Actual_Temp <= (Target_Temp+1))
@@ -53,7 +100,7 @@ int Heater_PID (int Target_Temp, int Target_Sensor)
     //else
         //Temp_Reached = 0;
 
-    return (Heater_Duty_Cycle);
+    return (Duty_Cycle);
 }
 
 

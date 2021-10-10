@@ -7,6 +7,7 @@
 #include "PumpRelay.h"
 #include "HeaterRelay.h"
 #include "EquipConfig.h"
+#include "HeaterPID.h"
 #include "interrupts.h"
 
 #include "freertos/FreeRTOS.h"
@@ -107,7 +108,6 @@ void FlowPID(int Targ_Temp)
 {
     int PID_Flow = 30;      //initilised to 30%
     int ReCheck = 0;
-    int Sensor2 = 50;
 
     while(FlowPID_En)
     {
@@ -123,18 +123,18 @@ void FlowPID(int Targ_Temp)
                 valve_set_position(Current_Flow1, &valve_tap_in);   //Only using valve 1
             }
             
-            //PID fnk
+            PID_Flow = (100 - Heater_PID(Targ_Temp, 4)); //Calls PID function, 4 = Flow PID setting
 
             //Safety check for unable to maintain temp with flow rate alone
             if (ReCheck != 0)
                 ReCheck = ReCheck - 1;
-            if(PID_Flow == 100 &&(Sensor2 > Targ_Temp) && (!ReCheck))   //if flow max and temp too great
+            if(PID_Flow == 100 &&(Temp2 > Targ_Temp) && (!ReCheck))   //if flow max and temp too great
             {    
                 Manual_Duty = (Manual_Duty-5);  //Reduce heater power by 5%
                 ReCheck = 50;                   //Wait 5 seconds before checking again
             }        
         }
-        vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
+        vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
     }
     vTaskDelete(NULL);
 }
