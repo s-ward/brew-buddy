@@ -57,7 +57,10 @@
 
 #include "servo.h"
 
-const int DS_PIN = 22;
+const int T1_PIN = 22;
+const int T2_PIN = 19;
+const int T3_PIN = 5;
+
 
 //#include "pidpwm.h"
 //#include "blink2.hpp"
@@ -80,13 +83,19 @@ int timeInterval = 1000; // interval time in milli seconds
 
 void getTempTask(void *arg)
 {
-
    int count = 0;
 
    while (1)
    {
-
-      printf("%d - Temperature: %f\n", count, ds18b20_get_temp());
+      ds18b20_init(T1_PIN);
+      Temp1 = ds18b20_get_temp();
+      printf("%d - Sensor 1 - Temperature: %f\n", count, Temp1);
+      ds18b20_init(T2_PIN);
+      Temp2 = ds18b20_get_temp();
+      printf("%d - Sensor 2 - Temperature: %f\n", count, Temp2);
+      ds18b20_init(T3_PIN);
+      Temp3 = ds18b20_get_temp();
+      printf("%d - Sensor 3 - Temperature: %f\n", count, Temp3);
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
       count++;
    }
@@ -196,7 +205,7 @@ void app_main(void)
    //flowM(); // add flow rate interrupt
    //xTaskCreate(timertesttask, "Timer Test", 2048, NULL, 10, NULL);
    //temp task
-   //xTaskCreate(getTempTask, "Temp task", 2048, NULL, 10, NULL );
+   xTaskCreate(getTempTask, "Temp task", 2048, NULL, 10, NULL );
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);
@@ -216,7 +225,6 @@ void app_main(void)
     
 
     //ds18b20
-    ds18b20_init(DS_PIN);
 
     //int count = 0;
  

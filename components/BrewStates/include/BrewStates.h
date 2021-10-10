@@ -45,6 +45,10 @@ int Current_Flow1;
 int Current_Flow2;
 int Current_Flow3;
 
+float Temp1;
+float Temp2;
+float Temp3;
+
 int Valve1_State;
 int Valve2_State;
 int Valve3_State;
