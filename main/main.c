@@ -220,7 +220,8 @@ void app_main(void)
    //temp task
    xTaskCreate(getTempTask, "Temp task", 2048, NULL, 10, NULL );
 
-   xTaskCreate(PIDTestTask, "PID task", 2048, NULL, 10, NULL );
+   //xTaskCreate(PIDTestTask, "PID task", 2048, NULL, 10, NULL );
+
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);

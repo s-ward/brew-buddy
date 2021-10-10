@@ -25,7 +25,7 @@ void PIDController_Init(void) {
     TempSensor1.out = 0.0f;
 
     //SENSOR 2
-    TempSensor2.Kp = 2.0f;
+    TempSensor2.Kp = 20.0f;
     TempSensor2.Ki = 0.5f;
     TempSensor2.Kd = 0.25f;
     TempSensor2.tau = 0.02f;

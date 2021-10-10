@@ -56,11 +56,12 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     Sensor = Auto_Run_Task->Target_Sensor;         
     PumpRelay(Auto_Run_Task->Pump);
     HeaterRelay(Auto_Run_Task->Heater);
+
     
     if (Auto_Run_Task->Target_Temp !=0) 
     {
         strcpy (Auto_Process,"Heating to target temp");
-        printf("*%s*\n", Auto_Process);
+        printf("*%s: %d*\n", Auto_Process, Temp);
 
         Auto_PID = 1;
         PWM_En = 1;
