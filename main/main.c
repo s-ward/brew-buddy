@@ -50,6 +50,7 @@
 
 //For Heater Control
 #include "HeaterPWM.h"
+#include "HeaterPID.h"
 
 
 //For Primary State Machine
@@ -80,6 +81,18 @@ const int T3_PIN = 5;
 static uint32_t currentTime = 0;
 static uint32_t previousTime = 0;
 int timeInterval = 1000; // interval time in milli seconds
+
+void PIDTestTask(void)
+{
+   int DutyTest = 0;
+
+   while (1)
+   {
+      DutyTest = Heater_PID (30, 1);
+      printf("Duty Cycle: %d\n", DutyTest);
+      vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   }
+}
 
 void getTempTask(void *arg)
 {
@@ -172,7 +185,7 @@ void timertesttask(void)
 
 void app_main(void)
 {
-
+   PIDController_Init();
    server_config();
 
    //led_config();
@@ -206,6 +219,8 @@ void app_main(void)
    //xTaskCreate(timertesttask, "Timer Test", 2048, NULL, 10, NULL);
    //temp task
    xTaskCreate(getTempTask, "Temp task", 2048, NULL, 10, NULL );
+
+   xTaskCreate(PIDTestTask, "PID task", 2048, NULL, 10, NULL );
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_in, 10, NULL);
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_sparge_out, 10, NULL);
    // xTaskCreate(valve_generic_example_task, "valve 2 task", 2048, &valve_tap_in, 10, NULL);

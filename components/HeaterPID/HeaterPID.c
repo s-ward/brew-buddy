@@ -8,7 +8,7 @@ void PIDController_Init(void) {
 	/* Clear and set controller variables */
 
     //SENSOR 1
-    TempSensor1.Kp = 2.0f;
+    TempSensor1.Kp = 20.0f;
     TempSensor1.Ki = 0.5f;
     TempSensor1.Kd = 0.25f;
     TempSensor1.tau = 0.02f;
@@ -80,25 +80,36 @@ void PIDController_Init(void) {
 
 int Heater_PID (int Target_Temp, int Target_Sensor)
 {
-    int Duty_Cycle;
-
     if (Target_Sensor == 1)
+    {
+        Actual_Temp = Temp1;
         Duty_Cycle = PIDController_Update(&TempSensor1, Target_Temp, Temp1);
+    }
     else if (Target_Sensor == 2)
+    {
+        Actual_Temp = Temp2;
         Duty_Cycle = PIDController_Update(&TempSensor2, Target_Temp, Temp2);
+    }
     else if (Target_Sensor == 3)
+    {
+        Actual_Temp = Temp3;
         Duty_Cycle = PIDController_Update(&TempSensor3, Target_Temp, Temp3);
+    }
     else if (Target_Sensor == 4)
+    {
+        Actual_Temp = Temp2;
         Duty_Cycle = PIDController_Update(&TempSensor2, Target_Temp, Temp2);    //Instant heat flow control PID
-
-    Duty_Cycle = 10;         //manual value atm, proper PID function will update this automatically
+    }
+    //Duty_Cycle = 10;         //manual value atm, proper PID function will update this automatically
     //printf("%d\n", Heater_Duty_Cycle);
 
-    //if ((Target_Temp-1) <= Actual_Temp <= (Target_Temp+1))
+    if (Target_Temp <= Actual_Temp)
+    {
         Temp_Reached = 1;
-
-    //else
-        //Temp_Reached = 0;
+        printf("Temp Reached!!!\n");
+    }
+    else
+        Temp_Reached = 0;
 
     return (Duty_Cycle);
 }

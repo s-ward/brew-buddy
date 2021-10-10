@@ -1,6 +1,8 @@
 int Heater_PID (int Target_Temp, int Target_Sensor);
 
 int Temp_Reached;
+int Duty_Cycle;
+float Actual_Temp;
 
 struct PIDController{
 
