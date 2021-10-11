@@ -531,7 +531,7 @@ void Manual (void)
    
    strcpy (Stage,"Manual");
    
-   ManState = Full_Man; // Test
+   //ManState = Full_Man; // Test
 
    while (BrewState == Manual_State)
    {
