@@ -421,10 +421,15 @@ void update_brewery_setup(int kettlevolume, int mashtunvolume, bool pumpedtransf
                           char *units, int leadtime, char *heatingmethod, char *coolingmethod)
 {
     //add extra struct vars
-    brewery_setup.main_config = 1;
-    brewery_setup.external_connection = 0;
-    brewery_setup.auto_fill = 1;
-    brewery_setup.safety_margin = 5;
+    int main_config = 1;
+    int external_connection = 0;
+    int auto_fill = 1;
+    int safety_margin = 5;
+
+    brewery_setup.main_config = main_config;
+    brewery_setup.external_connection = external_connection;
+    brewery_setup.auto_fill = auto_fill;
+    brewery_setup.safety_margin = safety_margin;
 
     brewery_setup.kettle_volume = kettlevolume;
     brewery_setup.mash_tun_volume = mashtunvolume;
@@ -435,6 +440,11 @@ void update_brewery_setup(int kettlevolume, int mashtunvolume, bool pumpedtransf
     strcpy(brewery_setup.cooling_method, coolingmethod);
 
     printf("brewery_setup updated - kettle: %d\n", brewery_setup.kettle_volume);
+
+    EquipConfig (main_config, kettlevolume, mashtunvolume, external_connection, pumpedtransfer,
+                    units, leadtime, heatingmethod, coolingmethod, auto_fill, safety_margin);
+
+
 }
 
 void update_recipe_list(char *recipelist)

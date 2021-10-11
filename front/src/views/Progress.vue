@@ -95,7 +95,7 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
- <v-btn v-if="get_adjunct_req || get_interaction_req" small @click="confirm_config">confirm</v-btn>
+ <v-btn v-if="get_adjunct_req || get_interaction_req" small @click="confirm">confirm</v-btn>
  <!-- <v-btn small @click="confirm_adjunct">confirm adjunct</v-btn> -->
  <v-spacer></v-spacer>
               </v-card-actions>
@@ -193,8 +193,8 @@
     </v-row>
      <v-row align="center" justify="space-around">
       <v-col>
-        <v-btn v-if="get_brew_status !==2" @click="pause">Pause</v-btn>
-        <v-btn v-if="get_brew_status ===2" @click="resume">Resume</v-btn>
+        <v-btn v-if="get_brew_status !==1" :disabled="get_interaction_req" @click="pause">Pause</v-btn>
+        <v-btn v-if="get_brew_status ===1" :disabled="get_interaction_req" @click="resume">Resume</v-btn>
       </v-col>
       <v-col>
         <v-btn @click="cancel">Cancel</v-btn>
@@ -231,39 +231,106 @@ export default {
     },
     pause () {
       // this.$store.dispatch('pause')
-      this.$store.commit('set_brew_status', 2)
+      // this.$store.commit('set_brew_status', 2)
+      console.log('Brew Int' + this.$store.state.brewint)
+      this.$store.dispatch('post_state_update', {
+        brewint: this.$store.state.brewint,
+        pauseint: 1,
+        cancelint: this.$store.state.cancelint,
+        cleanint: this.$store.state.cleanint,
+        userintreq: this.$store.state.userintreq,
+        adjunctreq: this.$store.state.adjunctreq
+      })
+      .then(() => (
       this.$store.commit('add_message', {
         textcolor: 'yellow--text',
         time: this.get_time_remaining,
         text: 'Brew Paused'
       })
+      ))
     },
     cancel () {
-      this.$store.dispatch('set_brew_state_action', { brewstate: 3 })
-        .then(() => this.$store.dispatch('post_state_update')
-          .then(() => this.$router.push('/')))
+      // add confirmation
+      // this.$store.dispatch('set_brew_state_action', {
+      this.$store.dispatch('post_state_update', {
+        brewint: this.$store.state.brewint,
+        pauseint: this.$store.state.pauseint,
+        cancelint: 1,
+        cleanint: this.$store.state.cleanint,
+        userintreq: this.$store.state.userintreq,
+        adjunctreq: this.$store.state.adjunctreq
+        // brewstate: this.$store.state.pauseint,
+        // pauseint: this.$store.state.pauseint,
+        // cancelint: 1
+      })
+        // .then(() => this.$store.dispatch('post_state_update')
+        .then(() => this.$router.push('/'))
     },
     resume () {
-      this.$store.commit('set_brew_status', 1)
-      this.$store.commit('add_message', {
-        textcolor: 'green--text',
-        time: this.get_time_remaining,
-        text: 'Brew Resumed'
+      // this.$store.commit('set_brew_status', 1)
+      this.$store.dispatch('post_state_update', {
+        brewint: this.$store.state.brewint,
+        pauseint: 0,
+        cancelint: this.$store.state.cancelint,
+        cleanint: this.$store.state.cleanint,
+        userintreq: this.$store.state.userintreq,
+        adjunctreq: this.$store.state.adjunctreq
       })
+        .then(() => (
+          this.$store.commit('add_message', {
+            textcolor: 'green--text',
+            time: this.get_time_remaining,
+            text: 'Brew Resumed'
+          })
+        ))
     },
     confirm () {
       // if user int req - confirm sends config message else if adj req send adj message else disabled
-      if (this.$store.userintreq) {
+      console.log('confirm ' + this.$store.userintreq)
+      // if (this.$store.userintreq) {
+      if (this.get_interaction_req) {
         // add message to stack
+        // this.$store.commit('add_message', {
+        this.$store.dispatch('add_message_action', {
+          textcolor: 'green--text',
+          time: this.get_time_remaining,
+          text: 'Brew Resumed: Configuration Confirmed'
+        })
         // unpause
+          .then(() => (
+            // this.resume()
+            this.$store.dispatch('post_state_update', {
+              brewint: this.$store.state.brewint,
+              pauseint: 0,
+              cancelint: this.$store.state.cancelint,
+              cleanint: this.$store.state.cleanint,
+              userintreq: this.$store.state.userintreq,
+              adjunctreq: this.$store.state.adjunctreq
+            })
+          ))
         // set to 0
         // tell esp of unpause and set to 0
-      } else if (this.$store.adjunctreq) {
+      // } else if (this.$store.adjunctreq) {
+      } else if (this.get_adjunct_req) {
         // add message to stack
+        this.$store.dispatch('add_message_action', {
+          textcolor: 'green--text',
+          time: this.get_time_remaining,
+          text: 'Adjunct Addition Confirmed'
+        })
         // set to 0
         // tell esp of set to 0
+          .then(() => (
+            this.$store.dispatch('post_state_update', {
+              brewint: this.$store.state.brewint,
+              pauseint: this.$store.state.pauseint,
+              cancelint: this.$store.state.cancelint,
+              cleanint: this.$store.state.cleanint,
+              userintreq: this.$store.state.userintreq,
+              adjunctreq: 0
+            })
+          ))
       }
-
     },
     updateData: function () {
       this.$store.dispatch('update_brew_progress')
@@ -307,7 +374,8 @@ export default {
     },
     get_brew_status () {
       // console.log(this.$store.state.status)
-      return this.$store.state.status // int
+      //return this.$store.state.status // int
+      return this.$store.state.pauseint
       
     },
     get_current_stage () {
@@ -329,40 +397,85 @@ export default {
       return `${this.$store.state.step} : ${this.$store.state.autoprocess}`
     },
     statusIconColor () {
-      if (this.$store.state.status === 1) {
-        return 'green'
-      } else if (this.$store.state.status === 2) {
-        return 'yellow'
-      } else if (this.$store.state.status === 3) {
-        return 'orange'
-      } else if (this.$store.state.status === 4) {
+      // if (this.$store.state.status === 1) {
+      //   return 'green'
+      // } else if (this.$store.state.status === 2) {
+      //   return 'yellow'
+      // } else if (this.$store.state.status === 3) {
+      //   return 'orange'
+      // } else if (this.$store.state.status === 4) {
+      //   return 'red'
+      // } else {
+      //   return ''
+      // }
+      // }
+      if (this.$store.state.brewstate === 3) {
+        return ''
+      }
+      else if (this.$store.state.userintreq === 1) {
         return 'red'
+      } else if (this.$store.state.pauseint === 1) {
+        return 'yellow'
+      } else if (this.$store.state.adjunctreq === 1) {
+        return 'orange'
+      } else if (this.$store.state.pauseint === 0) {
+        return 'green'
       } else {
         return ''
       }
     },
     statusIcon () {
-      if (this.$store.state.status === 1) {
-        return 'play_circle'
-      } else if (this.$store.state.status === 2) {
-        return 'pause_circle'
-      } else if (this.$store.state.status === 3) {
-        return 'error'
-      } else if (this.$store.state.status === 4) {
+      // if (this.$store.state.status === 1) {
+      //   return 'play_circle'
+      // } else if (this.$store.state.status === 2) {
+      //   return 'pause_circle'
+      // } else if (this.$store.state.status === 3) {
+      //   return 'error'
+      // } else if (this.$store.state.status === 4) {
+      //   return 'stop'
+      // } else {
+      //   return ''
+      // }
+      // }
+      if (this.$store.state.brewstate === 3) {
+        return ''
+      }
+      else if (this.$store.state.userintreq === 1) {
         return 'stop'
+      } else if (this.$store.state.pauseint === 1) {
+        return 'pause_circle'
+      } else if (this.$store.state.adjunctreq === 1) {
+        return 'error'
+      } else if (this.$store.state.pauseint === 0) {
+        return 'play_circle'
       } else {
         return ''
       }
     },
     statusTextColor () {
-      if (this.$store.state.status === 1) {
-        return 'green--text'
-      } else if (this.$store.state.status === 2) {
-        return 'yellow--text'
-      } else if (this.$store.state.status === 3) {
-        return 'orange--text'
-      } else if (this.$store.state.status === 4) {
+      // if (this.$store.state.status === 1) {
+      //   return 'green--text'
+      // } else if (this.$store.state.status === 2) {
+      //   return 'yellow--text'
+      // } else if (this.$store.state.status === 3) {
+      //   return 'orange--text'
+      // } else if (this.$store.state.status === 4) {
+      //   return 'red--text'
+      // } else {
+      //   return ''
+      // }
+      // }
+      if (this.$store.state.brewstate === 3) {
+        return ''
+      }
+      else if (this.$store.state.userintreq === 1) {
         return 'red--text'
+      } else if (this.$store.state.pauseint === 1) {
+        return 'yellow--text'
+      } else if (this.$store.state.adjunctreq === 1) {
+        return 'orange--text'
+      } else if (this.$store.state.pauseint === 0) {
+        return 'green--text'
       } else {
         return ''
       }

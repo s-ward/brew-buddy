@@ -249,7 +249,7 @@ static esp_err_t manual_control_post_handler(httpd_req_t *req)
     // go to manual state
     // #include BrewStates.h
     Manual_In = 1; //OR?
-    BrewState = Manual_State;
+    // BrewState = Manual_State;
   
     //print to terminal
     ESP_LOGI(REST_TAG, "Mode: %s, Heater Power: %d, Target Temp: %d, Target Flow: %d, Pump: %d, Heater: %d, Valve1: %d, Valve2: %d, Valve3: %d, Man State: %d, Brew State: %d",
@@ -293,22 +293,25 @@ static esp_err_t state_change_post_handler(httpd_req_t *req)
     // {
     //    BrewState = Passive_State;
     // }
-    int brewstate = cJSON_GetObjectItem(root, "brewstate")->valueint;
+    // int brewstate = cJSON_GetObjectItem(root, "brewstate")->valueint;
     int pauseint = cJSON_GetObjectItem(root, "pauseint")->valueint;
     int cancelint = cJSON_GetObjectItem(root, "cancelint")->valueint;
+    int brewint = cJSON_GetObjectItem(root, "brewint")->valueint;
+    //int manualint = cJSON_GetObjectItem(root, "manualint")->valueint;
 
-    if (brewstate == 3){
-        BrewState = Passive_State;
-    } else if (brewstate == 4) {
-        BrewState = Safety_Check_State;
-    }
+   // if (brewstate == 3){
+   //     BrewState = Passive_State;
+  //  } else if (brewstate == 4) {
+   //     BrewState = Safety_Check_State;
+   // }
     // really is just
     // BrewState = brewstate;
     Pause_In = pauseint;
     Cancel_In = cancelint;
+    Brew_In = brewint;
    
 
-    ESP_LOGI(REST_TAG, "Brew State: %d, Pause In: %d, Cancel In: %d", BrewState, Pause_In, Cancel_In);
+    ESP_LOGI(REST_TAG, "State POST - Brew State: %d, Pause In: %d, Cancel In: %d", BrewState, Pause_In, Cancel_In);
     cJSON_Delete(root);
     httpd_resp_sendstr(req, "Post control value successfully");
     return ESP_OK;
@@ -502,8 +505,8 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
         mashtime1, mashtime2, mashtime3, mashtime4, mashtime5,
         mashtemp1, mashtemp2, mashtemp3, mashtemp4, mashtemp5,
         spargewatervol, spargetemp, boiltime,
-        adjunctname1, adjunctname2, adjunctname3, adjunctname4, adjunctname5,
-        adjuncttime1, adjuncttime2, adjuncttime3, adjuncttime4, adjuncttime5,
+        adjunctname1, adjunctname2, adjunctname3, "adjunct", "adjunct",
+        adjuncttime1, adjuncttime2, adjuncttime3, 5, 5,
         cooltemp);
 
     // #include BrewStates.h
@@ -656,6 +659,29 @@ static esp_err_t brew_progress_get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+static esp_err_t state_get_handler(httpd_req_t *req)
+{
+    //printf("Brew progress get handler");
+
+    httpd_resp_set_type(req, "application/json");
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "brewstate", BrewState);
+    cJSON_AddNumberToObject(root, "manualint", Manual_In);
+    cJSON_AddNumberToObject(root, "pauseint", Pause_In);
+    cJSON_AddNumberToObject(root, "cancelint", Cancel_In);
+    cJSON_AddNumberToObject(root, "cleanint", Clean_In);
+    cJSON_AddNumberToObject(root, "brewint", Brew_In);
+  
+    //cJSON_AddNumberToObject(root, "brewstate", User_Adjunct_Rqd);
+    //cJSON_AddNumberToObject(root, "brewstate", User_Int_Rqd);
+
+    const char *sys_info = cJSON_Print(root);
+    httpd_resp_sendstr(req, sys_info);
+    free((void *)sys_info);
+    cJSON_Delete(root);
+    return ESP_OK;
+}
+
 
 
 esp_err_t start_rest_server(const char *base_path)
@@ -761,7 +787,6 @@ esp_err_t start_rest_server(const char *base_path)
         .user_ctx = rest_context};
     httpd_register_uri_handler(server, &recipes_save_post_uri);
 
-
     /* URI handler for fetching brew progress data */
     httpd_uri_t brew_progress_get_uri = {
         .uri = "/api/v1/progress/data",
@@ -770,6 +795,13 @@ esp_err_t start_rest_server(const char *base_path)
         .user_ctx = rest_context};
     httpd_register_uri_handler(server, &brew_progress_get_uri);
 
+    /* URI handler for fetching brew states data */
+    httpd_uri_t state_get_uri = {
+        .uri = "/api/v1/getstate",
+        .method = HTTP_GET,
+        .handler = state_get_handler,
+        .user_ctx = rest_context};
+    httpd_register_uri_handler(server, &state_get_uri);
 
     /* URI handler for getting web server files */
     httpd_uri_t common_get_uri = {

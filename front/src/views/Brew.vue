@@ -457,8 +457,17 @@ export default {
         })
     },
     start_brew: function () {
-      this.$store.dispatch('set_brew_state_action', { brewstate: 4 })
-        .then(() => this.$store.dispatch('post_state_update')
+      // this.$store.dispatch('set_brew_state_action', { // maybe add brewint here instead of brewstate
+      this.$store.dispatch('post_state_update', {
+        // brewstate: 4,
+        brewint: 1,
+        pauseint: this.$store.state.pauseint,
+        cancelint: this.$store.state.cancelint,
+        cleanint: this.$store.state.cleanint,
+        userintreq: this.$store.state.userintreq,
+        adjunctreq: this.$store.state.adjunctreq
+      })
+       // .then(() => this.$store.dispatch('post_state_update')
           .then(this.$ajax
             .post('/api/v1/brew/start', {
             // recipename: this.$store.state.selectedrecipe.name
@@ -479,7 +488,7 @@ export default {
             .catch(error => {
               console.log(error)
             }))
-          .then(this.$router.push('/progress')))
+          .then(this.$router.push('/progress'))
     }
     // get_selected_recipe: function () {
 

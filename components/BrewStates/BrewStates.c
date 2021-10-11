@@ -30,7 +30,7 @@ TaskHandle_t Pause_Task = NULL;
 TaskHandle_t Instant_Heat_Task = NULL;
 
 //User input commands
-int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;  // set to inerrupts?
+// int WPS_In, Clean_In, Manual_In, Pause_In, Cancel_In, Brew_In;  // set to inerrupts?
 
 int Kettle_Check;
 int Mash_Check;
@@ -46,14 +46,14 @@ int Mash_High;
 
 void Brew_States (void)
 {
-   gpio_set_direction(TEST_PAUSE_PIN, GPIO_MODE_INPUT);
-   gpio_set_direction(TEST_CANCEL_PIN, GPIO_MODE_INPUT);
+  // gpio_set_direction(TEST_PAUSE_PIN, GPIO_MODE_INPUT);
+  // gpio_set_direction(TEST_CANCEL_PIN, GPIO_MODE_INPUT);
    gpio_set_direction(Float1, GPIO_MODE_INPUT);
 
    while(1)
    {
-   Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
-   Cancel_In = gpio_get_level (TEST_CANCEL_PIN);
+   //Pause_Button = gpio_get_level (TEST_PAUSE_PIN);
+   //Cancel_In = gpio_get_level (TEST_CANCEL_PIN);
    Mash_High = gpio_get_level (Float1);
 
       switch (BrewState)
@@ -244,8 +244,8 @@ void Brew_States (void)
             1,                         //task priority
             NULL                       //task handle
          );
-         vTaskDelay(2000 / portTICK_PERIOD_MS); // only required for manual testing with switch
-         Cancel_In = 0;    //reset flag   
+         //vTaskDelay(2000 / portTICK_PERIOD_MS); // only required for manual testing with switch
+         //Cancel_In = 0;    //reset flag   
       }
       
       if (!Mash_High)   //Safety for mash tun overfill
@@ -288,6 +288,9 @@ void Passive (void)
    int Safe = 0;
 
    //Reset variables
+   Brew_In = 0;
+   Manual_In = 0;
+   Cancel_In = 0;
    Man_EN = 0;
    Paused = 0;
    FlowPID_En = 0;
@@ -301,6 +304,7 @@ void Passive (void)
    PWM_En = 0;
    Stage_complete = 0;
    User_Int_Rqd = 0;
+   User_Adjunct_Rqd = 0;
    strcpy (Auto_Process,"");
    strcpy (User_Int_Required,"");
    strcpy (User_Adjunct_Required,"");
@@ -498,7 +502,7 @@ void Clean (void)
 
 void Manual (void)
 {
-   Manual_In = 0;             //Reset trigger variable
+   // Manual_In = 0;             //Reset trigger variable
 
    Man_EN = 1;    //Manual settings that are always able to be updated by user
    xTaskCreate(
@@ -512,7 +516,7 @@ void Manual (void)
    
    strcpy (Stage,"Manual");
    
-   ManState = Full_Man; // Test
+   // ManState = Full_Man; // Test
 
    while (BrewState == Manual_State)
    {
@@ -737,7 +741,7 @@ void Manual_User_Input (void) //continuosly update controls with user input
 
 void Safety_Check (void)
 {
-   Brew_In = 0;             //Reset trigger variable
+   // Brew_In = 0;             //Reset trigger variable
    
    strcpy (Stage,"Safety Check");
    strcpy (Step,"");
@@ -1429,6 +1433,7 @@ void Pause(void)
 void Cancel(void)
 {
    printf("Canceled\n");
+   Cancel_In = 0;
 
    while (Pause_Button)        //Only required for testing. Prevents SS from physical button
    {

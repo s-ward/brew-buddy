@@ -127,46 +127,90 @@ export default {
       return 'green'
     },
     brewStatusIconColor () {
-      if (this.$store.state.status === 1) {
-        return 'green'
-      } else if (this.$store.state.status === 2) {
-        return 'lavender'
-      } else if (this.$store.state.status === 3) {
-        return 'orange'
-      } else if (this.$store.state.status === 4) {
+      // if (this.$store.state.status === 1) {
+      //   return 'green'
+      // } else if (this.$store.state.status === 2) {
+      //   return 'lavender'
+      // } else if (this.$store.state.status === 3) {
+      //   return 'orange'
+      // } else if (this.$store.state.status === 4) {
+      //   return 'red'
+      // } else {
+      //   return ''
+      // }
+      // }
+      if (this.$store.state.brewstate === 3) {
+        return ''
+      }
+      else if (this.$store.state.userintreq === 1) {
         return 'red'
+      } else if (this.$store.state.pauseint === 1) {
+        return 'yellow'
+      } else if (this.$store.state.adjunctreq === 1) {
+        return 'orange'
+      } else if (this.$store.state.pauseint === 0) {
+        return 'green'
       } else {
         return ''
       }
     },
     brewStatusIcon () {
-      if (this.$store.state.status === 1) {
-        return 'play_circle'
-      } else if (this.$store.state.status === 2) {
-        return 'pause_circle'
-      } else if (this.$store.state.status === 3) {
-        return 'error'
-      } else if (this.$store.state.status === 4) {
+      // if (this.$store.state.status === 1) {
+      //   return 'play_circle'
+      // } else if (this.$store.state.status === 2) {
+      //   return 'pause_circle'
+      // } else if (this.$store.state.status === 3) {
+      //   return 'error'
+      // } else if (this.$store.state.status === 4) {
+      //   return 'stop'
+      // } else {
+      //   return ''
+      // }
+      // }
+      if (this.$store.state.brewstate === 3) {
+        return ''
+      }
+      else if (this.$store.state.userintreq === 1) {
         return 'stop'
+      } else if (this.$store.state.pauseint === 1) {
+        return 'pause_circle'
+      } else if (this.$store.state.adjunctreq === 1) {
+        return 'error'
+      } else if (this.$store.state.pauseint === 0) {
+        return 'play_circle'
       } else {
         return ''
       }
     },
     brewStatusTextColor () {
-      if (this.$store.state.status === 1) {
-        return 'green--text'
-      } else if (this.$store.state.status === 2) {
-        return 'yellow--text'
-      } else if (this.$store.state.status === 3) {
-        return 'orange--text'
-      } else if (this.$store.state.status === 4) {
+      // if (this.$store.state.status === 1) {
+      //   return 'green--text'
+      // } else if (this.$store.state.status === 2) {
+      //   return 'yellow--text'
+      // } else if (this.$store.state.status === 3) {
+      //   return 'orange--text'
+      // } else if (this.$store.state.status === 4) {
+      //   return 'red--text'
+      // } else {
+      //   return ''
+      // }
+      if (this.$store.state.brewstate === 3) {
+        return ''
+      }
+      else if (this.$store.state.userintreq === 1) {
         return 'red--text'
+      } else if (this.$store.state.pauseint === 1) {
+        return 'yellow--text'
+      } else if (this.$store.state.adjunctreq === 1) {
+        return 'orange--text'
+      } else if (this.$store.state.pauseint === 0) {
+        return 'green--text'
       } else {
         return ''
       }
     },
     isDisabled () {
-      if (this.$store.state.status) { // if status is anything other than 0
+      if (this.$store.state.brewstate !== 3) { // if status is anything other than 0
         return true
       } else {
         return false

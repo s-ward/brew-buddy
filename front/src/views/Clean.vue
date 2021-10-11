@@ -59,12 +59,18 @@ export default {
       })
     },
     fullclean () {
-      this.$store.dispatch('set_brew_state_action', { brewstate: 4 })
+      this.$store.dispatch('set_brew_state_action', {
+        brewstate: 4,
+        pauseint: this.$store.state.pauseint,
+        cancelint: this.$store.state.cancelint })
         .then(() => this.$store.dispatch('post_state_update')
           .then(() => this.$router.push('/progress')))
     },
     rinse () {
-      this.$store.dispatch('set_brew_state_action', { brewstate: 4 })
+      this.$store.dispatch('set_brew_state_action', {
+        brewstate: 4,
+        pauseint: this.$store.state.pauseint,
+        cancelint: this.$store.state.cancelint })
         .then(() => this.$store.dispatch('post_state_update')
           .then(() => this.$router.push('/progress')))
     },

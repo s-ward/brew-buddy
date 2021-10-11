@@ -266,10 +266,10 @@
                     class="my-0 py-0"
                     >
                       <template v-slot:prepend>
-                        <v-icon @click="minustargettemp(); set_manual();" class="py-0 my-0" color="orange accent-3" :disabled="mode === 'None'">remove</v-icon>
+                        <v-icon @click="minustargettemp(); set_manual();" class="py-0 my-0" color="orange accent-3" :disabled="mode === 'None'">remove_circle_outline</v-icon>
                       </template>
                       <template v-slot:append>
-                        <v-icon @click="addtargettemp(); set_manual();" class="py-0 my-0" color="orange accent-3" :disabled="mode === 'None'">add</v-icon>
+                        <v-icon @click="addtargettemp(); set_manual();" class="py-0 my-0" color="orange accent-3" :disabled="mode === 'None'">add_circle_outline</v-icon>
                       </template>
                     </v-slider>
                   </v-col>
@@ -291,10 +291,10 @@
                     class="my-0 py-0"
                     >
                       <template v-slot:prepend>
-                        <v-icon @click="minustargetflow(); set_manual();" class="py-0 my-0" color="orange accent-3">remove</v-icon>
+                        <v-icon @click="minustargetflow(); set_manual();" class="py-0 my-0" color="orange accent-3">remove_circle_outline</v-icon>
                       </template>
                       <template v-slot:append>
-                        <v-icon @click="addtargetflow(); set_manual();" class="py-0 my-0" color="orange accent-3">add</v-icon>
+                        <v-icon @click="addtargetflow(); set_manual();" class="py-0 my-0" color="orange accent-3">add_circle_outline</v-icon>
                       </template>
                     </v-slider>
                   </v-col>
@@ -412,10 +412,20 @@ export default {
         .then(this.$router.push('/'))
     },
     gohome: function () {
-      this.$store.dispatch('set_brew_state_action', { brewstate: 3 })
-      // this.$store.commit('set_brew_state', brewstate: 3)
-        .then(() => this.$store.dispatch('post_state_update')
-          .then(this.$router.push('/')))
+      // this.$store.dispatch('set_brew_state_action', {
+      this.$store.dispatch('post_state_update', {
+        // brewstate: this.$store.state.brewstate,
+        brewint: this.$store.state.brewint,
+        pauseint: this.$store.state.pauseint,
+        cancelint: 1,
+        cleanint: this.$store.state.cleanint,
+        userintreq: this.$store.state.userintreq,
+        adjunctreq: this.$store.state.adjunctreq
+
+      }) // then get/update store states
+        // .then(() => this.$store.dispatch('post_state_update')
+        //.then(() => this.$store.dispatch('get_brew_state_action')
+          .then(() => (this.$router.push('/')))
     },
     minustargetflow () {
       this.targetflow--
