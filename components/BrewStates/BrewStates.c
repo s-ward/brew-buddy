@@ -313,6 +313,10 @@ void Passive (void)
    PWM_En = 0;
    Stage_complete = 0;
    User_Int_Rqd = 0;
+   User_Adjunct_Rqd = 0;
+   Temp = 0;
+   Sensor = 0;
+
    strcpy (Auto_Process,"");
    strcpy (User_Int_Required,"");
    strcpy (User_Adjunct_Required,"");
@@ -1220,7 +1224,11 @@ void Boil (void)
    HeaterRelay(Off);
    PumpRelay(Off);
 
-   vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
+   while (User_Adjunct_Rqd)
+   {
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 second
+   }
+
    Step_Active = 0;
    BrewState = Cooling_State;
    Boil_Task = NULL;
@@ -1432,7 +1440,7 @@ void Pause(void)
 
    while(Pause_In)  //Manual reset of hardcoded pause
    {
-      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 5 seconds, will be replaced by user unpause 
+      vTaskDelay(100 / portTICK_PERIOD_MS); //pause task until user unpause 
    }
 
    //unpause
