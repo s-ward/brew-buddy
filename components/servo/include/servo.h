@@ -9,7 +9,9 @@
 #define VALVE_OPEN 170 
 #define VALVE_CLOSE 10
 
-#define VALVE_TAP_IN 18
+// where did these values come from
+// #define VALVE_TAP_IN 18
+#define VALVE_TAP_IN 17 // valve 1
 #define VALVE_SPARGE_IN 19
 #define VALVE_SPARGE_OUT 21 
 

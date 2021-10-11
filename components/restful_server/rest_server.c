@@ -297,6 +297,9 @@ static esp_err_t state_change_post_handler(httpd_req_t *req)
     int pauseint = cJSON_GetObjectItem(root, "pauseint")->valueint;
     int cancelint = cJSON_GetObjectItem(root, "cancelint")->valueint;
     int brewint = cJSON_GetObjectItem(root, "brewint")->valueint;
+    int cleanint = cJSON_GetObjectItem(root, "cleanint")->valueint;
+    int userintreq = cJSON_GetObjectItem(root, "userintreq")->valueint;
+    int adjunctreq = cJSON_GetObjectItem(root, "adjunctreq")->valueint;
     //int manualint = cJSON_GetObjectItem(root, "manualint")->valueint;
 
    // if (brewstate == 3){
@@ -309,6 +312,9 @@ static esp_err_t state_change_post_handler(httpd_req_t *req)
     Pause_In = pauseint;
     Cancel_In = cancelint;
     Brew_In = brewint;
+    Clean_In = cleanint;
+    User_Int_Rqd = userintreq;
+    User_Adjunct_Rqd = adjunctreq;
    
 
     ESP_LOGI(REST_TAG, "State POST - Brew State: %d, Pause In: %d, Cancel In: %d", BrewState, Pause_In, Cancel_In);
@@ -672,8 +678,8 @@ static esp_err_t state_get_handler(httpd_req_t *req)
     cJSON_AddNumberToObject(root, "cleanint", Clean_In);
     cJSON_AddNumberToObject(root, "brewint", Brew_In);
   
-    //cJSON_AddNumberToObject(root, "brewstate", User_Adjunct_Rqd);
-    //cJSON_AddNumberToObject(root, "brewstate", User_Int_Rqd);
+    cJSON_AddNumberToObject(root, "userintreq", User_Int_Rqd);
+    cJSON_AddNumberToObject(root, "adjunctreq", User_Adjunct_Rqd);
 
     const char *sys_info = cJSON_Print(root);
     httpd_resp_sendstr(req, sys_info);

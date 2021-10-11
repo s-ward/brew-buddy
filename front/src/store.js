@@ -88,8 +88,8 @@ export default new Vuex.Store({
       state.adjunctreq = data.adjunctreq
       // if message different to old message, push to array
       if (data.userintreq) {
-        // if (data.userintreqmessage !== state.userintreqmessage) {
-        if (data.userintreqmessage !== state.message) {
+        if (data.userintreqmessage !== state.userintreqmessage) {
+        // if (data.userintreqmessage !== state.message) {
           this.commit('add_message', {
             textcolor: 'red--text',
             time: `${data.minutesremaining}: ${data.secondsremaining}`,
@@ -97,11 +97,11 @@ export default new Vuex.Store({
           })
           // state.textarea.push(data.userintreqmessage)
           // state.textarea.shift()
-          state.message = data.userintreqmessage
+          state.userintreqmessage = data.userintreqmessage
         }
       }
       if (data.adjunctreq) {
-        if (data.adjunctreqmessage !== state.message) {
+        if (data.adjunctreqmessage !== state.adjunctreqmessage) {
           this.commit('add_message', {
             textcolor: 'orange--text',
             time: `${data.minutesremaining}: ${data.secondsremaining}`,
@@ -109,7 +109,7 @@ export default new Vuex.Store({
           })
           // state.textarea.push(data.adjunctreqmessage)
           // state.textarea.shift()
-          state.message = data.adjunctreqmessage
+          state.adjunctreqmessage = data.adjunctreqmessage
         }
       }
     },
@@ -158,9 +158,12 @@ export default new Vuex.Store({
     },
     add_message (state, message) {
       state.textarea2.push(message)
-      state.message = message
-      //state.textarea2.shift()
+      // state.message = message.text
+      // state.textarea2.shift()
       // console.log(message)
+    },
+    clear_messages (state) {
+      state.textarea2 = []
     }
 
   },
@@ -192,10 +195,10 @@ export default new Vuex.Store({
           console.log(error);
         });
     },
-    update_brew_progress ({ commit }) {
-      axios.get("/api/v1/progress/data")
+    update_brew_progress_action ({ commit }) {
+      axios.get('/api/v1/progress/data')
         .then(data => {
-          commit("update_brew_progress", data.data)
+          commit('update_brew_progress', data.data)
         })
         .catch(error => {
           console.log(error);
@@ -277,9 +280,12 @@ export default new Vuex.Store({
     get_brew_state_action ({ commit }) {
       axios.get('/api/v1/getstate')
         .then(data => {
-          console.log(data.data.brewstate)
-          console.log(data.data.manualint)
-          console.log(data.data.cancelint)
+          console.log('Get Brew State Action - Brew State: ' + data.data.brewstate)
+          console.log('Get Brew State Action - Pause In: ' + data.data.pauseint)
+          console.log('Get Brew State Action - Cancel In: ' + data.data.cancelint)
+          console.log('Get Brew State Action - Brew In: ' + data.data.brewint)
+          console.log('Get Brew State Action - User Int: ' + data.data.userintreq)
+          console.log('Get Brew State Action - Adjunct Int: ' + data.data.adjunctreq)
           setTimeout(() => {
             commit('set_brew_state', data.data)
           }, 100)

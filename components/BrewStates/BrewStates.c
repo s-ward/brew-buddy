@@ -903,7 +903,9 @@ void Mash (void)
    {
       while (!Temp_Reached) //Wait for temp to be reached
       {
-         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+         
+         vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for .1 seconds
+         Temp_Reached = 1; // TEST VARIABLE
       }
 
    //Move valves to mash tun

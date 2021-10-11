@@ -193,7 +193,8 @@
     </v-row>
      <v-row align="center" justify="space-around">
       <v-col>
-        <v-btn v-if="get_brew_status !==1" :disabled="get_interaction_req" @click="pause">Pause</v-btn>
+        <v-btn v-if="get_brew_status !==1" :disabled="get_interaction_req" @click="pause2">Pause</v-btn>
+        <v-btn v-if="get_brew_status !==1" @click="pause2">Pause</v-btn>
         <v-btn v-if="get_brew_status ===1" :disabled="get_interaction_req" @click="resume">Resume</v-btn>
       </v-col>
       <v-col>
@@ -229,6 +230,9 @@ export default {
     gohome () {
       this.$router.push('/')
     },
+    pause2 () {
+      console.log('Pause 2 button pressed' + this.$store.state.userintreq)
+    },
     pause () {
       // this.$store.dispatch('pause')
       // this.$store.commit('set_brew_status', 2)
@@ -241,16 +245,17 @@ export default {
         userintreq: this.$store.state.userintreq,
         adjunctreq: this.$store.state.adjunctreq
       })
-      .then(() => (
-      this.$store.commit('add_message', {
-        textcolor: 'yellow--text',
-        time: this.get_time_remaining,
-        text: 'Brew Paused'
-      })
-      ))
+        .then(() => (
+          this.$store.commit('add_message', {
+            textcolor: 'yellow--text',
+            time: this.get_time_remaining,
+            text: 'Brew Paused'
+          })
+        ))
     },
     cancel () {
       // add confirmation
+      console.log('Brew Int' + this.$store.state.brewint)
       // this.$store.dispatch('set_brew_state_action', {
       this.$store.dispatch('post_state_update', {
         brewint: this.$store.state.brewint,
@@ -263,6 +268,14 @@ export default {
         // pauseint: this.$store.state.pauseint,
         // cancelint: 1
       })
+        .then(() => (
+          // this.$store.commit('add_message', {
+          //   textcolor: 'red--text',
+          //   time: this.get_time_remaining,
+          //   text: 'Brew Cancelled'
+          // })
+          this.$store.commit('clear_messages')
+        ))
         // .then(() => this.$store.dispatch('post_state_update')
         .then(() => this.$router.push('/'))
     },
@@ -286,7 +299,6 @@ export default {
     },
     confirm () {
       // if user int req - confirm sends config message else if adj req send adj message else disabled
-      console.log('confirm ' + this.$store.userintreq)
       // if (this.$store.userintreq) {
       if (this.get_interaction_req) {
         // add message to stack
@@ -333,7 +345,7 @@ export default {
       }
     },
     updateData: function () {
-      this.$store.dispatch('update_brew_progress')
+      this.$store.dispatch('update_brew_progress_action')
     },
     pause_state: function () {
       this.$ajax
