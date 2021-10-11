@@ -7,7 +7,7 @@ struct brewery_setup_struct
 
     int kettle_volume;
     int mash_tun_volume;
-    bool pumped_transfer;
+    int pumped_transfer;
     char units[10];
     int lead_time;
     char heating_method[20]; // heatingmethods: ['RIMS', 'Element'],

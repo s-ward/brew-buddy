@@ -14,7 +14,7 @@ void EquipConfig (int main_config, int kettlevolume, int mashtunvolume, int exte
     Mash_Tun_Volume = mashtunvolume; //0-127
     External_Connection = external_connection; //0 = tank, 1 = tap
 
-    printf("%d\n",Kettle_Volume);
+    printf("Kettle volume assigned: %d\n",Kettle_Volume);
 
     if (!strcmp (coolingmethod,"None"))
         Cooling_Rqd = 0;  // 0 = n, 1 = y

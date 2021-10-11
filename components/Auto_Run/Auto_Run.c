@@ -6,6 +6,8 @@
 #include "HeaterPID.h"
 #include "BrewStates.h"
 #include "servo.h"
+#include "interrupts.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "string.h"
@@ -13,6 +15,8 @@
 
 void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
 {
+    float Measured_Volume = 0;
+
     Absolute_Seconds_Remaining =-1;  //Initilised to non zero, prevents 0 minute hop additions being called immediately...
     
     HeaterRelay(Off);   //Turns off while moving valves for safety
@@ -52,11 +56,12 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     Sensor = Auto_Run_Task->Target_Sensor;         
     PumpRelay(Auto_Run_Task->Pump);
     HeaterRelay(Auto_Run_Task->Heater);
+
     
     if (Auto_Run_Task->Target_Temp !=0) 
     {
         strcpy (Auto_Process,"Heating to target temp");
-        printf("*%s*\n", Auto_Process);
+        printf("*%s: %d*\n", Auto_Process, Temp);
 
         Auto_PID = 1;
         PWM_En = 1;
@@ -81,13 +86,22 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     if (Auto_Run_Task->Target_Volume != 0)
     {   
         strcpy (Auto_Process,"Transfering target volume");
-        printf("*%s*\n", Auto_Process);
+        printf("*%s: %.2fL*\n", Auto_Process, Auto_Run_Task->Target_Volume);
 
+        reset_meter_flow_total(&flowMeterTapIn);
         //Call volume function
         while (!Volume_Reached)
         {
-            vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-            Volume_Reached=1;  //test
+            if (Auto_Run_Task->Target_Volume > (Measured_Volume/1000))
+            {
+                vTaskDelay(500 / portTICK_PERIOD_MS); //pause task for .5 second
+                Measured_Volume = get_meter_flow_total(&flowMeterTapIn);
+                printf("Transfered Volume: %.2fL\n",(Measured_Volume/1000));
+
+                Volume_Reached=1; //TEST VARIABLE!!!! remove in actual build
+            }
+            else
+                Volume_Reached=1; 
         }
     }
 

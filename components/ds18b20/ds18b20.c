@@ -298,13 +298,13 @@ float ds18b20_get_temp(void) {
       {
         ds18b20_send_byte(0xCC);
         ds18b20_send_byte(0x44);
-        vTaskDelay(750 / portTICK_RATE_MS);
+        //vTaskDelay(750 / portTICK_RATE_MS);
         check=ds18b20_RST_PULSE();
         ds18b20_send_byte(0xCC);
         ds18b20_send_byte(0xBE);
         temp1=ds18b20_read_byte();
         temp2=ds18b20_read_byte();
-        check=ds18b20_RST_PULSE();
+        check=ds18b20_RST_PULSE(); 
         float temp=0;
         temp=(float)(temp1+(temp2*256))/16;
         return temp;
@@ -336,6 +336,7 @@ void reset_search() {
 		ROM_NO[i] = 0;
 	}
 }
+
 // --- Replaced by the one from the Dallas Semiconductor web site ---
 //--------------------------------------------------------------------------
 // Perform the 1-Wire Search Algorithm on the 1-Wire bus using the existing

@@ -35,7 +35,7 @@ esp_err_t save_gpio_state(int gpio_num, int gpio_state)
     nvs_handle_t my_handle;
     esp_err_t err;
 
-    // Open
+    // Open 
     err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &my_handle);
     if (err != ESP_OK)
         return err;
@@ -442,9 +442,7 @@ void update_brewery_setup(int kettlevolume, int mashtunvolume, bool pumpedtransf
     printf("brewery_setup updated - kettle: %d\n", brewery_setup.kettle_volume);
 
     EquipConfig (main_config, kettlevolume, mashtunvolume, external_connection, pumpedtransfer,
-                    units, leadtime, heatingmethod, coolingmethod, auto_fill, safety_margin);
-
-
+        units, leadtime, heatingmethod, coolingmethod, auto_fill, safety_margin);
 }
 
 void update_recipe_list(char *recipelist)

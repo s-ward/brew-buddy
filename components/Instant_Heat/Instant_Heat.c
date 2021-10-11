@@ -7,12 +7,16 @@
 #include "PumpRelay.h"
 #include "HeaterRelay.h"
 #include "EquipConfig.h"
+#include "HeaterPID.h"
+#include "interrupts.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
 
 void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
 {
+    float Measured_Volume = 0;
     Wait = 1;
 
     if (BrewState != Manual_State)
@@ -55,14 +59,22 @@ void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
         if (Temp_Flow->Instant_Volume != 0)
         {   
             strcpy (Auto_Process,"Transfering target volume");
-            printf("*%s*\n", Auto_Process);
+            printf("*%s: %.2fL*\n", Auto_Process, Temp_Flow->Instant_Volume);
 
+            reset_meter_flow_total(&flowMeterTapIn);
             //Call volume function
-
             while (!Volume_Reached)
             {
-                vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
-                Volume_Reached=1;  //test
+                if (Temp_Flow->Instant_Volume > (Measured_Volume/1000))
+                {
+                    vTaskDelay(500 / portTICK_PERIOD_MS); //pause task for .5 second
+                    Measured_Volume = get_meter_flow_total(&flowMeterTapIn);
+                    printf("Transfered Volume: %.2fL\n",(Measured_Volume/1000));
+
+                    Volume_Reached=1; //TEST VARIABLE!!!! remove in actual build
+                }
+                else
+                    Volume_Reached=1;
             }
             Wait = 0;
         }
@@ -96,7 +108,6 @@ void FlowPID(int Targ_Temp)
 {
     int PID_Flow = 30;      //initilised to 30%
     int ReCheck = 0;
-    int Sensor2 = 50;
 
     while(FlowPID_En)
     {
@@ -112,18 +123,18 @@ void FlowPID(int Targ_Temp)
                 valve_set_position(Current_Flow1, &valve_tap_in);   //Only using valve 1
             }
             
-            //PID fnk
+            PID_Flow = (100 - Heater_PID(Targ_Temp, 4)); //Calls PID function, 4 = Flow PID setting
 
             //Safety check for unable to maintain temp with flow rate alone
             if (ReCheck != 0)
                 ReCheck = ReCheck - 1;
-            if(PID_Flow == 100 &&(Sensor2 > Targ_Temp) && (!ReCheck))   //if flow max and temp too great
+            if(PID_Flow == 100 &&(Temp2 > Targ_Temp) && (!ReCheck))   //if flow max and temp too great
             {    
                 Manual_Duty = (Manual_Duty-5);  //Reduce heater power by 5%
                 ReCheck = 50;                   //Wait 5 seconds before checking again
             }        
         }
-        vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for 1 second
+        vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
     }
     vTaskDelete(NULL);
 }
