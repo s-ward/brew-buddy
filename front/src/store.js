@@ -53,6 +53,7 @@ export default new Vuex.Store({
     userintreq: 0,
     adjunctreqmessage: '',
     adjunctreq: 0,
+    message: ''
 
     // needs if etc.
     // statusinfo: {
@@ -87,7 +88,8 @@ export default new Vuex.Store({
       state.adjunctreq = data.adjunctreq
       // if message different to old message, push to array
       if (data.userintreq) {
-        if (data.userintreqmessage !== state.userintreqmessage) {
+        // if (data.userintreqmessage !== state.userintreqmessage) {
+        if (data.userintreqmessage !== state.message) {
           this.commit('add_message', {
             textcolor: 'red--text',
             time: `${data.minutesremaining}: ${data.secondsremaining}`,
@@ -95,11 +97,11 @@ export default new Vuex.Store({
           })
           // state.textarea.push(data.userintreqmessage)
           // state.textarea.shift()
-          state.userintreqmessage = data.userintreqmessage
+          state.message = data.userintreqmessage
         }
       }
       if (data.adjunctreq) {
-        if (data.adjunctreqmessage !== state.adjunctreqmessage) {
+        if (data.adjunctreqmessage !== state.message) {
           this.commit('add_message', {
             textcolor: 'orange--text',
             time: `${data.minutesremaining}: ${data.secondsremaining}`,
@@ -107,7 +109,7 @@ export default new Vuex.Store({
           })
           // state.textarea.push(data.adjunctreqmessage)
           // state.textarea.shift()
-          state.adjunctreqmessage = data.adjunctreqmessage
+          state.message = data.adjunctreqmessage
         }
       }
     },
@@ -156,6 +158,7 @@ export default new Vuex.Store({
     },
     add_message (state, message) {
       state.textarea2.push(message)
+      state.message = message
       //state.textarea2.shift()
       // console.log(message)
     }
