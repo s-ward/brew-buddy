@@ -511,8 +511,8 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
         mashtime1, mashtime2, mashtime3, mashtime4, mashtime5,
         mashtemp1, mashtemp2, mashtemp3, mashtemp4, mashtemp5,
         spargewatervol, spargetemp, boiltime,
-        adjunctname1, adjunctname2, adjunctname3, adjunctname4, adjunctname5,
-        adjuncttime1, adjuncttime2, adjuncttime3, adjuncttime4, adjuncttime5,
+        adjunctname1, adjunctname2, adjunctname3, adjunct4, adjunct5,
+        adjuncttime1, adjuncttime2, adjuncttime3, adjunct4, adjunct5,
         cooltemp);
 
     // #include BrewStates.h
