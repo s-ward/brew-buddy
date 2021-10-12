@@ -103,7 +103,7 @@ void Auto_Run_Setup (void)
         Boiling.Valve2 = 1;   //to valve 3
         Boiling.Valve3 = 1;   //to valve 3
         Boiling.FlowCtrl = 100;            //Max? may be better to set to Mash_Flow_Rate but testing required
-        Boiling.Target_Temp = 100;         //Maybe 99 to prevent steam issues though. testing required
+        Boiling.Target_Temp = 25;         //Maybe 99 to prevent steam issues though. testing required
         Boiling.Target_Sensor = 2;
         Boiling.Pump = 1;
         Boiling.Heater = 1;
