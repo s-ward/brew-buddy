@@ -78,38 +78,41 @@ void PIDController_Init(void) {
 
 
 
-int Heater_PID (int Target_Temp, int Target_Sensor)
+int Heater_PID (int Targ_Temp, int Targ_Sensor)
 {
-    if (Target_Sensor == 1)
+    if (Targ_Sensor == 1)
     {
         Actual_Temp = Temp1;
-        Duty_Cycle = PIDController_Update(&TempSensor1, Target_Temp, Temp1);
+        Duty_Cycle = PIDController_Update(&TempSensor1, Targ_Temp, Temp1);
     }
-    else if (Target_Sensor == 2)
+    else if (Targ_Sensor == 2)
     {
         Actual_Temp = Temp2;
-        Duty_Cycle = PIDController_Update(&TempSensor2, Target_Temp, Temp2);
+        Duty_Cycle = PIDController_Update(&TempSensor2, Targ_Temp, Temp2);
     }
-    else if (Target_Sensor == 3)
+    else if (Targ_Sensor == 3)
     {
         Actual_Temp = Temp3;
-        Duty_Cycle = PIDController_Update(&TempSensor3, Target_Temp, Temp3);
+        Duty_Cycle = PIDController_Update(&TempSensor3, Targ_Temp, Temp3);
     }
-    else if (Target_Sensor == 4)
+    else if (Targ_Sensor == 4)
     {
         Actual_Temp = Temp2;
-        Duty_Cycle = PIDController_Update(&TempSensor2, Target_Temp, Temp2);    //Instant heat flow control PID
+        Duty_Cycle = PIDController_Update(&TempSensor2, Targ_Temp, Temp2);    //Instant heat flow control PID
     }
     //Duty_Cycle = 10;         //manual value atm, proper PID function will update this automatically
     //printf("%d\n", Heater_Duty_Cycle);
 
-    if (Target_Temp <= Actual_Temp)
+    if (Targ_Temp <= Actual_Temp)
     {
         Temp_Reached = 1;
         printf("Temp Reached!!!\n");
     }
     else
         Temp_Reached = 0;
+
+    Current_Temp = Actual_Temp; // Var for app
+    sprintf(Target_Temperature, "%d", Targ_Temp);
 
     return (Duty_Cycle);
 }

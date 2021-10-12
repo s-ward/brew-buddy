@@ -105,10 +105,20 @@ void getTempTask(void *arg)
       //printf("%d - Sensor 1 - Temperature: %f\n", count, Temp1);
       ds18b20_init(T2_PIN);
       Temp2 = ds18b20_get_temp();
-      //printf("%d - Sensor 2 - Temperature: %f\n", count, Temp2);
+      printf("%d - Sensor 2 - Temperature: %f\n", count, Temp2);
       ds18b20_init(T3_PIN);
       Temp3 = ds18b20_get_temp();
      // printf("%d - Sensor 3 - Temperature: %f\n", count, Temp3);
+
+      if (!PID_EN)
+      {
+         Current_Temp = Temp2;
+         strcpy(Target_Temperature, "N/A\n");
+      }
+
+      //printf("Temp: %.2f\n",Current_Temp);
+      printf("Target Temp: %s\n",Target_Temperature);
+
       vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
       count++;
    }

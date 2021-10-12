@@ -45,7 +45,6 @@ int Mash_Level_Safe;
 
 void Brew_States (void)
 {
-   int Flow_Rate = 0;
    // gpio_set_direction(TEST_PAUSE_PIN, GPIO_MODE_INPUT);
    // gpio_set_direction(TEST_CANCEL_PIN, GPIO_MODE_INPUT);
    gpio_set_direction(Float1, GPIO_MODE_INPUT);
@@ -913,8 +912,8 @@ void Mash (void)
       while (!Temp_Reached) //Wait for temp to be reached
       {
          
-         vTaskDelay(10000 / portTICK_PERIOD_MS); //pause task for .1 seconds
-         Temp_Reached = 1; // TEST VARIABLE
+         vTaskDelay(100 / portTICK_PERIOD_MS); //pause task for .1 seconds
+         //Temp_Reached = 1; // TEST VARIABLE
       }
 
    //Move valves to mash tun

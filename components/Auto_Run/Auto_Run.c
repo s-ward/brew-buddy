@@ -51,7 +51,7 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
 
 
     //Initilise temp pid
-
+    PID_EN = 1;
     Temp = Auto_Run_Task->Target_Temp;             
     Sensor = Auto_Run_Task->Target_Sensor;         
     PumpRelay(Auto_Run_Task->Pump);
@@ -133,6 +133,7 @@ void Auto_Run (struct Auto_Run_Controls *Auto_Run_Task)
     PumpRelay(Off);
     
     strcpy (Auto_Process,"");
+    PID_EN = 0;
     Temp_Reached = 0;
     Volume_Reached = 0;
     Timer = 0;

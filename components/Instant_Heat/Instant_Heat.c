@@ -19,6 +19,8 @@ void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
     float Measured_Volume = 0;
     Wait = 1;
 
+    PID_EN = 1;
+
     if (BrewState != Manual_State)
     {
         if (External_Connection)
@@ -92,6 +94,7 @@ void Instant_Heat (struct Instant_Heat_Controls *Temp_Flow)
         vTaskDelay(1000 / portTICK_PERIOD_MS); //pause task for 1 second
     }   
 
+    PID_EN = 0;
     FlowPID_En = 0;
     PWM_En = 0;
     Volume_Reached = 0;

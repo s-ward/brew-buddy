@@ -41,9 +41,15 @@ int Cold_Rinse;
 int FlowPID_En;
 int Man_EN;
 
+int Flow_Rate;
 int Current_Flow1;
 int Current_Flow2;
 int Current_Flow3;
+
+int PID_EN;
+
+float Current_Temp;
+char Target_Temperature[5];
 
 float Temp1;
 float Temp2;
