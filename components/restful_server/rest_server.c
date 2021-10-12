@@ -511,8 +511,8 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
         mashtime1, mashtime2, mashtime3, mashtime4, mashtime5,
         mashtemp1, mashtemp2, mashtemp3, mashtemp4, mashtemp5,
         spargewatervol, spargetemp, boiltime,
-        adjunctname1, adjunctname2, adjunctname3, "adjunct", "adjunct",
-        adjuncttime1, adjuncttime2, adjuncttime3, 5, 5,
+        adjunctname1, adjunctname2, adjunctname3, adjunctname4, adjunctname5,
+        adjuncttime1, adjuncttime2, adjuncttime3, adjuncttime4, adjuncttime5,
         cooltemp);
 
     // #include BrewStates.h
@@ -627,7 +627,8 @@ static esp_err_t manual_data_get_handler(httpd_req_t *req)
 {
     httpd_resp_set_type(req, "application/json");
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "raw", esp_random() % 20); //change to gettemp
+    //cJSON_AddNumberToObject(root, "raw", esp_random() % 20); //change to gettemp
+    cJSON_AddNumberToObject(root, "raw", Temp1); //change to gettemp
     //cJSON_AddNumberToObject(root, "raw", ds18b20_get_temp()); //change to gettemp
     const char *sys_info = cJSON_Print(root);
     httpd_resp_sendstr(req, sys_info);
