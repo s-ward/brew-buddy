@@ -628,7 +628,7 @@ static esp_err_t manual_data_get_handler(httpd_req_t *req)
     httpd_resp_set_type(req, "application/json");
     cJSON *root = cJSON_CreateObject();
     //cJSON_AddNumberToObject(root, "raw", esp_random() % 20); //change to gettemp
-    cJSON_AddNumberToObject(root, "raw", Temp1); //change to gettemp
+    cJSON_AddNumberToObject(root, "raw", Current_Temp); //change to gettemp
     //cJSON_AddNumberToObject(root, "raw", ds18b20_get_temp()); //change to gettemp
     const char *sys_info = cJSON_Print(root);
     httpd_resp_sendstr(req, sys_info);
