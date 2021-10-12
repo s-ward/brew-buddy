@@ -193,8 +193,7 @@
     </v-row>
      <v-row align="center" justify="space-around">
       <v-col>
-        <v-btn v-if="get_brew_status !==1" :disabled="get_interaction_req" @click="pause2">Pause</v-btn>
-        <v-btn v-if="get_brew_status !==1" @click="pause2">Pause</v-btn>
+        <v-btn v-if="get_brew_status !==1" :disabled="get_interaction_req" @click="pause">Pause</v-btn>
         <v-btn v-if="get_brew_status ===1" :disabled="get_interaction_req" @click="resume">Resume</v-btn>
       </v-col>
       <v-col>
@@ -502,7 +501,11 @@ export default {
       return this.$store.state.userintreqmessage
     },
     get_interaction_req () {
-      return this.$store.state.userintreq
+      if (this.$store.state.userintreq) {
+        return true
+      } else {
+        return false
+      }
     },
     get_text_area () {
       // document.getElementById('textarea').scrollTop = document.getElementById('textarea').scrollHeight
