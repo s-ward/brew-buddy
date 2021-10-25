@@ -82,23 +82,35 @@ int Heater_PID (int Targ_Temp, int Targ_Sensor)
 {
     if (Targ_Sensor == 1)
     {
-        Actual_Temp = Temp1;
-        Duty_Cycle = PIDController_Update(&TempSensor1, Targ_Temp, Temp1);
+        if (Temp1 < 120)
+        {    
+            Actual_Temp = Temp1;
+            Duty_Cycle = PIDController_Update(&TempSensor1, Targ_Temp, Temp1);
+        }
     }
     else if (Targ_Sensor == 2)
     {
-        Actual_Temp = Temp2;
-        Duty_Cycle = PIDController_Update(&TempSensor2, Targ_Temp, Temp2);
+        if (Temp2 < 120)
+        {    
+            Actual_Temp = Temp2;
+            Duty_Cycle = PIDController_Update(&TempSensor2, Targ_Temp, Temp2);
+        }
     }
     else if (Targ_Sensor == 3)
     {
-        Actual_Temp = Temp3;
-        Duty_Cycle = PIDController_Update(&TempSensor3, Targ_Temp, Temp3);
+        if (Temp3 < 120)
+        {
+            Actual_Temp = Temp3;
+            Duty_Cycle = PIDController_Update(&TempSensor3, Targ_Temp, Temp3);
+        }
     }
     else if (Targ_Sensor == 4)
     {
-        Actual_Temp = Temp2;
-        Duty_Cycle = PIDController_Update(&TempSensor2, Targ_Temp, Temp2);    //Instant heat flow control PID
+        if (Temp2 < 120)
+        {
+            Actual_Temp = Temp2;
+            Duty_Cycle = PIDController_Update(&TempSensor2, Targ_Temp, Temp2);    //Instant heat flow control PID
+        }
     }
     //Duty_Cycle = 10;         //manual value atm, proper PID function will update this automatically
     //printf("%d\n", Heater_Duty_Cycle);

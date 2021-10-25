@@ -112,8 +112,11 @@ void getTempTask(void *arg)
 
       if (!PID_EN)
       {
-         Current_Temp = Temp1;
-         strcpy(Target_Temperature, "N/A\n");
+         if (Temp1 < 120)
+        {
+            Current_Temp = Temp1;
+            strcpy(Target_Temperature, "N/A\n");
+        }     
       }
 
       //printf("Temp: %.2f\n",Current_Temp);
