@@ -44,5 +44,4 @@ void interrupts_config(void);
 void getFlowRate(uint32_t timeDifference);
 void updateFlowMeter(struct FlowMeter *flowMeter);
 
-
 #endif

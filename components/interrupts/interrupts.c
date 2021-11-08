@@ -12,7 +12,8 @@
 
 //flow meter
 #define FM_LARGE 23
-#define FM_SMALL 21
+#define FM_SMALL 18
+#define FM_SMALL2 21
 
 #define GPIO_OUTPUT_LED 2 //set which gpio are which output
 #define GPIO_OUTPUT_LED_2 18
@@ -31,6 +32,13 @@
 
 //#define FLOW_METER_CAL_SMALL 7
 #define FLOW_METER_CAL_LARGE 11
+
+//#define FLOW_METER_INTERVAL 1000
+
+//#define FLOW_METER_CAL_SMALL 7
+#define FLOW_METER_CAL_LARGE 11
+
+
 
 //#define FLOW_METER_INTERVAL 1000
 

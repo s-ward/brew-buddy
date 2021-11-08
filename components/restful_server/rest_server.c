@@ -358,29 +358,16 @@ static esp_err_t setup_save_post_handler(httpd_req_t *req)
     char *heatingmethod = cJSON_GetObjectItem(root, "heatingmethod")->valuestring;
     char *coolingmethod = cJSON_GetObjectItem(root, "coolingmethod")->valuestring;
 
-    //int n = cJSON_GetArraySize(root);
-
-    // new version of ->valueint
-    //double x = cJSON_GetNumberValue(cJSON_GetObjectItem(root, "mashtunvolume"));
-
-    // new version of ->valuestring
-    // char *xx = cJSON_GetStringValue(cJSON_GetObjectItem(root, "mashtunvolume"));
-    // if (xx) {
-    // }
-
-    // printf("server print - kettlevolume: %d, mashtunvolume: %d, pumpedtransfer: %s, units: %s, leadtime: %d, heating: %s, cooling: %s\n",
-    //        kettlevolume, mashtunvolume, pumpedtransfer ? "true" : "false", units,
-    //        leadtime, heatingmethod, coolingmethod);
-
     save_brewery_setup(kettlevolume, mashtunvolume, pumpedtransfer, units,
                        leadtime, heatingmethod, coolingmethod);
 
-    ESP_LOGI(REST_TAG, "Brewery Setup Saved - Kettle Volume: %d", kettlevolume);
+    ESP_LOGI(REST_TAG, "Brewery Setup Saved");
     cJSON_Delete(root);
     httpd_resp_sendstr(req, "Post control value successfully");
     return ESP_OK;
 }
 
+/* handler for saving recipe list */
 static esp_err_t recipes_save_post_handler(httpd_req_t *req)
 {
     int total_len = req->content_len;
@@ -419,7 +406,7 @@ static esp_err_t recipes_save_post_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-// start brew hand;ler
+/* start brew handler */
 static esp_err_t start_brew_post_handler(httpd_req_t *req)
 {
 
@@ -563,7 +550,7 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-/* Simple handler for getting manual data (temp, valve position, flow rate*/
+/* Simple handler for getting manual data (temp, valve position, flow rate) */
 static esp_err_t temperature_data_get_handler(httpd_req_t *req)
 {
     httpd_resp_set_type(req, "application/json");
@@ -592,8 +579,6 @@ static esp_err_t setup_load_get_handler(httpd_req_t *req)
     cJSON_AddStringToObject(root, "coolingmethod", brewery_setup.cooling_method);
 
     const char *brewery_setup = cJSON_Print(root);
-
-    //printf("brewsetup in rest_server.c string: %s\n", brewery_setup);
 
     httpd_resp_sendstr(req, brewery_setup);
     free((void *)brewery_setup);
@@ -692,7 +677,6 @@ static esp_err_t brew_progress_get_handler(httpd_req_t *req)
     // cJSON_AddNumberToObject(root, "secondsremaining", esp_random() % 60); // change to Seconds_Remaining
     cJSON_AddNumberToObject(root, "secondsremaining", Seconds_Remaining);
     cJSON_AddItemToObject(root, "targettemp", cJSON_CreateString(Target_Temperature));
-
     cJSON_AddItemToObject(root, "userintreqmessage", cJSON_CreateString(User_Int_Required));
     //cJSON_AddNumberToObject(root, "userintreq", User_Int_Required_Int);
     cJSON_AddNumberToObject(root, "userintreq", User_Int_Rqd);
@@ -707,6 +691,7 @@ static esp_err_t brew_progress_get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+/* handler for getting state */
 static esp_err_t state_get_handler(httpd_req_t *req)
 {
     //printf("Brew progress get handler");
@@ -729,7 +714,6 @@ static esp_err_t state_get_handler(httpd_req_t *req)
     cJSON_Delete(root);
     return ESP_OK;
 }
-
 
 
 esp_err_t start_rest_server(const char *base_path)
