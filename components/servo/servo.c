@@ -5,6 +5,8 @@
 
 #include "servo.h"
 
+#include "BrewStates.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -41,7 +43,25 @@ servo - the valve to move (valve_tap_in, valve_sparge_in, valve_sparge_out)
 */
 void valve_set_position (int angle, servo_params* servo) {
 
+    angle = ((angle*90)/100);//Convert % to 0-90 deg
+
+    if (!servo->internal)  //If valve set to external
+        angle = 270 - angle;    // Flow control setting for externally set valve
+
+    if (servo->gpio_num == VALVE_TAP_IN)
+        Valve1_State = servo->internal;
+    if (servo->gpio_num == VALVE_SPARGE_IN)
+        Valve2_State = servo->internal;
+    if (servo->gpio_num == VALVE_SPARGE_OUT)
+        Valve3_State = servo->internal;
+
+    printf("%s - Angle: %d\n", servo->name, angle);
+
     mcpwm_set_duty_in_us(servo->mcpwm_num, servo->timer_num, servo->gen, servo_per_degree_init(angle));
+
+    // vTaskDelay(5000 / portTICK_PERIOD_MS); //pause for 5 sec
+
+    // mcpwm_set_duty_in_us(servo->mcpwm_num, servo->timer_num, servo->gen, 0); // PWM off?
 }
 
 /*
@@ -52,7 +72,18 @@ uint32_t valve_get_position (servo_params* servo) {
     return duty_percent_to_angle(mcpwm_get_duty(servo->mcpwm_num, servo->timer_num, servo->gen));
 }
 
+void init_servo_params() {
+
+    static servo_params valve_tap_in = {MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, VALVE_TAP_IN, MCPWM_OPR_A, "Valve Tap In"};
+    static servo_params valve_sparge_in = {MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0B, VALVE_SPARGE_IN, MCPWM_OPR_B, "Valve Sparge In"};
+    static servo_params valve_sparge_out = {MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM1A, VALVE_SPARGE_OUT, MCPWM_OPR_A, "Valve Sparge Out"};
+}
+
+
+
 void servo_init(void) {
+
+   // init_servo_params();
 
     printf("%s Pointer Address: %p\n", valve_tap_in.name, &valve_tap_in);
     printf("%s Pointer Address: %p\n", valve_sparge_in.name, &valve_sparge_in);

@@ -37,16 +37,36 @@ export default new Router({
       name: 'manual',
       component: Manual
     },
+    // {
+    //   path: '/book',
+    //   name: 'book',
+    //   component: Book
+    // },
     {
-      path: '/book',
+      path: '/book/:id',
       name: 'book',
-      component: Book
+      components: {
+        default: Book
+      },
+      props: {
+        default: true
+      }
     },
     {
       path: '/brew',
       name: 'brew',
       component: Brew
     },
+    // {
+    //   path: '/brew/:recipe',
+    //   name: 'brew',
+    //   components: {
+    //     default: Brew
+    //   },
+    //   props: {
+    //     default: true
+    //   }
+    // },
     {
       path: '/clean',
       name: 'clean',
@@ -63,9 +83,14 @@ export default new Router({
       component: Recipe
     },
     {
-      path: '/setup',
+      path: '/setup/:id',
       name: 'setup',
-      component: Setup
+      components: {
+        default: Setup
+      },
+      props: {
+        default: true
+      }
     }
   ]
 })

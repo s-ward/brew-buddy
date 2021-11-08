@@ -1,7 +1,7 @@
-<template color="green accent-4">
+<template>
   <v-app id="inspire" color="blue accent-4">
-    <v-navigation-drawer v-model="drawer" fixed app clipped>
-      <v-list dense>
+    <!-- <v-navigation-drawer v-model="drawer" fixed app clipped> -->
+<!--       <v-list dense>
         <v-list-tile to="/">
           <v-list-tile-action>
             <v-icon>home</v-icon>
@@ -82,20 +82,28 @@
             <v-list-tile-title>Brewery Setup</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-      </v-list>
-    </v-navigation-drawer>
-    <v-toolbar color="red accent-4" dark fixed app clipped-left>
+      </v-list> -->
+    <!-- </v-navigation-drawer> -->
+    <!-- <v-toolbar color="red accent-4" dark fixed app clipped-left>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Brew Buddy</v-toolbar-title>
-    </v-toolbar>
-    <v-content color="indigo accent-4" class="red">
-      <v-container fluid fill-height teal>
-        <router-view class="#C96E12"></router-view>
-      </v-container>
-    </v-content>
-    <v-footer color="red accent-4" app fixed>
+    </v-toolbar> -->
+  <!-- <div class="purple darken-2">  -->
+      <v-main class="grey lighten-3">
+        <v-container fluid fill-height justify-center class="pa-0 ma-0">
+          <!-- <v-row class="fill-height justify-center" justify-center :justify="center" > -->
+    <v-col cols="12" sm="8"  md="6" lg="4" class="fill-height">
+      
+          <router-view ></router-view>
+              </v-col>
+  <!-- </v-row>  -->
+        </v-container>
+      </v-main>
+      <!-- </div> -->
+ 
+    <!-- <v-footer color="red accent-4" app fixed>
       <span class="white--text">&copy; ESPRESSIF SYSTEMS (SHANGHAI) CO., LTD. All rights reserved.</span>
-    </v-footer>
+    </v-footer> -->
   </v-app>
 </template>
 
