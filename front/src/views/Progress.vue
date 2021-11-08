@@ -135,7 +135,7 @@
     <v-row>
       <v-col>
         <v-text-field
-          :value="get_brew_status"
+          :value="get_target_temp"
           readonly
           outlined
           dense
@@ -180,7 +180,7 @@
       
       <v-col>
         <v-text-field
-          :value="get_brew_status"
+          :value="get_flow_chart_value"
           readonly
           outlined
           dense
@@ -388,6 +388,9 @@ export default {
       //return this.$store.state.status // int
       return this.$store.state.pauseint
       
+    },
+    get_target_temp () {
+      return this.$store.state.targettemp
     },
     get_current_stage () {
       return this.$store.state.stage

@@ -463,9 +463,9 @@ export default {
           { id: '5', time: 0 }
           // { id: '1', time: 0, adjuncts: 'Adjuncts' },
           // { id: '2', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '2', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '2', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '2', time: 0, adjuncts: 'Adjuncts' }
+          // { id: '3', time: 0, adjuncts: 'Adjuncts' },
+          // { id: '4', time: 0, adjuncts: 'Adjuncts' },
+          // { id: '5', time: 0, adjuncts: 'Adjuncts' }
         ],
         cooltemp: 0,
         notes: ''
@@ -497,9 +497,9 @@ export default {
           { id: '5', time: 0 }
           // { id: '1', time: 0, adjuncts: 'Adjuncts' },
           // { id: '2', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '2', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '2', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '2', time: 0, adjuncts: 'Adjuncts' }
+          // { id: '3', time: 0, adjuncts: 'Adjuncts' },
+          // { id: '4', time: 0, adjuncts: 'Adjuncts' },
+          // { id: '5', time: 0, adjuncts: 'Adjuncts' }
         ],
         // adjuncts: [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }, { id: '5' }],
         adjunctname: '',

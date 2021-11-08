@@ -12,16 +12,18 @@
 
 //flow meter
 #define FM_LARGE 23
-#define FM_SMALL 21
+#define FM_SMALL 18
+#define FM_SMALL2 21
 
-#define GPIO_OUTPUT_LED 2 //set which gpio are which output
-#define GPIO_OUTPUT_LED_2 18
+
+#define GPIO_OUTPUT_LED 12 //set which gpio are which output
+#define GPIO_OUTPUT_LED_2 32
 #define GPIO_OUTPUT_PIN_SEL ((1ULL << GPIO_OUTPUT_LED) | (1ULL << GPIO_OUTPUT_LED_2)) //bitmask output pins
 
 #define GPIO_INPUT_BUTTON 13 //button
 #define GPIO_INPUT_IO_1 5
 //#define GPIO_INPUT_PIN_SEL  ((1ULL<<GPIO_INPUT_BUTTON) | (1ULL<<GPIO_INPUT_IO_1))
-#define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_BUTTON) | (1ULL << FM_LARGE) | (1ULL << FM_SMALL))
+#define GPIO_INPUT_PIN_SEL ((1ULL << GPIO_INPUT_BUTTON) | (1ULL << FLOW_METER_GPIO_TAP_IN) | (1ULL << FLOW_METER_GPIO_SPARGE_IN) | (1ULL << FLOW_METER_GPIO_SPARGE_OUT))
 
 #define ESP_INTR_FLAG_DEFAULT 0
 
@@ -29,8 +31,12 @@
 #define FLOW_METER_GPIO_SPARGE_IN 21  // second flow meter - revise name
 #define FLOW_METER_GPIO_SPARGE_OUT 18 // third flow meter - revise name
 
+
+
 //#define FLOW_METER_CAL_SMALL 7
 #define FLOW_METER_CAL_LARGE 11
+
+
 
 //#define FLOW_METER_INTERVAL 1000
 
@@ -213,6 +219,7 @@ void initFlowMeters(void)
     flowMeterTapIn = (struct FlowMeter){FLOW_METER_GPIO_TAP_IN, 0, 0, FLOW_METER_CAL_LARGE, 0, 0, 0, 0, 0};
    // printf("%d Pointer Address inside init: %p\n", flowMeterTapIn.gpio_num, &flowMeterTapIn);
     flowMeterSpargeIn = (struct FlowMeter){FLOW_METER_GPIO_SPARGE_IN, 0, 0, FLOW_METER_CAL_LARGE, 0, 0, 0, 0, 0};
+    flowMeterSpargeOut = (struct FlowMeter){FLOW_METER_GPIO_SPARGE_OUT, 0, 0, FLOW_METER_CAL_LARGE, 0, 0, 0, 0, 0};
    // static struct FlowMeter flowMeterSpargeOut = {FLOW_METER_GPIO_SPARGE_OUT, 0, 0, FLOW_METER_CAL_LARGE, 0, 0, 0, 0, 0};
 }
 
@@ -256,10 +263,15 @@ void interrupts_config(void)
 
     // flow meter interrupts
  //gpio_isr_handler_add(GPIO_INPUT_BUTTON, button_isr_handler, &flowMeterSpargeOut);
-    gpio_isr_handler_add(FLOW_METER_GPIO_TAP_IN, pulse_count_add, &flowMeterTapIn);
+    // gpio_isr_handler_add(FLOW_METER_GPIO_TAP_IN, pulse_count_add, &flowMeterTapIn);
 
     gpio_isr_handler_add(FLOW_METER_GPIO_SPARGE_IN, pulse_count_add, &flowMeterSpargeIn);
-    // gpio_isr_handler_add(FLOW_METER_GPIO_SPARGE_OUT, pulse_count_add, &flowMeterSpargeOut);
+    
+    
+    
+    
+    gpio_isr_handler_add(FLOW_METER_GPIO_TAP_IN, pulse_count_add, &flowMeterTapIn);
+    gpio_isr_handler_add(FLOW_METER_GPIO_SPARGE_OUT, pulse_count_add, &flowMeterSpargeOut);
 
     //add handlers for each input here
     //gpio_isr_handler_add(GPIO_INPUT_BUTTON, gpio_isr_handler, (void*) GPIO_INPUT_BUTTON);

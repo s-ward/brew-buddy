@@ -9,7 +9,9 @@ export default new Vuex.Store({
     chart_value: [8, 2, 5, 9, 5, 11, 3, 5, 10, 0, 1, 8, 2, 9, 0, 13, 10, 7, 16],
     ch_value: 10,
     temp1_chart_value: [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    flow1_chart_value: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     temp1_value: 8,
+    flow1_value: 0,
     textarea: ['text line 1', 'text line 2', 'text line 3'],
     textarea2: [
       // { textcolor: 'red--text', time: '44:10', text: 'Brew Paused: Please configure Mash Tun and confirm to continue' },
@@ -53,7 +55,8 @@ export default new Vuex.Store({
     userintreq: 0,
     adjunctreqmessage: '',
     adjunctreq: 0,
-    message: ''
+    message: '',
+    targettemp: ''
 
     // needs if etc.
     // statusinfo: {
@@ -74,12 +77,18 @@ export default new Vuex.Store({
       state.temp1_chart_value.shift()
       state.temp1_value = newTemp;
     },
+    update_flow1 (state, newFlow) {
+      state.flow1_chart_value.push(newFlow)
+      state.flow1_chart_value.shift()
+      state.flow1_value = newFlow;
+    },
     update_brew_progress (state, data) {
       state.brewstate = data.brewstate
       state.autoprocess = data.autoprocess
       // state.status = data.status
       state.minutesremaining = data.minutesremaining
       state.secondsremaining = data.secondsremaining
+      state.targettemp = data.targettemp
       state.autoprocess = data.autoprocess
       state.stage = data.stage
       state.step = data.step
@@ -136,17 +145,11 @@ export default new Vuex.Store({
      
     },
     set_brew_state (state, data) {
-      // state.brewstate = data.brewstate
       state.pauseint = data.pauseint
       state.cancelint = data.cancelint
       state.cleanint = data.cleanint
       state.brewint = data.brewint
       state.brewstate = data.brewstate
-      // state.userintreq = data.userintreq
-      // state.adjunctreq = data.adjunctreq
-      console.log(data.brewstate)
-      console.log(data.pauseint)
-      console.log(data.cancelint)
       if (data.brewstate === 3) {
         state.status = 0
       } else if ([4, 5, 6, 7, 8, 9].includes(data.brewstate)) {
@@ -180,7 +183,16 @@ export default new Vuex.Store({
     update_temp1({ commit }) {
       axios.get("/api/v1/manual/raw")
         .then(data => {
-          commit("update_temp1", data.data.raw);
+          commit("update_temp1", data.data.rawTemp1);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    update_flow1({ commit }) {
+      axios.get("/api/v1/manual/raw")
+        .then(data => {
+          commit("update_flow1", data.data.rawFlow1);
         })
         .catch(error => {
           console.log(error);
@@ -261,18 +273,24 @@ export default new Vuex.Store({
     //     }, 1000)
     //   })
     // }
+
+    set_brew_state (state, data) {
+      state.pauseint = data.pauseint
+      state.cancelint = data.cancelint
+      state.cleanint = data.cleanint
+      state.brewint = data.brewint
+      state.brewstate = data.brewstate
+      if (data.brewstate === 3) {
+        state.status = 0
+      } else if ([4, 5, 6, 7, 8, 9].includes(data.brewstate)) {
+        state.status = 1
+      }
+    },
     set_brew_state_action ({ commit }, data) {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           commit('set_brew_state', data)
           resolve()
-          // console.log(data.brewstate)
-          console.log(data.pauseint)
-          console.log(data.cancelint)
-          console.log(data.cleanint)
-          console.log(data.brewint)
-          console.log(data.userintreq)
-          console.log(data.adjunctreq)
         }, 1000)
       })
     },
@@ -280,12 +298,6 @@ export default new Vuex.Store({
     get_brew_state_action ({ commit }) {
       axios.get('/api/v1/getstate')
         .then(data => {
-          console.log('Get Brew State Action - Brew State: ' + data.data.brewstate)
-          console.log('Get Brew State Action - Pause In: ' + data.data.pauseint)
-          console.log('Get Brew State Action - Cancel In: ' + data.data.cancelint)
-          console.log('Get Brew State Action - Brew In: ' + data.data.brewint)
-          console.log('Get Brew State Action - User Int: ' + data.data.userintreq)
-          console.log('Get Brew State Action - Adjunct Int: ' + data.data.adjunctreq)
           setTimeout(() => {
             commit('set_brew_state', data.data)
           }, 100)
@@ -294,7 +306,7 @@ export default new Vuex.Store({
           console.log(error)
         })
     },
-    add_message_action ({commit}, data) {
+    add_message_action ({ commit }, data) {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           commit('add_message', data)

@@ -324,7 +324,7 @@
           <chart></chart>
         </v-col>
         <v-col cols="6">
-          <v-text-field :value="get_chart_value" label="Flow" suffix="mL/m" class="mt-0" type="number" hide-details readonly outlined></v-text-field>
+          <v-text-field :value="get_flow_chart_value" label="Flow" suffix="mL/m" class="mt-0" type="number" hide-details readonly outlined></v-text-field>
           <chart></chart>
         </v-col>
       </v-row>
@@ -394,27 +394,8 @@ export default {
           console.log(error)
         })
     },
-    // gohome () {
-    //   // go back to passive state
-    //   this.$router.push('/')
-    // },
-    gohome1: function () {
-      this.$ajax
-        .post('/api/v1/changestate', {
-          brewstate: 'passive'
-        })
-        .then(data => {
-          console.log(data)
-        })
-        .catch(error => {
-          console.log(error)
-        })
-        .then(this.$router.push('/'))
-    },
     gohome: function () {
-      // this.$store.dispatch('set_brew_state_action', {
       this.$store.dispatch('post_state_update', {
-        // brewstate: this.$store.state.brewstate,
         brewint: this.$store.state.brewint,
         pauseint: this.$store.state.pauseint,
         cancelint: 1,
@@ -422,10 +403,8 @@ export default {
         userintreq: this.$store.state.userintreq,
         adjunctreq: this.$store.state.adjunctreq
 
-      }) // then get/update store states
-        // .then(() => this.$store.dispatch('post_state_update')
-        //.then(() => this.$store.dispatch('get_brew_state_action')
-          .then(() => (this.$router.push('/')))
+      })
+        .then(() => (this.$router.push('/')))
     },
     minustargetflow () {
       this.targetflow--
@@ -450,6 +429,7 @@ export default {
     },
     updateData: function () {
       this.$store.dispatch('update_temp1')
+      this.$store.dispatch('update_flow1')
     }
   },
 
@@ -459,6 +439,9 @@ export default {
   computed: {
     get_chart_value () {
       return this.$store.state.temp1_value
+    },
+    get_flow_chart_value () {
+      return this.$store.state.flow1_value
     },
     compheaterpowertextmodel () {
       if (this.mode === 'None') {

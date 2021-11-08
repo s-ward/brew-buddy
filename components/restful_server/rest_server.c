@@ -358,29 +358,16 @@ static esp_err_t setup_save_post_handler(httpd_req_t *req)
     char *heatingmethod = cJSON_GetObjectItem(root, "heatingmethod")->valuestring;
     char *coolingmethod = cJSON_GetObjectItem(root, "coolingmethod")->valuestring;
 
-    //int n = cJSON_GetArraySize(root);
-
-    // new version of ->valueint
-    //double x = cJSON_GetNumberValue(cJSON_GetObjectItem(root, "mashtunvolume"));
-
-    // new version of ->valuestring
-    // char *xx = cJSON_GetStringValue(cJSON_GetObjectItem(root, "mashtunvolume"));
-    // if (xx) {
-    // }
-
-    // printf("server print - kettlevolume: %d, mashtunvolume: %d, pumpedtransfer: %s, units: %s, leadtime: %d, heating: %s, cooling: %s\n",
-    //        kettlevolume, mashtunvolume, pumpedtransfer ? "true" : "false", units,
-    //        leadtime, heatingmethod, coolingmethod);
-
     save_brewery_setup(kettlevolume, mashtunvolume, pumpedtransfer, units,
                        leadtime, heatingmethod, coolingmethod);
 
-    ESP_LOGI(REST_TAG, "Brewery Setup Saved - Kettle Volume: %d", kettlevolume);
+    ESP_LOGI(REST_TAG, "Brewery Setup Saved");
     cJSON_Delete(root);
     httpd_resp_sendstr(req, "Post control value successfully");
     return ESP_OK;
 }
 
+/* handler for saving recipe list */
 static esp_err_t recipes_save_post_handler(httpd_req_t *req)
 {
     int total_len = req->content_len;
@@ -419,7 +406,7 @@ static esp_err_t recipes_save_post_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-// start brew hand;ler
+/* start brew handler */
 static esp_err_t start_brew_post_handler(httpd_req_t *req)
 {
 
@@ -486,23 +473,60 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
 
     cJSON *adjunct1 = cJSON_GetArrayItem(adjuncts, 0); //adjunct 1
     int adjuncttime1 = cJSON_GetObjectItem(adjunct1, "time")->valueint;
-    char* adjunctname1 = cJSON_GetObjectItem(adjunct1, "adjuncts")->valuestring;
+    // char* adjunctname1 = cJSON_GetObjectItem(adjunct1, "adjuncts")->valuestring;
+    char* adjunctname1;
+
+    // new version of ->valuestring
+    // char *adjunctname1 = cJSON_GetStringValue(cJSON_GetObjectItem(adjunct1, "adjuncts"));
+    // if (adjunctname1) {
+    // }
+    if (cJSON_HasObjectItem(adjunct1, "adjuncts")) {
+        adjunctname1 = cJSON_GetObjectItem(adjunct1, "adjuncts")->valuestring;
+    } else {
+        adjunctname1 = "";
+    }
+   
 
     cJSON *adjunct2 = cJSON_GetArrayItem(adjuncts, 1); //adjunct 2
     int adjuncttime2 = cJSON_GetObjectItem(adjunct2, "time")->valueint;
-    char* adjunctname2 = cJSON_GetObjectItem(adjunct2, "adjuncts")->valuestring;
+    // char* adjunctname2 = cJSON_GetObjectItem(adjunct2, "adjuncts")->valuestring;
+    char* adjunctname2;
+
+    if (cJSON_HasObjectItem(adjunct2, "adjuncts")) {
+        adjunctname2 = cJSON_GetObjectItem(adjunct2, "adjuncts")->valuestring;
+    } else {
+        adjunctname2 = "";
+    }
 
     cJSON *adjunct3 = cJSON_GetArrayItem(adjuncts, 2); //adjunct 3
     int adjuncttime3 = cJSON_GetObjectItem(adjunct3, "time")->valueint;
-    char* adjunctname3 = cJSON_GetObjectItem(adjunct3, "adjuncts")->valuestring;
+    // char* adjunctname3 = cJSON_GetObjectItem(adjunct3, "adjuncts")->valuestring;
+    char* adjunctname3;
+    if (cJSON_HasObjectItem(adjunct3, "adjuncts")) {
+        adjunctname3 = cJSON_GetObjectItem(adjunct3, "adjuncts")->valuestring;
+    } else {
+        adjunctname3 = "";
+    }
 
     cJSON *adjunct4 = cJSON_GetArrayItem(adjuncts, 3); //adjunct 4
     int adjuncttime4 = cJSON_GetObjectItem(adjunct4, "time")->valueint;
-    char* adjunctname4 = cJSON_GetObjectItem(adjunct4, "adjuncts")->valuestring;
+    // char* adjunctname4 = cJSON_GetObjectItem(adjunct4, "adjuncts")->valuestring;
+    char* adjunctname4;
+    if (cJSON_HasObjectItem(adjunct4, "adjuncts")) {
+        adjunctname4 = cJSON_GetObjectItem(adjunct4, "adjuncts")->valuestring;
+    } else {
+        adjunctname4 = "";
+    }
 
     cJSON *adjunct5 = cJSON_GetArrayItem(adjuncts, 4); //adjunct 5
     int adjuncttime5 = cJSON_GetObjectItem(adjunct5, "time")->valueint;
-    char* adjunctname5 = cJSON_GetObjectItem(adjunct5, "adjuncts")->valuestring;
+    // char* adjunctname5 = cJSON_GetObjectItem(adjunct5, "adjuncts")->valuestring;
+    char* adjunctname5;
+    if (cJSON_HasObjectItem(adjunct5, "adjuncts")) {
+        adjunctname5 = cJSON_GetObjectItem(adjunct5, "adjuncts")->valuestring;
+    } else {
+        adjunctname5 = "";
+    }
     
     int cooltemp = cJSON_GetObjectItem(root, "cooltemp")->valueint;
 
@@ -511,8 +535,8 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
         mashtime1, mashtime2, mashtime3, mashtime4, mashtime5,
         mashtemp1, mashtemp2, mashtemp3, mashtemp4, mashtemp5,
         spargewatervol, spargetemp, boiltime,
-        adjunctname1, adjunctname2, adjunctname3, adjunct4, adjunct5,
-        adjuncttime1, adjuncttime2, adjuncttime3, adjunct4, adjunct5,
+        adjunctname1, adjunctname2, adjunctname3, adjunctname4, adjunctname5,
+        adjuncttime1, adjuncttime2, adjuncttime3, adjuncttime4, adjuncttime5,
         cooltemp);
 
     // #include BrewStates.h
@@ -526,7 +550,7 @@ static esp_err_t start_brew_post_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-/* Simple handler for getting manual data (temp, valve position, flow rate*/
+/* Simple handler for getting manual data (temp, valve position, flow rate) */
 static esp_err_t temperature_data_get_handler(httpd_req_t *req)
 {
     httpd_resp_set_type(req, "application/json");
@@ -555,8 +579,6 @@ static esp_err_t setup_load_get_handler(httpd_req_t *req)
     cJSON_AddStringToObject(root, "coolingmethod", brewery_setup.cooling_method);
 
     const char *brewery_setup = cJSON_Print(root);
-
-    //printf("brewsetup in rest_server.c string: %s\n", brewery_setup);
 
     httpd_resp_sendstr(req, brewery_setup);
     free((void *)brewery_setup);
@@ -628,7 +650,8 @@ static esp_err_t manual_data_get_handler(httpd_req_t *req)
     httpd_resp_set_type(req, "application/json");
     cJSON *root = cJSON_CreateObject();
     //cJSON_AddNumberToObject(root, "raw", esp_random() % 20); //change to gettemp
-    cJSON_AddNumberToObject(root, "raw", Current_Temp); //change to gettemp
+    cJSON_AddNumberToObject(root, "rawTemp1", Current_Temp); //change to gettemp
+    cJSON_AddNumberToObject(root, "rawFlow1", Flow_Rate); //change to gettemp
     //cJSON_AddNumberToObject(root, "raw", ds18b20_get_temp()); //change to gettemp
     const char *sys_info = cJSON_Print(root);
     httpd_resp_sendstr(req, sys_info);
@@ -652,6 +675,7 @@ static esp_err_t brew_progress_get_handler(httpd_req_t *req)
     cJSON_AddNumberToObject(root, "minutesremaining", Minutes_Remaining);
     // cJSON_AddNumberToObject(root, "secondsremaining", esp_random() % 60); // change to Seconds_Remaining
     cJSON_AddNumberToObject(root, "secondsremaining", Seconds_Remaining);
+    cJSON_AddItemToObject(root, "targettemp", cJSON_CreateString(Target_Temperature));
     cJSON_AddItemToObject(root, "userintreqmessage", cJSON_CreateString(User_Int_Required));
     //cJSON_AddNumberToObject(root, "userintreq", User_Int_Required_Int);
     cJSON_AddNumberToObject(root, "userintreq", User_Int_Rqd);
@@ -666,6 +690,7 @@ static esp_err_t brew_progress_get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+/* handler for getting state */
 static esp_err_t state_get_handler(httpd_req_t *req)
 {
     //printf("Brew progress get handler");
@@ -688,7 +713,6 @@ static esp_err_t state_get_handler(httpd_req_t *req)
     cJSON_Delete(root);
     return ESP_OK;
 }
-
 
 
 esp_err_t start_rest_server(const char *base_path)

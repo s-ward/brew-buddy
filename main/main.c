@@ -155,8 +155,8 @@ void updateFlowMeterTask(void *args)
       updateFlowMeter(flowMeter);
       
       vTaskDelay(1000 / portTICK_PERIOD_MS); //run roughly every 1 second
-     // printf("Flow Meter GPIO: %d, Flow Rate: %d ml/m, Flow Total: % d, Pulse Count Total: % d, Pointer Address: %p\n", 
-       //  flowMeter->gpio_num, flowMeter->flow_rate, flowMeter->flow_total, flowMeter->pulse_count_total, flowMeter);
+      printf("Flow Meter GPIO: %d, Flow Rate: %d ml/m, Flow Total: % d, Pulse Count Total: % d, Pointer Address: %p\n", 
+      flowMeter->gpio_num, flowMeter->flow_rate, flowMeter->flow_total, flowMeter->pulse_count_total, flowMeter);
    }
 }
 
@@ -259,13 +259,14 @@ void app_main(void)
  
 
     //flow rate
-    flowM(); // add flow rate interrupt
-    getFlowRate(1000);
+    //flowM(); // add flow rate interrupt
+    //getFlowRate(1000);
 
    //flow task
    //xTaskCreate(getFlowTask, "flow task", 2048, NULL, 10, NULL );
    xTaskCreate(updateFlowMeterTask, "Update Flow Meter Task", 2048, &flowMeterTapIn, 10, NULL);
    xTaskCreate(updateFlowMeterTask, "Update Flow Meter Task", 2048, &flowMeterSpargeIn, 10, NULL);
+   xTaskCreate(updateFlowMeterTask, "Update Flow Meter Task", 2048, &flowMeterSpargeOut, 10, NULL);
 
    // while(1) {
    // led_toggle();

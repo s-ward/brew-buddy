@@ -1,4 +1,5 @@
-
+#ifndef INTERRUPTS_H_
+#define INTERRUPTS_H_
 
 struct Interrupts
 {
@@ -42,3 +43,5 @@ void flowM(void);
 void interrupts_config(void);
 void getFlowRate(uint32_t timeDifference);
 void updateFlowMeter(struct FlowMeter *flowMeter);
+
+#endif
