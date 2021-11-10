@@ -30,6 +30,7 @@ export default {
     updateData: function() {
       //this.$store.dispatch("update_chart_value");
       this.$store.dispatch("update_temp1");
+      this.$store.dispatch('update_flow1')
     }
   },
   mounted() {
