@@ -209,43 +209,8 @@
           </td>
         </tr>
       </template>
-        <!-- <template v-slot:item.time="{ item }" >
-          <v-text-field class="mx-0 px-0" disabled v-model="item.time" solo flat :hide-details="true" dense single-line></v-text-field>
-        </template> -->
-        <!-- <template v-slot:[`item.temp`]="{ item }">
-          <v-text-field class="mx-0 px-0" disabled v-model="item.temp" solo flat :hide-details="true" dense single-line></v-text-field>
-        </template> -->
       </v-data-table>
-
-      <!-- <v-card>
-        <v-row>
-          <v-col>
-            <v-text-field
-              v-model="adjunctname"
-              label="Name"
-              disabled
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col>
-            <v-text-field
-              v-model="adjuncttime"
-              label="Time"
-              disabled
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-        </v-row>
-      </v-card> -->
-        <!-- </v-container> -->
-      <!-- </v-card-text> -->
-
       <v-card-subtitle v-card-subtitle>Cool</v-card-subtitle>
-
-      <!-- <v-card-text> -->
-      <!-- <v-container> -->
       <v-row>
         <v-col>
           <v-text-field
@@ -310,6 +275,7 @@ export default {
       coolingmethod: '',
       heatingmethods: ['RIMS', 'Element'],
       coolingmethods: ['None', 'Wort Recirc', 'Water Recirc'],
+
       // selected recipe info
       name: this.$store.state.selectedrecipe.name,
       grainweight: this.$store.state.selectedrecipe.grainweight,
@@ -356,48 +322,15 @@ export default {
     gohome () {
       this.$router.push('/')
     },
-    // gobook () {
-    //   this.$router.push('/book')
-    // },
     gobook () {
-    // this.$router.push('/book')
       this.$router.push({ name: 'book', params: { id: 'fromBrew' } })
-    // this.$router.push({ path: `/book/${'1'}` })
     },
     gosetup () {
       this.$router.push({ name: 'setup', params: { id: 'fromBrew' } })
     },
-    goprogress () {
-      // set esp state to brew
-      // send store recipe info to esp
-      // set recipe to selected
-
-      // start_brew ()
-
-      this.$router.push('/progress')
-    },
-    save_setup: function () {
-      this.$ajax
-        .post('/api/v1/setup/save', {
-          kettlevolume: this.kettlevolume,
-          mashtunvolume: this.mashtunvolume,
-          pumpedtransfer: this.pumpedtransfer,
-          heatingmethod: this.heatingmethod,
-          coolingmethod: this.coolingmethod,
-          units: this.units,
-          leadtime: this.leadtime
-        })
-        .then(data => {
-          console.log(data)
-        })
-        .catch(error => {
-          console.log(error)
-        })
-    },
     start_brew: function () {
       // this.$store.dispatch('set_brew_state_action', { // maybe add brewint here instead of brewstate
       this.$store.dispatch('post_state_update', {
-        // brewstate: 4,
         brewint: 1,
         pauseint: this.$store.state.pauseint,
         cancelint: this.$store.state.cancelint,
@@ -425,11 +358,6 @@ export default {
             console.log(error)
           }))
         .then(this.$router.push('/progress'))
-    }
-  },
-  computed: {
-    get_recipe () {
-      return this.$store.state.temp1_value
     }
   }
 }

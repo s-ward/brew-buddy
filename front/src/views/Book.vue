@@ -192,7 +192,7 @@
                       hide-default-footer
                       :mobile-breakpoint='0'
                     >
-                    <!-- remove padding from colummns, and change time and temp to text fields for inlien editing -->
+                    <!-- remove padding from colummns, and change time and temp to text fields for inline editing -->
                       <template v-slot:item="{item} ">
                         <tr>
                           <td class="mx-0 px-0">{{item.id}}</td>

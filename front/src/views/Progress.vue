@@ -326,18 +326,6 @@ export default {
       return `${this.$store.state.step} : ${this.$store.state.autoprocess}`
     },
     statusIconColor () {
-      // if (this.$store.state.status === 1) {
-      //   return 'green'
-      // } else if (this.$store.state.status === 2) {
-      //   return 'yellow'
-      // } else if (this.$store.state.status === 3) {
-      //   return 'orange'
-      // } else if (this.$store.state.status === 4) {
-      //   return 'red'
-      // } else {
-      //   return ''
-      // }
-      // }
       if (this.$store.state.brewstate === 3) {
         return ''
       } else if (this.$store.state.userintreq === 1) {
@@ -353,18 +341,6 @@ export default {
       }
     },
     statusIcon () {
-      // if (this.$store.state.status === 1) {
-      //   return 'play_circle'
-      // } else if (this.$store.state.status === 2) {
-      //   return 'pause_circle'
-      // } else if (this.$store.state.status === 3) {
-      //   return 'error'
-      // } else if (this.$store.state.status === 4) {
-      //   return 'stop'
-      // } else {
-      //   return ''
-      // }
-      // }
       if (this.$store.state.brewstate === 3) {
         return ''
       } else if (this.$store.state.userintreq === 1) {
@@ -380,18 +356,6 @@ export default {
       }
     },
     statusTextColor () {
-      // if (this.$store.state.status === 1) {
-      //   return 'green--text'
-      // } else if (this.$store.state.status === 2) {
-      //   return 'yellow--text'
-      // } else if (this.$store.state.status === 3) {
-      //   return 'orange--text'
-      // } else if (this.$store.state.status === 4) {
-      //   return 'red--text'
-      // } else {
-      //   return ''
-      // }
-      // }
       if (this.$store.state.brewstate === 3) {
         return ''
       } else if (this.$store.state.userintreq === 1) {
@@ -445,19 +409,11 @@ export default {
   components: {
     Chart
   },
-  updated () {
-    // console.log('updated')
-    // this.$nextTick(() => this.scrollBottom())
-  },
   watch: {
     get_text_area () {
       // console.log('updated text area')
       this.$nextTick(() => this.scrollBottom())
     }
-    // textarea: function () {
-    //   console.log('updated text area')
-    //   this.$nextTick(() => this.scrollBottom())
-    // }
   }
 
 }
