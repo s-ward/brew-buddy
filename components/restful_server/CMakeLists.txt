@@ -1,7 +1,7 @@
 idf_component_register(SRCS "esp_rest_main.c"
                             "rest_server.c"
                     INCLUDE_DIRS "include"
-                    REQUIRES "fatfs" "spiffs" "nvs_flash" "mdns" "protocol_examples_common" "esp_http_server" "json" "led" "nvsblob" "ds18b20")
+                    REQUIRES "fatfs" "spiffs" "nvs_flash" "mdns" "protocol_examples_common" "esp_http_server" "json" "wps_led" "nvsblob" "ds18b20")
 
 
 if(CONFIG_EXAMPLE_WEB_DEPLOY_SF)

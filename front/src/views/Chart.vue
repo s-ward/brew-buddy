@@ -15,30 +15,28 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
       timer: null
-    };
+    }
   },
   computed: {
     get_chart_value () {
-      //return this.$store.state.chart_value;
-      return this.$store.state.temp1_chart_value;
+      return this.$store.state.temp1_chart_value
     }
   },
   methods: {
-    updateData: function() {
-      //this.$store.dispatch("update_chart_value");
-      this.$store.dispatch("update_temp1");
+    updateData: function () {
+      this.$store.dispatch('update_temp1')
       this.$store.dispatch('update_flow1')
     }
   },
-  mounted() {
-    clearInterval(this.timer);
-    this.timer = setInterval(this.updateData, 1000);
+  mounted () {
+    clearInterval(this.timer)
+    this.timer = setInterval(this.updateData, 1000)
   },
-  destroyed: function() {
-    clearInterval(this.timer);
+  destroyed: function () {
+    clearInterval(this.timer)
   }
-};
+}
 </script>

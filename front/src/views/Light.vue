@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-layout text-xs-center wrap>
+    <v-layout text-center wrap>
       <v-flex xs12 sm6 offset-sm3>
         <v-card>
           <v-responsive :style="{ background: `rgb(${red}, ${green}, ${blue})` }" height="300px"></v-responsive>
