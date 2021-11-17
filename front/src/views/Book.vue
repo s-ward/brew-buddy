@@ -2,16 +2,10 @@
   <v-card height="100%" class="fill-height justify-center text-center" color="orange lighten-3" elevation="0">
     <v-card-title class="text-h5 white--text">
       Recipe Book
-      <!-- <span class="text-h5 white--text">Recipe Book</span> -->
       <v-spacer></v-spacer>
       <v-btn @click="gohome" icon><v-icon large color="orange accent-3">home</v-icon></v-btn>
     </v-card-title>
-
     <hr style="height:2px; width:90%; border-width:0; color:yellow; margin:5%; margin-top:0%; background-color:orange">
-
-    <!-- <v-card-text class="text-left"> -->
-      <!-- <p>JSON : {{selected}}</p> -->
-
       <template>
           <v-toolbar
             flat
@@ -33,7 +27,6 @@
                   hide-details
                   rounded
                 ></v-text-field>
-                <!-- <template v-slot:append-outer> -->
                 <v-btn
                   @click="setview"
                   v-bind="attrs"
@@ -44,13 +37,8 @@
                   <v-icon>add</v-icon>
                   New Recipe
                 </v-btn>
-                <!-- </template> -->
-                <!-- </v-text-field> -->
               </template>
               <v-card>
-                <!-- <v-card-title>
-                  <span class="text-h5">{{ formTitle }}</span>
-                </v-card-title> -->
                 <v-card-title>
                   <v-text-field
                     outlined
@@ -62,17 +50,12 @@
                     maxlength="20"
                   ></v-text-field>
                 </v-card-title>
-                <v-card-subtitle>Mash</v-card-subtitle>
 
+                <v-card-subtitle>Mash</v-card-subtitle>
                 <v-card-text>
                   <v-container>
                     <v-row>
                       <v-col>
-                        <!-- <v-text-field
-                          v-model="editedItem.name"
-                          label="Recipe Name"
-                          :disabled="viewonly ? true : false"
-                        ></v-text-field> -->
                         <v-text-field
                           v-model.number="editedItem.grainweight"
                           label="Grain Weight"
@@ -115,7 +98,6 @@
                         ></v-text-field>
                       </v-col>
                     </v-row>
-                    <!-- mash stuff in here somewhere -->
                     <v-data-table
                       :headers="mashstageheaders"
                       :items="editedItem.mashstages"
@@ -123,50 +105,43 @@
                       hide-default-footer
                       :mobile-breakpoint='0'
                     >
-                    <!-- remove padding from colummns, and change time and temp to text fields for inlien editing -->
-                    <template v-slot:item="{item} ">
-                      <tr>
-                        <td class="mx-0 px-0">{{item.id}}</td>
-                        <td class="mx-0 px-0">
-                          <v-text-field
-                            class="mx-0 px-0"
-                            :disabled="viewonly ? true : false"
-                            v-model.number="item.time"
-                            solo
-                            flat
-                            :hide-details="true"
-                            dense
-                            single-line
-                            type="number"
-                          ></v-text-field>
-                        </td>
-                        <td class="mx-0 px-0">
-                          <v-text-field
-                            class="mx-0 px-0"
-                            :disabled="viewonly"
-                            v-model.number="item.temp"
-                            solo
-                            flat
-                            :hide-details="true"
-                            dense
-                            single-line
-                            type="number"
-                          ></v-text-field>
-                        </td>
-                      </tr>
-                    </template>
-                      <!-- <template v-slot:item.time="{ item }" >
-                        <v-text-field class="mx-0 px-0" :disabled="viewonly ? true : false" v-model="item.time" solo flat :hide-details="true" dense single-line></v-text-field>
-                      </template> -->
-                      <!-- <template v-slot:[`item.temp`]="{ item }">
-                        <v-text-field class="mx-0 px-0" :disabled="viewonly" v-model="item.temp" solo flat :hide-details="true" dense single-line></v-text-field>
-                      </template> -->
+                    <!-- remove padding from colummns, and change time and temp to text fields for inline editing -->
+                      <template v-slot:item="{item} ">
+                        <tr>
+                          <td class="mx-0 px-0">{{item.id}}</td>
+                          <td class="mx-0 px-0">
+                            <v-text-field
+                              class="mx-0 px-0"
+                              :disabled="viewonly ? true : false"
+                              v-model.number="item.time"
+                              solo
+                              flat
+                              :hide-details="true"
+                              dense
+                              single-line
+                              type="number"
+                            ></v-text-field>
+                          </td>
+                          <td class="mx-0 px-0">
+                            <v-text-field
+                              class="mx-0 px-0"
+                              :disabled="viewonly"
+                              v-model.number="item.temp"
+                              solo
+                              flat
+                              :hide-details="true"
+                              dense
+                              single-line
+                              type="number"
+                            ></v-text-field>
+                          </td>
+                        </tr>
+                      </template>
                     </v-data-table>
                   </v-container>
                 </v-card-text>
 
                 <v-card-subtitle>Sparge</v-card-subtitle>
-
                 <v-card-text>
                   <v-container>
                     <v-row>
@@ -195,7 +170,6 @@
                 </v-card-text>
 
                 <v-card-subtitle>Boil</v-card-subtitle>
-
                 <v-card-text>
                   <v-container>
                     <v-row>
@@ -219,72 +193,42 @@
                       :mobile-breakpoint='0'
                     >
                     <!-- remove padding from colummns, and change time and temp to text fields for inlien editing -->
-                    <template v-slot:item="{item} ">
-                      <tr>
-                        <td class="mx-0 px-0">{{item.id}}</td>
-                        <td class="mx-0 px-0">
-                          <v-text-field
-                            class="mx-0 px-0"
-                            :disabled="viewonly ? true : false"
-                            v-model.number="item.time"
-                            solo
-                            flat
-                            :hide-details="true"
-                            dense
-                            single-line
-                            type="number"
-                          ></v-text-field>
-                        </td>
-                        <td class="mx-0 px-0">
-                          <v-text-field
-                            class="mx-0 px-0"
-                            label="Adjuncts"
-                            :disabled="viewonly"
-                            v-model="item.adjuncts"
-                            solo
-                            flat
-                            :hide-details="true"
-                            dense
-                            single-line
-                          ></v-text-field>
-                        </td>
-                      </tr>
-                    </template>
-                      <!-- <template v-slot:item.time="{ item }" >
-                        <v-text-field class="mx-0 px-0" :disabled="viewonly ? true : false" v-model="item.time" solo flat :hide-details="true" dense single-line></v-text-field>
-                      </template> -->
-                      <!-- <template v-slot:[`item.temp`]="{ item }">
-                        <v-text-field class="mx-0 px-0" :disabled="viewonly" v-model="item.temp" solo flat :hide-details="true" dense single-line></v-text-field>
-                      </template> -->
+                      <template v-slot:item="{item} ">
+                        <tr>
+                          <td class="mx-0 px-0">{{item.id}}</td>
+                          <td class="mx-0 px-0">
+                            <v-text-field
+                              class="mx-0 px-0"
+                              :disabled="viewonly ? true : false"
+                              v-model.number="item.time"
+                              solo
+                              flat
+                              :hide-details="true"
+                              dense
+                              single-line
+                              type="number"
+                            ></v-text-field>
+                          </td>
+                          <td class="mx-0 px-0">
+                            <v-text-field
+                              class="mx-0 px-0"
+                              label="Adjuncts"
+                              :disabled="viewonly"
+                              v-model="item.adjuncts"
+                              solo
+                              flat
+                              :hide-details="true"
+                              dense
+                              single-line
+                            ></v-text-field>
+                          </td>
+                        </tr>
+                      </template>
                     </v-data-table>
-
-                    <!-- <v-card>
-                      <v-row>
-                        <v-col>
-                          <v-text-field
-                            v-model="editedItem.adjunctname"
-                            label="Name"
-                            :disabled="viewonly ? true : false"
-                            outlined
-                            dense
-                          ></v-text-field>
-                        </v-col>
-                        <v-col>
-                          <v-text-field
-                            v-model="editedItem.adjuncttime"
-                            label="Time"
-                            :disabled="viewonly ? true : false"
-                            outlined
-                            dense
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-                    </v-card> -->
                   </v-container>
                 </v-card-text>
 
                 <v-card-subtitle>Cool</v-card-subtitle>
-
                 <v-card-text>
                   <v-container>
                     <v-row>
@@ -301,21 +245,21 @@
                     </v-row>
                   </v-container>
                 </v-card-text>
-                  <v-container fluid>
-                    <v-row>
-                      <v-col>
-                        <v-textarea
-                          outlined
-                          v-model="editedItem.notes"
-                          name="input-5-1"
-                          label="Notes"
-                          auto-grow
-                          :disabled="viewonly ? true : false"
-                          rows="2"
-                        ></v-textarea>
-                      </v-col>
-                    </v-row>
-                  </v-container>
+                <v-container fluid>
+                  <v-row>
+                    <v-col>
+                      <v-textarea
+                        outlined
+                        v-model="editedItem.notes"
+                        name="input-5-1"
+                        label="Notes"
+                        auto-grow
+                        :disabled="viewonly ? true : false"
+                        rows="2"
+                      ></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-container>
 
                 <v-card-actions>
                   <v-spacer></v-spacer>
@@ -433,7 +377,6 @@ export default {
         { text: 'Adjuncts', align: 'start', sortable: false, value: 'adjuncts' }
       ],
       recipes: [],
-      // mashstages: [{ id: 'Stage 11', time: 10, temp: 10 }, { id: 'Stage 22', time: 20, temp: 20 }],
       adjuncts: [],
       editedIndex: -1,
       editedItem: {
@@ -442,7 +385,6 @@ export default {
         mashwatervol: 0,
         striketemp: 0,
         flowrate: 0,
-        // mashstages: [],
         mashstages: [
           { id: 'Stage 1', time: 0, temp: 0 },
           { id: 'Stage 2', time: 0, temp: 0 },
@@ -454,18 +396,12 @@ export default {
         spargewatervol: 0,
         spargetemp: 0,
         boiltime: 0,
-        // adjuncts: [],
         adjuncts: [
           { id: '1', time: 0 },
           { id: '2', time: 0 },
           { id: '3', time: 0 },
           { id: '4', time: 0 },
           { id: '5', time: 0 }
-          // { id: '1', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '2', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '3', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '4', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '5', time: 0, adjuncts: 'Adjuncts' }
         ],
         cooltemp: 0,
         notes: ''
@@ -483,7 +419,6 @@ export default {
           { id: 'Stage 4', time: 0, temp: 0 },
           { id: 'Stage 5', time: 0, temp: 0 }
         ],
-        // mashstages: [{ id: 'Stage 1' }, { id: 'Stage 2' }, { id: 'Stage 3' }, { id: 'Stage 4' }, { id: 'Stage 5' }],
         time: 0,
         temp: 0,
         spargewatervol: 0,
@@ -495,13 +430,7 @@ export default {
           { id: '3', time: 0 },
           { id: '4', time: 0 },
           { id: '5', time: 0 }
-          // { id: '1', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '2', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '3', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '4', time: 0, adjuncts: 'Adjuncts' },
-          // { id: '5', time: 0, adjuncts: 'Adjuncts' }
         ],
-        // adjuncts: [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }, { id: '5' }],
         adjunctname: '',
         adjuncttime: 0,
         cooltemp: 0,
@@ -535,22 +464,17 @@ export default {
 
   methods: {
     rowClick: function (item, row) {
-      let selectState = (row.isSelected) ? false : true
+      let selectState = (!row.isSelected)
       row.select(selectState)
     },
     gohome () {
       this.$router.push('/')
     },
     gobrew () {
-      // set recipe to selected, or pass recipe name? pass recipe info
       // stores selected recipe in store
-      // this.$store.commit('set_RECIPE_JSON', )
-      // this.$store.commit({ type: 'set_recipe', recipename: this.selected.name, grainweight: this.selected.grainweight })
       // selected is array containing one recipe, so selected recipe is at index 0
       this.$store.commit('set_recipe', { recipe: this.selected[0] })
-      // this.$store.commit('set_recipe_array', this.selected)
       this.$router.push('/brew')
-      // this.$router.push({ name: 'brew', params: { recipe: 'selected' } })
     },
     save_list: function () {
       this.$ajax

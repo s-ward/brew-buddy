@@ -1,16 +1,14 @@
 <template>
-  <v-card height="100%" class="fill-height justify-center text-center" color="orange lighten-3" elevation="0">
-    <v-card-title class="text-h5 white--text"> Brew Progress
-    <!-- <span class="text-h5 white--text">Brew</span> -->
+<v-card height="100%" class="fill-height justify-center text-center" color="orange lighten-3" elevation="0">
+  <v-card-title class="text-h5 white--text">
+    Brew Progress
     <v-spacer></v-spacer>
     <v-btn @click="gohome" color="orange accent-3" icon><v-icon large>home</v-icon></v-btn>
   </v-card-title>
   <hr style="height:2px; width:90%; border-width:0; color:yellow; margin:5%; margin-top:0%; background-color:orange">
   <v-card-text>
- <!-- <v-chip v-model="status" color="success">Running</v-chip> -->
     <v-row align="center">
       <v-col cols="8">
-       
         <v-text-field
         :value="get_current_stage"
         hide-details
@@ -19,30 +17,17 @@
         dense
         label="Current Stage"
         class="mt-0 align-center"
-        >
-          <!-- <template v-slot:append-outer>
-   
-                    <div class="pa-1 white rounded-circle d-inline-block">
-          <v-icon :color="statusIconColor" class="pa-0 ma-0" x-large>{{statusIcon}}</v-icon>
-        </div>
-          </template> -->
-          </v-text-field>
+        ></v-text-field>
       </v-col>
       <v-col cols="4">
-        <!-- <v-icon :color="statusIconColor" x-large>{{statusIcon}}</v-icon> -->
-        <!-- <v-chip disabled class="rounded-circle" color="white"><v-icon :color="statusIconColor" x-large>{{statusIcon}}</v-icon></v-chip> -->
-        <!-- place white circle around status icon for readability -->
         <div class="pa-1 white rounded-circle d-inline-block">
-          <!-- <v-icon :color="statusIconColor" class="pa-0 ma-0" size="50">{{statusIcon}}</v-icon> -->
           <v-icon :color="statusIconColor" class="pa-0 ma-0" size="50">{{statusIcon}}</v-icon>
         </div>
-        <!-- <v-icon :color="statusIconColor" class="pa-0 ma-0" x-large>{{statusIcon}}</v-icon> -->
-  
       </v-col>
     </v-row>
     <v-row>
       <v-col>
-         <v-text-field
+        <v-text-field
         :value="get_current_step"
         hide-details
         readonly
@@ -53,85 +38,22 @@
         ></v-text-field>
       </v-col>
     </v-row>
-    <!-- <v-row>
+    <v-row>
       <v-col>
-        <v-textarea
-          outlined
-          :value="get_text_area"
-          name="input-5-1"
-          label="User Interaction Required"
-          auto-grow
-          readonly
-          hide-details
-          rows="3"
-          scroll
-        ></v-textarea>
-         <v-btn v-if="get_interaction_req" small @click="confirm">confirm changes & continue</v-btn>
-       
+        <v-sheet outlined color="rgba(0,0,0,0.2)" rounded>
+          <v-card color="orange lighten-3" outlined elevation="0" class="justify-left text-left">
+            <v-card-text id="textarea" v-model="textarea" class="pa-3 overflow-y-auto" :style="text_area_style" overflow-y-scroll>
+              <div v-for="item in get_text_area" :key="item" :class="item.textcolor">{{item.time}} {{item.text}}</div>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn v-if="get_adjunct_req || get_interaction_req" small @click="confirm">confirm</v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-sheet>
       </v-col>
-    </v-row> -->
-    <!-- :max-height="text_area_height"
-    style="max-height: 50px" -->
-      <v-row>
-        <v-col>
-          <v-sheet outlined color="rgba(0,0,0,0.2)" rounded>
-            <v-card color="orange lighten-3" outlined elevation="0" class="justify-left text-left">
-              <v-card-text id="textarea" v-model="textarea" class="pa-3 overflow-y-auto" :style="text_area_style" overflow-y-scroll>
-                <!-- <div id="textarea"></div> -->
-                <div v-for="item in get_text_area" :key="item" :class="item.textcolor">{{item.time}} {{item.text}}</div>
-<!-- 
-                <div class="red--text">text line 1 </div>
-                <div class="green--text">text line 2 </div>
-                <div class="orange--text">text line 3text line 3text line 3text line 3text line 3
-                  text line 3text line 3text line 3text line 3text line 3text line 3 </div>
-                  <div class="yellow--text">textl ine 4 add something line 3 </div>
-                    <div class="orange--text">text line 3text line 3text line 3text line 3text line 3
-                  text line 3text line 3text line 3text line 3text line 3text line 3 </div>
-                  <div class="yellow--text">textl ine 4 add something line 3 </div>
-                    <div class="orange--text">text line 3text line 3text line 3text line 3text line 3
-                  text line 3text line 3text line 3text line 3text line 3text line 3 </div>
-                  <div class="yellow--text">textl ine 4 add something line 3 </div> -->
-                 
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
- <v-btn v-if="get_adjunct_req || get_interaction_req" small @click="confirm">confirm</v-btn>
- <!-- <v-btn small @click="confirm_adjunct">confirm adjunct</v-btn> -->
- <v-spacer></v-spacer>
-              </v-card-actions>
-
-            </v-card>
-          </v-sheet>
-        </v-col>
-     </v-row>
-     <!-- <v-row>
-       <v-col>
-          <v-sheet outlined color="rgba(0,0,0,0.2)" rounded>
-            <v-card color="orange lighten-3" outlined elevation="0" class="justify-left text-left">
-       <v-virtual-scroll
-        :items="get_text_area"
-        height="150"
-        item-height="30"
-       >
-        <template v-slot:default="{item}">
-          <v-list-item :key="item">
-            <v-list-item-content :class="item.textcolor">
-              {{item.text}}
-            </v-list-item-content>
-          </v-list-item>
-        </template>
-
-
-       </v-virtual-scroll>
-            </v-card>
-          </v-sheet>
-       </v-col>
-
-
-     </v-row> -->
-      <!-- <v-col>
-        <v-btn small @click="pause">confirm changes & continue</v-btn>
-      </v-col> -->
+    </v-row>
     <v-row>
       <v-col>
         <v-text-field
@@ -145,8 +67,7 @@
           suffix="°C"
         ></v-text-field>
       </v-col>
-  <v-col>
-        
+      <v-col>
         <v-text-field
         :value="get_time_remaining"
         readonly
@@ -157,12 +78,9 @@
         class="mt-0"
         ></v-text-field>
       </v-col>
-      
     </v-row>
-     
-
-        <v-row>
-           <v-col cols="6">
+    <v-row>
+      <v-col cols="6">
         <v-text-field
         :value="get_chart_value"
         readonly
@@ -175,9 +93,7 @@
         type="number"
         ></v-text-field>
         <chart></chart>
-
       </v-col>
-      
       <v-col>
         <v-text-field
           :value="get_flow_chart_value"
@@ -189,9 +105,9 @@
           class="mt-0"
           suffix="mL/m"
         ></v-text-field>
-      </v-col>
+        </v-col>
     </v-row>
-     <v-row align="center" justify="space-around">
+    <v-row align="center" justify="space-around">
       <v-col>
         <v-btn v-if="get_brew_status !==1" :disabled="get_interaction_req" @click="pause">Pause</v-btn>
         <v-btn v-if="get_brew_status ===1" :disabled="get_interaction_req" @click="resume">Resume</v-btn>
@@ -200,12 +116,12 @@
         <v-btn @click="cancel">Cancel</v-btn>
       </v-col>
     </v-row>
-
   </v-card-text>
-
+</v-card>
 </template>
 
 <script>
+
 import Chart from './Chart.vue'
 
 export default {
@@ -223,7 +139,6 @@ export default {
 
     }
   },
- 
 
   methods: {
     gohome () {
@@ -387,14 +302,11 @@ export default {
       return this.$store.state.flow1_value
     },
     get_brew_status () {
-      // console.log(this.$store.state.status)
-      //return this.$store.state.status // int
       return this.$store.state.pauseint
-      
     },
-    get_target_temp () {
-      return this.$store.state.targettemp
-    },
+    get_target_temp () {
+      return this.$store.state.targettemp
+    },
     get_current_stage () {
       return this.$store.state.stage
     },
@@ -428,8 +340,7 @@ export default {
       // }
       if (this.$store.state.brewstate === 3) {
         return ''
-      }
-      else if (this.$store.state.userintreq === 1) {
+      } else if (this.$store.state.userintreq === 1) {
         return 'red'
       } else if (this.$store.state.pauseint === 1) {
         return 'yellow'
@@ -456,8 +367,7 @@ export default {
       // }
       if (this.$store.state.brewstate === 3) {
         return ''
-      }
-      else if (this.$store.state.userintreq === 1) {
+      } else if (this.$store.state.userintreq === 1) {
         return 'stop'
       } else if (this.$store.state.pauseint === 1) {
         return 'pause_circle'
@@ -484,8 +394,7 @@ export default {
       // }
       if (this.$store.state.brewstate === 3) {
         return ''
-      }
-      else if (this.$store.state.userintreq === 1) {
+      } else if (this.$store.state.userintreq === 1) {
         return 'red--text'
       } else if (this.$store.state.pauseint === 1) {
         return 'yellow--text'

@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 <template>
   <v-app id="inspire">
     <v-main class="grey lighten-3">

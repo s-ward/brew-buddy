@@ -14,12 +14,6 @@ export default new Vuex.Store({
     flow1_value: 0,
     textarea: ['text line 1', 'text line 2', 'text line 3'],
     textarea2: [
-      // { textcolor: 'red--text', time: '44:10', text: 'Brew Paused: Please configure Mash Tun and confirm to continue' },
-      // { textcolor: 'green--text', time: '43:30', text: 'Brew Resumed: Mash Tun configuration confirmed' },
-      // { textcolor: 'yellow--text', time: '42:10', text: 'Brew Paused' },
-      // { textcolor: 'green--text', time: '40:15', text: 'Brew Resumed' },
-      // { textcolor: 'orange--text', time: '39:00', text: 'Please add Adjuncts 1 at time 34:00' },
-      // { textcolor: 'green--text', time: '33:55', text: 'Adjunct addition confirmed' }
     ],
 
     selectedrecipe: {
@@ -57,35 +51,26 @@ export default new Vuex.Store({
     adjunctreq: 0,
     message: '',
     targettemp: ''
-
-    // needs if etc.
-    // statusinfo: {
-    //   statusicon: 'pause_circle',
-    //   statusiconcolor: 'green',
-    //   statustextcolor: 'green--text'
-    // }
-
   },
   mutations: {
-    update_chart_value (state, new_value) {
-      state.chart_value.push(new_value)
+    update_chart_value (state, newValue) {
+      state.chart_value.push(newValue)
       state.chart_value.shift()
-      state.ch_value = new_value
-    },   
+      state.ch_value = newValue
+    },
     update_temp1 (state, newTemp) {
       state.temp1_chart_value.push(newTemp)
       state.temp1_chart_value.shift()
-      state.temp1_value = newTemp;
+      state.temp1_value = newTemp
     },
     update_flow1 (state, newFlow) {
       state.flow1_chart_value.push(newFlow)
       state.flow1_chart_value.shift()
-      state.flow1_value = newFlow;
+      state.flow1_value = newFlow
     },
     update_brew_progress (state, data) {
       state.brewstate = data.brewstate
       state.autoprocess = data.autoprocess
-      // state.status = data.status
       state.minutesremaining = data.minutesremaining
       state.secondsremaining = data.secondsremaining
       state.targettemp = data.targettemp
@@ -93,19 +78,15 @@ export default new Vuex.Store({
       state.stage = data.stage
       state.step = data.step
       state.userintreq = data.userintreq
-      // state.userintreqmessage = data.userintreqmessage
       state.adjunctreq = data.adjunctreq
       // if message different to old message, push to array
       if (data.userintreq) {
         if (data.userintreqmessage !== state.userintreqmessage) {
-        // if (data.userintreqmessage !== state.message) {
           this.commit('add_message', {
             textcolor: 'red--text',
             time: `${data.minutesremaining}: ${data.secondsremaining}`,
             text: data.userintreqmessage
           })
-          // state.textarea.push(data.userintreqmessage)
-          // state.textarea.shift()
           state.userintreqmessage = data.userintreqmessage
         }
       }
@@ -116,14 +97,12 @@ export default new Vuex.Store({
             time: `${data.minutesremaining}: ${data.secondsremaining}`,
             text: data.adjunctreqmessage
           })
-          // state.textarea.push(data.adjunctreqmessage)
-          // state.textarea.shift()
           state.adjunctreqmessage = data.adjunctreqmessage
         }
       }
     },
     set_recipe (state, recipe) {
-      // do some shit with JSON array string etc?
+      // do some shit with JSON array string etc
       // needs recipe.recipe not just recipe.
       state.selectedrecipe.name = recipe.recipe.name
       state.selectedrecipe.grainweight = recipe.recipe.grainweight
@@ -140,9 +119,6 @@ export default new Vuex.Store({
     },
     set_recipe_JSON (state, recipeJSON) {
       state.recipeJSON = recipeJSON
-    },
-    add_adjunct_confirm () {
-     
     },
     set_brew_state (state, data) {
       state.pauseint = data.pauseint
@@ -161,9 +137,6 @@ export default new Vuex.Store({
     },
     add_message (state, message) {
       state.textarea2.push(message)
-      // state.message = message.text
-      // state.textarea2.shift()
-      // console.log(message)
     },
     clear_messages (state) {
       state.textarea2 = []
@@ -171,60 +144,41 @@ export default new Vuex.Store({
 
   },
   actions: {
-    update_chart_value({ commit }) {
-      axios.get("/api/v1/temp/raw")
-        .then(data => {
-          commit("update_chart_value", data.data.raw);
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-     update_temp1({ commit }) {
-      axios.get("/api/v1/manual/raw")
-        .then(data => {
-          commit("update_temp1", data.data.rawTemp1);
-         })
-         .catch(error => {
-          console.log(error);
-         });
-    },
-    update_flow1({ commit }) {
-     axios.get("/api/v1/manual/raw")
-      .then(data => {
-       commit("update_flow1", data.data.rawFlow1);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    },
-      
-    update_brewery_setup ({ commit }) {
-      axios.get('/api/v1/setup/load')
-        .then(data => {
-          commit("update_temp1", data.data.rawTemp1);
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    update_flow1({ commit }) {
-      axios.get("/api/v1/manual/raw")
-        .then(data => {
-          commit("update_flow1", data.data.rawFlow1);
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    update_brewery_setup ({ commit }) {
-      axios.get('/api/v1/setup/load')
+    update_chart_value ({ commit }) {
+      axios.get('/api/v1/temp/raw')
         .then(data => {
           commit('update_chart_value', data.data.raw)
         })
         .catch(error => {
-          console.log(error);
-        });
+          console.log(error)
+        })
+    },
+    update_temp1 ({ commit }) {
+      axios.get('/api/v1/manual/raw')
+        .then(data => {
+          commit('update_temp1', data.data.rawTemp1)
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    },
+    update_brewery_setup ({ commit }) {
+      axios.get('/api/v1/setup/load')
+        .then(data => {
+          commit('update_temp1', data.data.rawTemp1)
+        })
+        .catch(error => {
+          console.log(error)
+        })
+    },
+    update_flow1 ({ commit }) {
+      axios.get('/api/v1/manual/raw')
+        .then(data => {
+          commit('update_flow1', data.data.rawFlow1)
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     update_brew_progress_action ({ commit }) {
       axios.get('/api/v1/progress/data')
@@ -232,28 +186,10 @@ export default new Vuex.Store({
           commit('update_brew_progress', data.data)
         })
         .catch(error => {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
-    // pause ({ commit }) {
-      
-    // },
-    // post_state_update ({ commit }) {
-    //   // console.log(this.state.brewstate)
-    //   axios.post('/api/v1/changestate', {
-    //     brewstate: this.state.brewstate,
-    //     pauseint: this.state.pauseint,
-    //     cancelint: this.state.cancelint,
-    //     // cleanint: this.state.cleanint, // maybe
-    //     // brewint: this.state.brewint // maybe
-    //   })
-    //     .then(data => {
-    //       console.log(data)
-    //     })
-    //     .catch(error => {
-    //       console.log(error)
-    //     })
-    // },
+
     post_state_update ({ commit }, data) {
       // console.log(this.state.brewstate)
       console.log(data.pauseint)
@@ -281,17 +217,6 @@ export default new Vuex.Store({
         }, 100)
         )
     },
-    // set_brew_state_action ({ commit }, data) {
-    //   return new Promise((resolve, reject) => {
-    //     setTimeout(() => {
-    //       commit('set_brew_state', data)
-    //       resolve()
-    //       console.log(data.brewstate)
-    //       console.log(data.pauseint)
-    //       console.log(data.cancelint)
-    //     }, 1000)
-    //   })
-    // }
 
     set_brew_state (state, data) {
       state.pauseint = data.pauseint
@@ -335,15 +260,3 @@ export default new Vuex.Store({
     }
   }
 })
-
-
-
-// update_brew_progress ({ commit }) {
-//   axios.get("/api/v1/progress/data")
-//     .then(data => {
-//       commit("update_brew_progress", data.data)
-//     })
-//     .catch(error => {
-//       console.log(error);
-//     });
-// },
