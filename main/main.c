@@ -120,8 +120,8 @@ void getTempTask(void *arg)
       }
 
       Flow_Rate = get_meter_flow_rate(&flowMeterTapIn);
-      //printf("Temp: %.2f\n",Current_Temp);
-      // printf("Flow Rate: %d",Flow_Rate);
+      printf("Temp: %.2f\n",Current_Temp);
+      printf("Flow Rate: %d",Flow_Rate);
 
       // printf(" flow meter 1: %d", get_meter_flow_rate(&flowMeterTapIn));
       // printf(" flow meter 2: %d", get_meter_flow_rate(&flowMeterSpargeIn));

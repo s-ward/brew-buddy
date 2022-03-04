@@ -246,13 +246,13 @@ void Brew_States (void)
          Cancel_In = 0;    //reset flag   
       }
       
-      if (!Mash_Level_Safe)   //Safety for mash tun overfill
-      {
-         strcpy (User_Int_Required,"***WARNING*** Mash tun is too full, please check for stuck sparge"); 
-         printf("%s\n", User_Int_Required);
-         User_Int_Rqd = 1; //Set flag for app
-         Pause_In = 1;
-      }
+      // if (!Mash_Level_Safe)   //Safety for mash tun overfill
+      // {
+      //    strcpy (User_Int_Required,"***WARNING*** Mash tun is too full, please check for stuck sparge"); 
+      //    printf("%s\n", User_Int_Required);
+      //    User_Int_Rqd = 1; //Set flag for app
+      //    Pause_In = 1;
+      // }
 
       //Flow_Rate = get_meter_flow_rate(&flowMeterTapIn);
 
